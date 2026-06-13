@@ -9,6 +9,7 @@
     <string name="widget_background_description">Rhodos-Bild</string>
     <string name="widget_favorite_description">Favorit</string>
     <string name="widget_weather_description">Wetter</string>
+    <string name="widget_refresh_description">Wetter aktualisieren</string>
     <string name="widget_weather_temp">28°</string>
     <string name="widget_days_label">TAGE</string>
     <string name="widget_hours_label">STD.</string>

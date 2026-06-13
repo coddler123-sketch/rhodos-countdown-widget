@@ -62,6 +62,7 @@
                 android:text="" />
 
             <LinearLayout
+                android:id="@+id/widget_weather_pill"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/widget_weather_pill_background"
@@ -93,6 +94,15 @@
                     android:textColor="@android:color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/widget_refresh_icon"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_marginLeft="7dp"
+                    android:alpha="0.72"
+                    android:contentDescription="@string/widget_refresh_description"
+                    android:src="@drawable/ic_refresh_subtle" />
             </LinearLayout>
         </LinearLayout>
 

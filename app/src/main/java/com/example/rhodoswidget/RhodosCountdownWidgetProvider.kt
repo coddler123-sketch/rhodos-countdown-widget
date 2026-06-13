@@ -77,6 +77,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(R.id.widget_root, openAppIntent(context))
             views.setOnClickPendingIntent(R.id.widget_large_title, refreshIntent(context))
+            views.setOnClickPendingIntent(R.id.widget_weather_pill, refreshIntent(context))
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
