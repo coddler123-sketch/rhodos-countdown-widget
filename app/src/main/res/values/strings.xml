@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">Rhodos Widget</string>
+
+    <!-- 4x2-Widget -->
+    <string name="widget_large_name">Rhodos 4x2 Gross</string>
+    <string name="widget_large_description">Rhodos 4x2 grosses Countdown-Widget</string>
+    <string name="widget_large_title">RHODOS</string>
+    <string name="widget_subtitle">Unser Urlaubs-Countdown</string>
+    <string name="widget_background_description">Rhodos-Bild</string>
+    <string name="widget_favorite_description">Favorit</string>
+    <string name="widget_weather_description">Wetter</string>
+    <string name="widget_weather_temp">28°</string>
+    <string name="widget_days_label">TAGE</string>
+    <string name="widget_hours_label">STD.</string>
+    <string name="widget_minutes_label">MIN.</string>
+    <string name="widget_phrase_description">Spruch des Tages</string>
+    <string name="widget_phrase">Jeden Tag ein Stück näher ans Meer.</string>
+    <string name="widget_arrival_message">Es ist soweit!</string>
+
+    <!-- Spruch des Tages, sortiert nach verbleibenden Tagen bis zum Abflug.
+         Index 0 = 101 Tage vorher, letzter Index = Reisetag. -->
+    <string-array name="widget_phrases">
+        <!-- 101 Tage -->
+        <item>Rhodos rückt näher.</item>
+        <item>Die Insel lockt.</item>
+        <item>Vorfreude wächst.</item>
+        <item>Die Ägäis wartet.</item>
+        <item>Zeit für Inselträume.</item>
+        <item>Sommer wartet auf uns.</item>
+        <item>Sonne in Sicht.</item>
+        <item>Der Countdown läuft.</item>
+        <item>Urlaub wird geladen.</item>
+        <item>Die Auszeit kommt.</item>
+        <item>Das Meer ruft.</item>
+        <item>Noch näher ans Meer.</item>
+        <item>Fast am Ziel.</item>
+        <item>Rhodos zählt mit.</item>
+        <item>Bald unter Palmen.</item>
+        <item>Die Koffer träumen schon.</item>
+        <item>Urlaub naht.</item>
+        <item>Inselträume beginnen.</item>
+        <item>Die Insel wartet.</item>
+        <item>Urlaubshorizont voraus.</item>
+        <item>Der Sommer ruft.</item>
+        <item>Bald beginnt die Auszeit.</item>
+        <item>Die Insel lächelt schon.</item>
+        <item>Rhodos ist nicht mehr fern.</item>
+        <item>Fast Inselzeit.</item>
+        <item>Inselzauber wartet.</item>
+        <item>Die Vorfreude siegt.</item>
+        <item>Morgen wieder näher dran.</item>
+        <item>Sonne, wir kommen.</item>
+        <item>Meerzeit voraus.</item>
+        <item>Bald wieder Inselzeit.</item>
+        <!-- 70 Tage -->
+        <item>Meerblick voraus.</item>
+        <item>Bald am Strand.</item>
+        <item>Bald wieder Meeresluft.</item>
+        <item>Inselmodus lädt ...</item>
+        <item>Das Meer kommt näher.</item>
+        <item>Wellen in Sicht.</item>
+        <item>Salzige Luft voraus.</item>
+        <item>Meerrauschen wartet.</item>
+        <item>Bald wieder Meerblick.</item>
+        <item>Die nächste Welle naht.</item>
+        <item>Sonnenlicht voraus.</item>
+        <item>Bald unter blauem Himmel.</item>
+        <item>Sonnenuntergänge warten.</item>
+        <item>Goldene Stunden voraus.</item>
+        <item>Abendlicht am Meer.</item>
+        <item>Die Sonne wartet.</item>
+        <item>Der Strand zählt mit.</item>
+        <item>Inselmomente voraus.</item>
+        <item>Die Insel ruft uns.</item>
+        <item>Bald nur noch entspannen.</item>
+        <item>Meerzeit kommt näher.</item>
+        <item>Die Ägäis glitzert schon.</item>
+        <item>Inselabende kommen.</item>
+        <item>Meerblick kommt näher.</item>
+        <item>Inselglück voraus.</item>
+        <item>Die Sonne wird wärmer.</item>
+        <item>Meer statt Termine.</item>
+        <item>Sonne statt To-do-Liste.</item>
+        <item>Inselenergie voraus.</item>
+        <item>Bald nur noch Meer.</item>
+        <!-- 40 Tage -->
+        <item>Gemeinsam ans Meer.</item>
+        <item>Unsere Insel wartet.</item>
+        <item>Bald wieder Zeit für uns.</item>
+        <item>Vorfreude zu zweit.</item>
+        <item>Gemeinsam Richtung Sonne.</item>
+        <item>Bald neue Erinnerungen.</item>
+        <item>Noch ein Stück näher.</item>
+        <item>Unsere Auszeit kommt.</item>
+        <item>Bald wieder wir zwei.</item>
+        <item>Die besten Tage warten.</item>
+        <item>Sonne für uns reserviert.</item>
+        <item>Gemeinsam Richtung Rhodos.</item>
+        <item>Das Abenteuer naht.</item>
+        <item>Noch näher an der Auszeit.</item>
+        <item>Urlaub für zwei.</item>
+        <item>Bald am Lieblingsort.</item>
+        <item>Inselträume werden wahr.</item>
+        <item>Vorfreude geteilt.</item>
+        <item>Bald wieder unterwegs.</item>
+        <item>Gemeinsam dem Alltag davon.</item>
+        <item>Unsere Reise kommt.</item>
+        <item>Die Flip-Flops warten.</item>
+        <item>Cocktails in Bereitschaft.</item>
+        <item>Sonnencreme wird nervös.</item>
+        <item>Der Alltag verliert.</item>
+        <item>Koffer gedanklich gepackt.</item>
+        <item>Der Strand reserviert Plätze.</item>
+        <item>Urlaub gewinnt.</item>
+        <item>Rhodos hält durch.</item>
+        <item>Fast bereit zum Abflug.</item>
+        <!-- 10 Tage -->
+        <item>Noch etwas Geduld.</item>
+        <item>Der Urlaub klopft an.</item>
+        <item>Die Liegen sind frei.</item>
+        <item>Urlaub statt Alltag.</item>
+        <item>Die Insel wird größer.</item>
+        <item>Nur noch wenige Schritte.</item>
+        <item>Bald geht\'s los.</item>
+        <item>Fast geschafft.</item>
+        <item>Noch zwei Nächte.</item>
+        <item>Morgen sehen wir Rhodos.</item>
+        <!-- Reisetag -->
+        <item>Kolymbia, wir kommen.</item>
+    </string-array>
+</resources>
