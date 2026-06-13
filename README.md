@@ -39,4 +39,3 @@ Warm, hochwertig und persoenlich, aber nicht kitschig.
 
 Die Widgets nutzen grosse Rhodos-Fotos, dezente dunkle Verlaeufe fuer Lesbarkeit,
 weisse Typografie und abgerundete Android-Widget-Karten.
-
