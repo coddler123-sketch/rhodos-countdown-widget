@@ -273,28 +273,29 @@ private fun BottomSection(
 ) {
     Column {
         WeatherCard(s)
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SecondaryActionButton(
-                text = if (isRefreshing) "Lädt ..." else "Wetter neu",
-                enabled = !isRefreshing,
-                onClick = onRefresh,
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${s.weatherStatus} · $updateStatus",
+                color = Color(0xA6FFFFFF),
+                fontSize = 10.sp,
+                fontFamily = Montserrat,
                 modifier = Modifier.weight(1f)
             )
             SecondaryActionButton(
-                text = if (isCheckingUpdate) "Prüft ..." else "Update",
+                text = if (isRefreshing) "Lädt" else "Wetter",
+                enabled = !isRefreshing,
+                onClick = onRefresh
+            )
+            SecondaryActionButton(
+                text = if (isCheckingUpdate) "Prüft" else "Update",
                 enabled = !isCheckingUpdate,
-                onClick = onCheckUpdate,
-                modifier = Modifier.weight(1f)
+                onClick = onCheckUpdate
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "${s.weatherStatus} · $updateStatus",
-            color = Color(0xBFFFFFFF),
-            fontSize = 11.sp,
-            fontFamily = Montserrat
-        )
     }
 }
 
@@ -304,8 +305,8 @@ private fun WeatherCard(s: HomeState) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0x2EFFFFFF))
-            .padding(horizontal = 15.dp, vertical = 13.dp)
+            .background(Color(0x26FFFFFF))
+            .padding(horizontal = 15.dp, vertical = 12.dp)
     ) {
         if (s.weather == null) {
             Text(
@@ -327,9 +328,16 @@ private fun WeatherCard(s: HomeState) {
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "${s.weather.temperatureLabel} in Kolymbia",
+                            text = "Kolymbia jetzt",
+                            color = Color(0xBFFFFFFF),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = Montserrat
+                        )
+                        Text(
+                            text = s.weather.temperatureLabel,
                             color = Color.White,
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = Montserrat
                         )
@@ -345,7 +353,7 @@ private fun WeatherCard(s: HomeState) {
                 Text(
                     text = "Wind ${s.weather.windSpeedLabel} · Luftfeuchte ${s.weather.humidityLabel} · Regen ${s.weather.precipitationLabel}",
                     color = Color(0xCCFFFFFF),
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     fontFamily = Montserrat
                 )
             }
@@ -363,11 +371,12 @@ private fun SecondaryActionButton(
         Button(
             onClick = onClick,
             enabled = enabled,
-            modifier = modifier,
+            modifier = modifier.height(32.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0x33FFFFFF),
+                containerColor = Color(0x24FFFFFF),
                 contentColor = Color.White,
-                disabledContainerColor = Color(0x22FFFFFF),
+                disabledContainerColor = Color(0x18FFFFFF),
                 disabledContentColor = Color(0x99FFFFFF)
             )
         ) {
@@ -375,7 +384,7 @@ private fun SecondaryActionButton(
                 text = text,
                 fontFamily = Montserrat,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp
+                fontSize = 11.sp
             )
         }
 }

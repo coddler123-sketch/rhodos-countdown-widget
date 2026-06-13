@@ -97,10 +97,10 @@
 
                 <ImageView
                     android:id="@+id/widget_refresh_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="13dp"
-                    android:layout_marginLeft="7dp"
-                    android:alpha="0.72"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_marginLeft="6dp"
+                    android:alpha="0.58"
                     android:contentDescription="@string/widget_refresh_description"
                     android:src="@drawable/ic_refresh_subtle" />
             </LinearLayout>
