@@ -2,6 +2,7 @@
 .gradle
 /local.properties
 /.idea/caches
+/.idea/
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
@@ -16,6 +17,12 @@ local.properties
 keystore.properties
 *.jks
 *.apk
+
+rhodos_*preview*.png
+rhodos_emulator.png
+rhodos_phone.png
+widget_rotation_contact_sheet.jpg
+images/
 
 # Compiled class file
 *.class
