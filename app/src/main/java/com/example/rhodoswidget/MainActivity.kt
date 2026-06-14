@@ -1,5 +1,6 @@
 package com.example.rhodoswidget
 
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
@@ -8,18 +9,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,7 +48,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.example.rhodoswidget.ui.theme.RhodosWidgetTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -108,10 +111,8 @@ private fun RhodosHome(padding: PaddingValues) {
         var tick = 0
         while (true) {
             if (tick % 60 == 0) {
-                // Vollständiger Reload jede Minute: Spruch, Wetter, Bild
                 state.value = HomeState.load(context)
             } else {
-                // Nur Countdown-Zahlen sekundengenau aktualisieren
                 val r = CountdownCalculator.calculate()
                 state.value = state.value.copy(
                     days = r.days, hours = r.hours,
@@ -210,6 +211,34 @@ private fun RhodosHome(padding: PaddingValues) {
                             }
                         }
                     }
+                },
+                onShare = {
+                    val sv = state.value
+                    val msg = buildString {
+                        when {
+                            sv.isOnVacation -> {
+                                appendLine("🌊 Wir sind auf Rhodos!")
+                                append("Genießt jeden Augenblick.")
+                            }
+                            sv.isReached -> {
+                                appendLine("🛫 Heute geht's los nach Rhodos!")
+                                append("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr")
+                            }
+                            else -> {
+                                appendLine("🌊 Noch ${sv.days} Tage bis Rhodos!")
+                                appendLine("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr")
+                                appendLine()
+                                appendLine("${sv.days} Tage · ${sv.hours.toString().padStart(2, '0')} Std. · ${sv.minutes.toString().padStart(2, '0')} Min.")
+                                appendLine()
+                                append("»${sv.phrase}«")
+                            }
+                        }
+                    }
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, msg)
+                    }
+                    context.startActivity(Intent.createChooser(intent, "Countdown teilen"))
                 }
             )
         }
@@ -239,6 +268,31 @@ private fun HeaderSection(s: HomeState) {
             fontSize = 12.sp,
             fontFamily = Montserrat,
             modifier = Modifier.padding(top = 8.dp)
+        )
+        CountdownProgress(s.progress)
+    }
+}
+
+@Composable
+private fun CountdownProgress(fraction: Float) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .height(3.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color(0x33FFFFFF))
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(fraction)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color(0xCCFFFFFF))
         )
     }
 }
@@ -331,7 +385,8 @@ private fun BottomSection(
     isCheckingUpdate: Boolean,
     onRefresh: () -> Unit,
     onSpeakWeather: () -> Unit,
-    onCheckUpdate: () -> Unit
+    onCheckUpdate: () -> Unit,
+    onShare: () -> Unit
 ) {
     Column {
         WeatherCard(s, onSpeakWeather)
@@ -356,6 +411,11 @@ private fun BottomSection(
                 text = if (isCheckingUpdate) "Prüft" else "Update",
                 enabled = !isCheckingUpdate,
                 onClick = onCheckUpdate
+            )
+            SecondaryActionButton(
+                text = "Teilen",
+                enabled = true,
+                onClick = onShare
             )
         }
     }
@@ -429,15 +489,43 @@ private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
                     fontSize = 11.sp,
                     fontFamily = Montserrat
                 )
-                if (s.weather.forecastLabels.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(7.dp))
-                    Text(
-                        text = s.weather.forecastLabels.joinToString(" · "),
-                        color = Color(0xBFFFFFFF),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = Montserrat
-                    )
+                if (s.weather.forecastDays.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        s.weather.forecastDays.forEach { day ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = day.weekday,
+                                    color = Color(0xBFFFFFFF),
+                                    fontSize = 10.sp,
+                                    fontFamily = Montserrat
+                                )
+                                Image(
+                                    painter = painterResource(day.iconRes),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .padding(vertical = 2.dp)
+                                )
+                                Text(
+                                    text = "${day.maxTemp}°",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = Montserrat
+                                )
+                                Text(
+                                    text = "${day.minTemp}°",
+                                    color = Color(0xBFFFFFFF),
+                                    fontSize = 10.sp,
+                                    fontFamily = Montserrat
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -472,6 +560,22 @@ private fun SecondaryActionButton(
         }
 }
 
+private fun shortWeekday(dateIso: String): String {
+    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(dateIso) ?: return "?"
+    val cal = Calendar.getInstance().apply { time = date }
+    return when (cal.get(Calendar.DAY_OF_WEEK)) {
+        Calendar.MONDAY -> "Mo"
+        Calendar.TUESDAY -> "Di"
+        Calendar.WEDNESDAY -> "Mi"
+        Calendar.THURSDAY -> "Do"
+        Calendar.FRIDAY -> "Fr"
+        Calendar.SATURDAY -> "Sa"
+        else -> "So"
+    }
+}
+
+private data class ForecastEntry(val weekday: String, val iconRes: Int, val minTemp: Int, val maxTemp: Int)
+
 private data class WeatherSnapshot(
     val temperatureLabel: String,
     val apparentTemperatureLabel: String,
@@ -479,7 +583,7 @@ private data class WeatherSnapshot(
     val precipitationLabel: String,
     val windSpeedLabel: String,
     val iconRes: Int,
-    val forecastLabels: List<String>,
+    val forecastDays: List<ForecastEntry>,
     val spokenReport: String
 )
 
@@ -495,10 +599,10 @@ private data class HomeState(
     val weatherStatus: String,
     val backgroundRes: Int,
     val departureDate: String,
-    val departureTime: String
+    val departureTime: String,
+    val progress: Float
 ) {
     companion object {
-        // 20.09.2026 14:30 — gleich wie im Provider, dort ist der "Source of Truth".
         private const val YEAR = 2026
         private const val MONTH = Calendar.SEPTEMBER
         private const val DAY = 20
@@ -512,16 +616,23 @@ private data class HomeState(
             val phraseIndex = (quotes.size - 1 - CountdownCalculator.daysUntilDeparture())
                 .coerceIn(0, quotes.size - 1)
 
-            val weather = WeatherRepository.cached(context)?.let {
+            val weather = WeatherRepository.cached(context)?.let { w ->
                 WeatherSnapshot(
-                    temperatureLabel = it.temperatureLabel,
-                    apparentTemperatureLabel = it.apparentTemperatureLabel,
-                    humidityLabel = it.humidityLabel,
-                    precipitationLabel = it.precipitationLabel,
-                    windSpeedLabel = it.windSpeedLabel,
-                    iconRes = WeatherRepository.iconFor(it),
-                    forecastLabels = it.forecast.take(3).map(WeatherReportFormatter::compactForecastLabel),
-                    spokenReport = WeatherReportFormatter.spokenReport(it)
+                    temperatureLabel = w.temperatureLabel,
+                    apparentTemperatureLabel = w.apparentTemperatureLabel,
+                    humidityLabel = w.humidityLabel,
+                    precipitationLabel = w.precipitationLabel,
+                    windSpeedLabel = w.windSpeedLabel,
+                    iconRes = WeatherRepository.iconFor(w),
+                    forecastDays = w.forecast.take(7).map { day ->
+                        ForecastEntry(
+                            weekday = shortWeekday(day.dateIso),
+                            iconRes = WeatherRepository.iconForCode(day.weatherCode),
+                            minTemp = day.minTemperatureCelsius,
+                            maxTemp = day.maxTemperatureCelsius
+                        )
+                    },
+                    spokenReport = WeatherReportFormatter.spokenReport(w)
                 )
             }
             val weatherStatus = weatherStatus(context, weather)
@@ -543,7 +654,8 @@ private data class HomeState(
                 weatherStatus = weatherStatus,
                 backgroundRes = backgroundRes,
                 departureDate = df.format(target.time),
-                departureTime = tf.format(target.time)
+                departureTime = tf.format(target.time),
+                progress = CountdownCalculator.progressFraction()
             )
         }
 

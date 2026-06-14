@@ -137,7 +137,7 @@ object WeatherRepository {
                 "precipitation,weather_code,wind_speed_10m,is_day" +
                 "&daily=weather_code,temperature_2m_max,temperature_2m_min," +
                 "precipitation_probability_max,precipitation_sum" +
-                "&timezone=auto&forecast_days=4"
+                "&timezone=auto&forecast_days=8"
         )
         val connection = (url.openConnection() as HttpURLConnection).apply {
             connectTimeout = 10_000
@@ -213,6 +213,15 @@ object WeatherRepository {
         else -> R.drawable.ic_weather_cloud
     }
 
+    fun iconForCode(code: Int): Int = when (code) {
+        0, 1 -> R.drawable.ic_sun
+        2, 3, 45, 48 -> R.drawable.ic_weather_cloud
+        in 51..67, in 80..82 -> R.drawable.ic_weather_rain
+        in 71..77, 85, 86 -> R.drawable.ic_weather_snow
+        95, 96, 99 -> R.drawable.ic_weather_thunder
+        else -> R.drawable.ic_weather_cloud
+    }
+
     private fun parseForecast(daily: JSONObject?): List<RhodosForecastDay> {
         if (daily == null) return emptyList()
         val dates = daily.getJSONArray("time")
@@ -222,7 +231,7 @@ object WeatherRepository {
         val probabilities = daily.optJSONArray("precipitation_probability_max")
         val precipitation = daily.optJSONArray("precipitation_sum")
         val days = mutableListOf<RhodosForecastDay>()
-        for (index in 1 until minOf(dates.length(), 4)) {
+        for (index in 1 until minOf(dates.length(), 8)) {
             val probability = probabilities?.optInt(index, -1)?.takeIf { it >= 0 }
             days += RhodosForecastDay(
                 dateIso = dates.getString(index),

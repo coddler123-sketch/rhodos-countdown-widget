@@ -24,6 +24,24 @@ object CountdownCalculator {
     private const val ARRIVAL_HOUR = 19
     private const val ARRIVAL_MINUTE = 0
 
+    // Startpunkt des Countdowns (genau 1 Jahr vor Abflug)
+    private const val START_YEAR = 2025
+    private const val START_MONTH = Calendar.SEPTEMBER
+    private const val START_DAY = 20
+
+    fun progressFraction(): Float {
+        val start = Calendar.getInstance().apply {
+            set(Calendar.YEAR, START_YEAR)
+            set(Calendar.MONTH, START_MONTH)
+            set(Calendar.DAY_OF_MONTH, START_DAY)
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }
+        val total = (departureCalendar().timeInMillis - start.timeInMillis).toFloat()
+        val elapsed = (Calendar.getInstance().timeInMillis - start.timeInMillis).toFloat()
+        return (elapsed / total).coerceIn(0f, 1f)
+    }
+
     fun calculate(): RemainingTime {
         val now = Calendar.getInstance()
         val target = departureCalendar()
