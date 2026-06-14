@@ -1,6 +1,8 @@
 package com.example.rhodoswidget
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -27,11 +29,17 @@ class RhodosWidgetWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        if (shouldFetchWeather()) {
+        if (shouldFetchWeather() && isNetworkAvailable(applicationContext)) {
             WeatherRepository.fetch()?.let { WeatherRepository.save(applicationContext, it) }
         }
         RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(applicationContext)
         Result.success()
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork ?: return false) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private fun shouldFetchWeather(): Boolean {

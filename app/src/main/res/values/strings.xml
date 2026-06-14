@@ -17,6 +17,8 @@
     <string name="widget_phrase_description">Spruch des Tages</string>
     <string name="widget_phrase">Jeden Tag ein Stück näher ans Meer.</string>
     <string name="widget_arrival_message">Es ist soweit!</string>
+    <string name="widget_vacation_line1">Ihr seid auf Rhodos. 🌊</string>
+    <string name="widget_vacation_line2">Genießt jeden Augenblick.</string>
 
     <!-- Spruch des Tages, sortiert nach verbleibenden Tagen bis zum Abflug.
          Index 0 = 101 Tage vorher, letzter Index = Reisetag. -->

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/widget_background_description"
         android:scaleType="centerCrop"
-        android:src="@drawable/rhodos_lindos" />
+        android:src="@drawable/prasonisi_rhodes_023" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -247,7 +247,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Abflugtag: ersetzt den Countdown, sobald das Ziel erreicht ist -->
+        <!-- Abflugtag / Urlaub: ersetzt den Countdown -->
         <TextView
             android:id="@+id/widget_arrival_message"
             android:layout_width="wrap_content"
@@ -262,6 +262,21 @@
             android:textColor="@android:color/white"
             android:textSize="27sp"
             android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/widget_vacation_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:shadowColor="#CC000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="5"
+            android:text="@string/widget_vacation_line2"
+            android:textColor="#E6FFFFFF"
+            android:textSize="15sp"
             android:visibility="gone" />
 
         <!-- Spruch des Tages -->

@@ -104,10 +104,22 @@ private fun RhodosHome(padding: PaddingValues) {
         }
     }
 
-    // Jede Minute auffrischen, damit der Countdown live wirkt.
     LaunchedEffect(Unit) {
+        var tick = 0
         while (true) {
-            state.value = HomeState.load(context)
+            if (tick % 60 == 0) {
+                // Vollständiger Reload jede Minute: Spruch, Wetter, Bild
+                state.value = HomeState.load(context)
+            } else {
+                // Nur Countdown-Zahlen sekundengenau aktualisieren
+                val r = CountdownCalculator.calculate()
+                state.value = state.value.copy(
+                    days = r.days, hours = r.hours,
+                    minutes = r.minutes, seconds = r.seconds,
+                    isReached = r.isReached, isOnVacation = r.isOnVacation
+                )
+            }
+            tick++
             delay(1_000)
         }
     }
@@ -234,7 +246,22 @@ private fun HeaderSection(s: HomeState) {
 @Composable
 private fun CountdownSection(s: HomeState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        if (s.isReached) {
+        if (s.isOnVacation) {
+            Text(
+                text = "Ihr seid auf Rhodos. 🌊",
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat
+            )
+            Text(
+                text = "Genießt jeden Augenblick.",
+                color = Color(0xE6FFFFFF),
+                fontSize = 18.sp,
+                fontFamily = Montserrat,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else if (s.isReached) {
             Text(
                 text = "Es ist soweit!",
                 color = Color.White,
@@ -462,6 +489,7 @@ private data class HomeState(
     val minutes: Long,
     val seconds: Long,
     val isReached: Boolean,
+    val isOnVacation: Boolean,
     val phrase: String,
     val weather: WeatherSnapshot?,
     val weatherStatus: String,
@@ -478,35 +506,10 @@ private data class HomeState(
         private const val MINUTE = 30
 
         fun load(context: android.content.Context): HomeState {
-            val now = Calendar.getInstance()
-            val target = Calendar.getInstance().apply {
-                set(Calendar.YEAR, YEAR); set(Calendar.MONTH, MONTH)
-                set(Calendar.DAY_OF_MONTH, DAY); set(Calendar.HOUR_OF_DAY, HOUR)
-                set(Calendar.MINUTE, MINUTE); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }
-            val arrivalDayStart = (target.clone() as Calendar).apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-            }
-            val remaining = (target.timeInMillis - now.timeInMillis).coerceAtLeast(0L)
-            val days = TimeUnit.MILLISECONDS.toDays(remaining)
-            val afterDays = remaining - TimeUnit.DAYS.toMillis(days)
-            val hours = TimeUnit.MILLISECONDS.toHours(afterDays)
-            val afterHours = afterDays - TimeUnit.HOURS.toMillis(hours)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(afterHours)
-            val seconds = TimeUnit.MILLISECONDS.toSeconds(afterHours - TimeUnit.MINUTES.toMillis(minutes))
-            val isReached = now.timeInMillis >= arrivalDayStart.timeInMillis
+            val remaining = CountdownCalculator.calculate()
 
             val quotes = context.resources.getStringArray(R.array.widget_phrases)
-            val today = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }
-            val deptMidnight = (target.clone() as Calendar).apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-            }
-            val daysUntilDeparture =
-                Math.round((deptMidnight.timeInMillis - today.timeInMillis) / 86_400_000.0).toInt()
-            val phraseIndex = (quotes.size - 1 - daysUntilDeparture)
+            val phraseIndex = (quotes.size - 1 - CountdownCalculator.daysUntilDeparture())
                 .coerceIn(0, quotes.size - 1)
 
             val weather = WeatherRepository.cached(context)?.let {
@@ -525,9 +528,16 @@ private data class HomeState(
             val backgroundRes = Images.resourceOfTheDay(context)
             val df = SimpleDateFormat("d. MMMM yyyy", Locale.GERMAN)
             val tf = SimpleDateFormat("HH:mm", Locale.GERMAN)
+            val target = Calendar.getInstance().apply {
+                set(Calendar.YEAR, YEAR); set(Calendar.MONTH, MONTH)
+                set(Calendar.DAY_OF_MONTH, DAY); set(Calendar.HOUR_OF_DAY, HOUR)
+                set(Calendar.MINUTE, MINUTE); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }
             return HomeState(
-                days = days, hours = hours, minutes = minutes, seconds = seconds,
-                isReached = isReached,
+                days = remaining.days, hours = remaining.hours,
+                minutes = remaining.minutes, seconds = remaining.seconds,
+                isReached = remaining.isReached,
+                isOnVacation = remaining.isOnVacation,
                 phrase = quotes[phraseIndex],
                 weather = weather,
                 weatherStatus = weatherStatus,

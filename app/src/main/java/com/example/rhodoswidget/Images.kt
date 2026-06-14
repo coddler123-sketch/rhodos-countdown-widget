@@ -52,7 +52,8 @@ object Images {
         "rhodes_greece_landscape_003",
         "prasonisi_rhodes_028",
         "rhodos_1906326",
-        "rhodos_1906319"
+        "rhodos_1906319",
+        "relax_hotel_kolymbia"
     )
 
     /** Drawable-Resource fuer das heutige Hintergrundbild. */

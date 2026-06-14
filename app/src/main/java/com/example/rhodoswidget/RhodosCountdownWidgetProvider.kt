@@ -8,8 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import java.util.Calendar
-import java.util.concurrent.TimeUnit
 
 /**
  * 4x2-Widget: Countdown auf das fixe Abflugdatum, Hintergrundbild und Spruch
@@ -39,13 +37,6 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_REFRESH = "com.example.rhodoswidget.ACTION_REFRESH"
 
-        // Fixes Abflugdatum: 20.09.2026, 14:30 Uhr (lokale Zeit).
-        private const val DEPARTURE_YEAR = 2026
-        private const val DEPARTURE_MONTH = Calendar.SEPTEMBER
-        private const val DEPARTURE_DAY = 20
-        private const val DEPARTURE_HOUR = 14
-        private const val DEPARTURE_MINUTE = 30
-
         private const val ARRIVAL_BACKGROUND = R.drawable.arrival_day_rhodos
 
         fun updateLargeWidget(
@@ -58,19 +49,33 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
 
             views.setTextViewText(R.id.widget_phrase_value, phraseOfTheDay(context))
 
-            if (remaining.isReached) {
-                views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
-                views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
-                views.setImageViewResource(R.id.widget_background_image, ARRIVAL_BACKGROUND)
-            } else {
-                views.setViewVisibility(R.id.widget_countdown_row, View.VISIBLE)
-                views.setViewVisibility(R.id.widget_arrival_message, View.GONE)
-                views.setTextViewText(R.id.widget_days, remaining.days.toString())
-                views.setTextViewText(R.id.widget_hours, remaining.hours.toString().padStart(2, '0'))
-                views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))
-                val image = Images.resourceOfTheDay(context)
-                if (image != 0) {
-                    views.setImageViewResource(R.id.widget_background_image, image)
+            when {
+                remaining.isOnVacation -> {
+                    views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
+                    views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_vacation_subtitle, View.VISIBLE)
+                    views.setTextViewText(R.id.widget_arrival_message,
+                        context.getString(R.string.widget_vacation_line1))
+                    val image = Images.resourceOfTheDay(context)
+                    if (image != 0) views.setImageViewResource(R.id.widget_background_image, image)
+                }
+                remaining.isReached -> {
+                    views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
+                    views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
+                    views.setTextViewText(R.id.widget_arrival_message,
+                        context.getString(R.string.widget_arrival_message))
+                    views.setImageViewResource(R.id.widget_background_image, ARRIVAL_BACKGROUND)
+                }
+                else -> {
+                    views.setViewVisibility(R.id.widget_countdown_row, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_arrival_message, View.GONE)
+                    views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
+                    views.setTextViewText(R.id.widget_days, remaining.days.toString())
+                    views.setTextViewText(R.id.widget_hours, remaining.hours.toString().padStart(2, '0'))
+                    views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))
+                    val image = Images.resourceOfTheDay(context)
+                    if (image != 0) views.setImageViewResource(R.id.widget_background_image, image)
                 }
             }
             applyWeather(context, views)
@@ -110,29 +115,9 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
 
         private fun phraseOfTheDay(context: Context): String {
             val quotes = context.resources.getStringArray(R.array.widget_phrases)
-            // Index 0 = groesste Distanz, letzter Index = Reisetag.
-            val index = (quotes.size - 1 - daysUntilDeparture())
+            val index = (quotes.size - 1 - CountdownCalculator.daysUntilDeparture())
                 .coerceIn(0, quotes.size - 1)
             return quotes[index]
-        }
-
-        private fun daysUntilDeparture(): Int {
-            val today = midnight(Calendar.getInstance())
-            val departure = midnight(Calendar.getInstance().apply {
-                set(Calendar.YEAR, DEPARTURE_YEAR)
-                set(Calendar.MONTH, DEPARTURE_MONTH)
-                set(Calendar.DAY_OF_MONTH, DEPARTURE_DAY)
-            })
-            // Auf ganze Tage runden, damit Sommer-/Winterzeit nicht stoert.
-            val diffDays = (departure.timeInMillis - today.timeInMillis) / 86_400_000.0
-            return Math.round(diffDays).toInt()
-        }
-
-        private fun midnight(cal: Calendar): Calendar = cal.apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }
 
         private fun openAppIntent(context: Context): PendingIntent {
@@ -152,38 +137,6 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        private fun calculateRemainingTime(): RemainingTime {
-            val now = Calendar.getInstance()
-            val target = Calendar.getInstance().apply {
-                set(Calendar.YEAR, DEPARTURE_YEAR)
-                set(Calendar.MONTH, DEPARTURE_MONTH)
-                set(Calendar.DAY_OF_MONTH, DEPARTURE_DAY)
-                set(Calendar.HOUR_OF_DAY, DEPARTURE_HOUR)
-                set(Calendar.MINUTE, DEPARTURE_MINUTE)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            // Abflugtag-Nachricht ab Mitternacht des Zieltages anzeigen.
-            val arrivalDayStart = midnight(target.clone() as Calendar)
-
-            val remainingMillis = (target.timeInMillis - now.timeInMillis).coerceAtLeast(0L)
-            val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
-            val afterDays = remainingMillis - TimeUnit.DAYS.toMillis(days)
-            val hours = TimeUnit.MILLISECONDS.toHours(afterDays)
-            val afterHours = afterDays - TimeUnit.HOURS.toMillis(hours)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(afterHours)
-
-            return RemainingTime(
-                days, hours, minutes,
-                isReached = now.timeInMillis >= arrivalDayStart.timeInMillis
-            )
-        }
+        private fun calculateRemainingTime() = CountdownCalculator.calculate()
     }
 }
-
-data class RemainingTime(
-    val days: Long,
-    val hours: Long,
-    val minutes: Long,
-    val isReached: Boolean = false
-)
