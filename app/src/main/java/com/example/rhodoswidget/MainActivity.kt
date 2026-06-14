@@ -1,11 +1,13 @@
 package com.example.rhodoswidget
 
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -23,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +82,27 @@ private fun RhodosHome(padding: PaddingValues) {
     val isRefreshing = remember { mutableStateOf(false) }
     val updateStatus = remember { mutableStateOf("App-Version ${BuildConfig.VERSION_NAME}") }
     val isCheckingUpdate = remember { mutableStateOf(false) }
+    val textToSpeech = remember { mutableStateOf<TextToSpeech?>(null) }
+    val isSpeechReady = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    DisposableEffect(context) {
+        var engine: TextToSpeech? = null
+        engine = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val result = engine?.setLanguage(Locale.GERMAN)
+                isSpeechReady.value = result != TextToSpeech.LANG_MISSING_DATA &&
+                    result != TextToSpeech.LANG_NOT_SUPPORTED
+            }
+        }
+        textToSpeech.value = engine
+        onDispose {
+            engine.stop()
+            engine.shutdown()
+            textToSpeech.value = null
+            isSpeechReady.value = false
+        }
+    }
 
     // Jede Minute auffrischen, damit der Countdown live wirkt.
     LaunchedEffect(Unit) {
@@ -136,6 +160,16 @@ private fun RhodosHome(padding: PaddingValues) {
                             isRefreshing.value = false
                         }
                     }
+                },
+                onSpeakWeather = {
+                    val message = state.value.weather?.spokenReport
+                        ?: "Das Wetter ist noch nicht geladen. Bitte zuerst aktualisieren."
+                    textToSpeech.value?.takeIf { isSpeechReady.value }?.speak(
+                        message,
+                        TextToSpeech.QUEUE_FLUSH,
+                        null,
+                        "rhodos-weather-report"
+                    )
                 },
                 onCheckUpdate = {
                     if (!isCheckingUpdate.value) {
@@ -269,10 +303,11 @@ private fun BottomSection(
     updateStatus: String,
     isCheckingUpdate: Boolean,
     onRefresh: () -> Unit,
+    onSpeakWeather: () -> Unit,
     onCheckUpdate: () -> Unit
 ) {
     Column {
-        WeatherCard(s)
+        WeatherCard(s, onSpeakWeather)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -300,7 +335,7 @@ private fun BottomSection(
 }
 
 @Composable
-private fun WeatherCard(s: HomeState) {
+private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,15 +343,26 @@ private fun WeatherCard(s: HomeState) {
             .background(Color(0x26FFFFFF))
             .padding(horizontal = 15.dp, vertical = 12.dp)
     ) {
+        Image(
+            painter = painterResource(R.drawable.ic_speaker_subtle),
+            contentDescription = "Wetterbericht abspielen",
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(18.dp)
+                .clickable(onClick = onSpeakWeather)
+                .padding(1.dp),
+            alpha = 0.72f
+        )
         if (s.weather == null) {
             Text(
                 text = "Kolymbia-Wetter noch nicht geladen",
                 color = Color(0xE6FFFFFF),
                 fontSize = 13.sp,
-                fontFamily = Montserrat
+                fontFamily = Montserrat,
+                modifier = Modifier.padding(end = 28.dp)
             )
         } else {
-            Column {
+            Column(modifier = Modifier.padding(end = 28.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
                         painter = painterResource(s.weather.iconRes),
@@ -356,6 +402,16 @@ private fun WeatherCard(s: HomeState) {
                     fontSize = 11.sp,
                     fontFamily = Montserrat
                 )
+                if (s.weather.forecastLabels.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(7.dp))
+                    Text(
+                        text = s.weather.forecastLabels.joinToString(" · "),
+                        color = Color(0xBFFFFFFF),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Montserrat
+                    )
+                }
             }
         }
     }
@@ -395,7 +451,9 @@ private data class WeatherSnapshot(
     val humidityLabel: String,
     val precipitationLabel: String,
     val windSpeedLabel: String,
-    val iconRes: Int
+    val iconRes: Int,
+    val forecastLabels: List<String>,
+    val spokenReport: String
 )
 
 private data class HomeState(
@@ -458,7 +516,9 @@ private data class HomeState(
                     humidityLabel = it.humidityLabel,
                     precipitationLabel = it.precipitationLabel,
                     windSpeedLabel = it.windSpeedLabel,
-                    iconRes = WeatherRepository.iconFor(it)
+                    iconRes = WeatherRepository.iconFor(it),
+                    forecastLabels = it.forecast.take(3).map(WeatherReportFormatter::compactForecastLabel),
+                    spokenReport = WeatherReportFormatter.spokenReport(it)
                 )
             }
             val weatherStatus = weatherStatus(context, weather)
