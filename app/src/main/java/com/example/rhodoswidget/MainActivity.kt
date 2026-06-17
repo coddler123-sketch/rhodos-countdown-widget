@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,8 +29,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -83,13 +87,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RhodosHome(padding: PaddingValues) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
-    val updateStatus = remember { mutableStateOf("App-Version ${BuildConfig.VERSION_NAME}") }
+    val updateStatus = remember { mutableStateOf("v${BuildConfig.VERSION_NAME}") }
     val isCheckingUpdate = remember { mutableStateOf(false) }
+    val updateAvailable = remember { mutableStateOf<AppUpdate?>(null) }
+    val showSettings = remember { mutableStateOf(false) }
     val textToSpeech = remember { mutableStateOf<TextToSpeech?>(null) }
     val isSpeechReady = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -110,6 +117,12 @@ private fun RhodosHome(padding: PaddingValues) {
             textToSpeech.value = null
             isSpeechReady.value = false
         }
+    }
+
+    LaunchedEffect(Unit) {
+        // Stiller Update-Check beim Start
+        val found = withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
+        if (found != null) updateAvailable.value = found
     }
 
     LaunchedEffect(Unit) {
@@ -157,7 +170,7 @@ private fun RhodosHome(padding: PaddingValues) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
-            HeaderSection(s)
+            HeaderSection(s, onSettings = { showSettings.value = true })
             Spacer(Modifier.height(36.dp))
             CountdownSection(s)
             Spacer(Modifier.height(20.dp))
@@ -167,7 +180,7 @@ private fun RhodosHome(padding: PaddingValues) {
                 s = s,
                 isRefreshing = isRefreshing.value,
                 updateStatus = updateStatus.value,
-                isCheckingUpdate = isCheckingUpdate.value,
+                hasUpdateBadge = updateAvailable.value != null,
                 onRefresh = {
                     if (!isRefreshing.value) {
                         scope.launch {
@@ -192,93 +205,111 @@ private fun RhodosHome(padding: PaddingValues) {
                         null,
                         "rhodos-weather-report"
                     )
-                },
-                onCheckUpdate = {
-                    if (!isCheckingUpdate.value) {
-                        scope.launch {
-                            isCheckingUpdate.value = true
-                            updateStatus.value = "Suche nach Update ..."
-                            val update = withContext(Dispatchers.IO) {
-                                AppUpdateRepository.checkLatest()
-                            }
-                            if (update == null) {
-                                updateStatus.value = "Kein Update gefunden"
-                                isCheckingUpdate.value = false
-                            } else {
-                                updateStatus.value = "Update ${update.versionName} wird geladen ..."
-                                val apk = withContext(Dispatchers.IO) {
-                                    AppUpdateRepository.download(context, update)
-                                }
-                                if (apk == null) {
-                                    updateStatus.value = "Update konnte nicht geladen werden"
-                                    isCheckingUpdate.value = false
-                                } else {
-                                    updateStatus.value = "Installer wird geöffnet"
-                                    context.startActivity(AppUpdateRepository.installIntent(context, apk))
-                                    isCheckingUpdate.value = false
-                                }
-                            }
-                        }
-                    }
-                },
-                onShare = {
-                    val sv = state.value
-                    val msg = buildString {
-                        when {
-                            sv.isOnVacation -> {
-                                appendLine("🌊 Wir sind auf Rhodos!")
-                                append("Genießt jeden Augenblick.")
-                            }
-                            sv.isReached -> {
-                                appendLine("🛫 Heute geht's los nach Rhodos!")
-                                append("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr")
-                            }
-                            else -> {
-                                appendLine("🌊 Noch ${sv.days} Tage bis Rhodos!")
-                                appendLine("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr")
-                                appendLine()
-                                appendLine("${sv.days} Tage · ${sv.hours.toString().padStart(2, '0')} Std. · ${sv.minutes.toString().padStart(2, '0')} Min.")
-                                appendLine()
-                                append("»${sv.phrase}«")
-                            }
-                        }
-                    }
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, msg)
-                    }
-                    context.startActivity(Intent.createChooser(intent, "Countdown teilen"))
                 }
             )
+        }
+
+        // Settings-BottomSheet: Update + Teilen + Version
+        if (showSettings.value) {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ModalBottomSheet(
+                onDismissRequest = { showSettings.value = false },
+                sheetState = sheetState,
+                containerColor = Color(0xFF1A1A2E)
+            ) {
+                SettingsSheet(
+                    updateStatus = updateStatus.value,
+                    isCheckingUpdate = isCheckingUpdate.value,
+                    hasUpdate = updateAvailable.value != null,
+                    onCheckUpdate = {
+                        if (!isCheckingUpdate.value) {
+                            scope.launch {
+                                isCheckingUpdate.value = true
+                                val update = updateAvailable.value ?: run {
+                                    updateStatus.value = "Suche ..."
+                                    withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
+                                }
+                                if (update == null) {
+                                    updateStatus.value = "Kein Update gefunden"
+                                    isCheckingUpdate.value = false
+                                } else {
+                                    updateAvailable.value = update
+                                    updateStatus.value = "Lädt v${update.versionName} ..."
+                                    val apk = withContext(Dispatchers.IO) {
+                                        AppUpdateRepository.download(context, update)
+                                    }
+                                    if (apk == null) {
+                                        updateStatus.value = "Download fehlgeschlagen"
+                                        isCheckingUpdate.value = false
+                                    } else {
+                                        showSettings.value = false
+                                        context.startActivity(AppUpdateRepository.installIntent(context, apk))
+                                        isCheckingUpdate.value = false
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onShare = {
+                        val sv = state.value
+                        val msg = buildString {
+                            when {
+                                sv.isOnVacation -> { appendLine("🌊 Wir sind auf Rhodos!"); append("Genießt jeden Augenblick.") }
+                                sv.isReached -> { appendLine("🛫 Heute geht's los nach Rhodos!"); append("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr") }
+                                else -> {
+                                    appendLine("🌊 Noch ${sv.days} Tage bis Rhodos!")
+                                    appendLine("Abflug: ${sv.departureDate} um ${sv.departureTime} Uhr")
+                                    appendLine()
+                                    appendLine("${sv.days} Tage · ${sv.hours.toString().padStart(2,'0')} Std. · ${sv.minutes.toString().padStart(2,'0')} Min.")
+                                    appendLine(); append("»${sv.phrase}«")
+                                }
+                            }
+                        }
+                        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, msg) }, "Countdown teilen"))
+                        showSettings.value = false
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun HeaderSection(s: HomeState) {
-    Column {
+private fun HeaderSection(s: HomeState, onSettings: () -> Unit) {
+    Row(verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "RHODOS",
+                color = Color.White,
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat,
+                letterSpacing = 5.sp
+            )
+            Text(
+                text = "Unser Urlaubs-Countdown",
+                color = Color(0xE6FFFFFF),
+                fontSize = 15.sp,
+                fontFamily = Montserrat
+            )
+            Text(
+                text = "${s.departureDate} · ${s.departureTime} Uhr",
+                color = Color(0xCCFFFFFF),
+                fontSize = 12.sp,
+                fontFamily = Montserrat,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            CountdownProgress(s.progress)
+        }
+        // Dezentes Gear-Icon oben rechts
         Text(
-            text = "RHODOS",
-            color = Color.White,
-            fontSize = 38.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = Montserrat,
-            letterSpacing = 5.sp
+            text = "⚙",
+            fontSize = 18.sp,
+            color = Color(0x80FFFFFF),
+            modifier = Modifier
+                .padding(top = 4.dp, start = 8.dp)
+                .clickable(onClick = onSettings)
         )
-        Text(
-            text = "Unser Urlaubs-Countdown",
-            color = Color(0xE6FFFFFF),
-            fontSize = 15.sp,
-            fontFamily = Montserrat
-        )
-        Text(
-            text = "${s.departureDate} · ${s.departureTime} Uhr",
-            color = Color(0xCCFFFFFF),
-            fontSize = 12.sp,
-            fontFamily = Montserrat,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-        CountdownProgress(s.progress)
     }
 }
 
@@ -411,45 +442,38 @@ private fun BottomSection(
     s: HomeState,
     isRefreshing: Boolean,
     updateStatus: String,
-    isCheckingUpdate: Boolean,
+    hasUpdateBadge: Boolean,
     onRefresh: () -> Unit,
     onSpeakWeather: () -> Unit,
-    onCheckUpdate: () -> Unit,
-    onShare: () -> Unit
 ) {
     Column {
         WeatherCard(s, onSpeakWeather)
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = "${s.weatherStatus} · $updateStatus",
-            color = Color(0xA6FFFFFF),
-            fontSize = 10.sp,
-            fontFamily = Montserrat,
-            maxLines = 1
-        )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(Modifier.weight(1f))
+            Text(
+                text = "${s.weatherStatus} · $updateStatus",
+                color = Color(0xA6FFFFFF),
+                fontSize = 10.sp,
+                fontFamily = Montserrat,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
+            )
+            if (hasUpdateBadge) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .background(Color(0xFFFF4444), shape = RoundedCornerShape(4.dp))
+                )
+                Spacer(Modifier.width(6.dp))
+            }
             SecondaryActionButton(
-                text = if (isRefreshing) "Lädt" else "Wetter",
+                text = if (isRefreshing) "Lädt …" else "Wetter",
                 enabled = !isRefreshing,
                 onClick = onRefresh
             )
-            SecondaryActionButton(
-                text = if (isCheckingUpdate) "Prüft" else "Update",
-                enabled = !isCheckingUpdate,
-                onClick = onCheckUpdate
-            )
-            SecondaryActionButton(
-                text = "Teilen",
-                enabled = true,
-                onClick = onShare
-            )
-            Spacer(Modifier.weight(1f))
         }
     }
 }
@@ -461,17 +485,17 @@ private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0x26FFFFFF))
-            .padding(horizontal = 15.dp, vertical = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 9.dp)
     ) {
         Image(
             painter = painterResource(R.drawable.ic_speaker_subtle),
             contentDescription = "Wetterbericht abspielen",
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .size(18.dp)
+                .size(17.dp)
                 .clickable(onClick = onSpeakWeather)
                 .padding(1.dp),
-            alpha = 0.72f
+            alpha = 0.55f
         )
         if (s.weather == null) {
             Text(
@@ -518,7 +542,7 @@ private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(9.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Wind ${s.weather.windSpeedLabel} · Luftfeuchte ${s.weather.humidityLabel} · Regen ${s.weather.precipitationLabel}",
                     color = Color(0xCCFFFFFF),
@@ -527,7 +551,7 @@ private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
                     modifier = Modifier.padding(end = 28.dp)
                 )
                 if (s.weather.forecastDays.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -615,11 +639,80 @@ private fun FactCard(fact: String) {
 }
 
 @Composable
+private fun SettingsSheet(
+    updateStatus: String,
+    isCheckingUpdate: Boolean,
+    hasUpdate: Boolean,
+    onCheckUpdate: () -> Unit,
+    onShare: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 36.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Optionen",
+            color = Color(0x99FFFFFF),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = Montserrat,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        SettingsRow(
+            icon = if (hasUpdate) "🔴" else "✓",
+            label = if (hasUpdate) "Update verfügbar" else "App aktuell",
+            detail = updateStatus,
+            actionLabel = when {
+                isCheckingUpdate -> "Lädt …"
+                hasUpdate -> "Jetzt installieren"
+                else -> "Prüfen"
+            },
+            onAction = onCheckUpdate,
+            enabled = !isCheckingUpdate
+        )
+        SettingsRow(
+            icon = "↗",
+            label = "Countdown teilen",
+            detail = "Via WhatsApp, SMS, …",
+            actionLabel = "Teilen",
+            onAction = onShare
+        )
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    icon: String,
+    label: String,
+    detail: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    enabled: Boolean = true
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = icon, fontSize = 16.sp, modifier = Modifier.width(28.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = label, color = Color.White, fontSize = 14.sp, fontFamily = Montserrat, fontWeight = FontWeight.SemiBold)
+            Text(text = detail, color = Color(0x99FFFFFF), fontSize = 11.sp, fontFamily = Montserrat)
+        }
+        SecondaryActionButton(text = actionLabel, enabled = enabled, onClick = onAction)
+    }
+}
+
+@Composable
 private fun SecondaryActionButton(
     text: String,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = Color(0x24FFFFFF)
 ) {
         Button(
             onClick = onClick,
@@ -627,7 +720,7 @@ private fun SecondaryActionButton(
             modifier = modifier.height(32.dp),
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0x24FFFFFF),
+                containerColor = containerColor,
                 contentColor = Color.White,
                 disabledContainerColor = Color(0x18FFFFFF),
                 disabledContentColor = Color(0x99FFFFFF)
@@ -640,6 +733,31 @@ private fun SecondaryActionButton(
                 fontSize = 11.sp
             )
         }
+}
+
+@Composable
+private fun UpdateButton(isChecking: Boolean, hasUpdate: Boolean, onClick: () -> Unit) {
+    Box {
+        SecondaryActionButton(
+            text = when {
+                isChecking -> "Prüft"
+                hasUpdate -> "Update!"
+                else -> "Update"
+            },
+            enabled = !isChecking,
+            onClick = onClick,
+            containerColor = if (hasUpdate) Color(0x55FF6B35) else Color(0x24FFFFFF)
+        )
+        if (hasUpdate && !isChecking) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .align(Alignment.TopEnd)
+                    .offset(x = 3.dp, y = (-3).dp)
+                    .background(Color(0xFFFF4444), shape = RoundedCornerShape(4.dp))
+            )
+        }
+    }
 }
 
 private fun shortWeekday(dateIso: String): String {
