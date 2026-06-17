@@ -2,7 +2,6 @@ package com.example.rhodoswidget
 
 import android.content.Intent
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -36,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,31 +91,10 @@ private fun RhodosHome(padding: PaddingValues) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
-    val updateStatus = remember { mutableStateOf("v${BuildConfig.VERSION_NAME}") }
     val isCheckingUpdate = remember { mutableStateOf(false) }
     val updateAvailable = remember { mutableStateOf<AppUpdate?>(null) }
     val showSettings = remember { mutableStateOf(false) }
-    val textToSpeech = remember { mutableStateOf<TextToSpeech?>(null) }
-    val isSpeechReady = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-
-    DisposableEffect(context) {
-        var engine: TextToSpeech? = null
-        engine = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                val result = engine?.setLanguage(Locale.GERMAN)
-                isSpeechReady.value = result != TextToSpeech.LANG_MISSING_DATA &&
-                    result != TextToSpeech.LANG_NOT_SUPPORTED
-            }
-        }
-        textToSpeech.value = engine
-        onDispose {
-            engine.stop()
-            engine.shutdown()
-            textToSpeech.value = null
-            isSpeechReady.value = false
-        }
-    }
 
     LaunchedEffect(Unit) {
         // Stiller Update-Check beim Start
@@ -179,7 +156,6 @@ private fun RhodosHome(padding: PaddingValues) {
             BottomSection(
                 s = s,
                 isRefreshing = isRefreshing.value,
-                updateStatus = updateStatus.value,
                 hasUpdateBadge = updateAvailable.value != null,
                 onRefresh = {
                     if (!isRefreshing.value) {
@@ -195,16 +171,6 @@ private fun RhodosHome(padding: PaddingValues) {
                             isRefreshing.value = false
                         }
                     }
-                },
-                onSpeakWeather = {
-                    val message = state.value.weather?.spokenReport
-                        ?: "Das Wetter ist noch nicht geladen. Bitte zuerst aktualisieren."
-                    textToSpeech.value?.takeIf { isSpeechReady.value }?.speak(
-                        message,
-                        TextToSpeech.QUEUE_FLUSH,
-                        null,
-                        "rhodos-weather-report"
-                    )
                 }
             )
         }
@@ -215,31 +181,25 @@ private fun RhodosHome(padding: PaddingValues) {
             ModalBottomSheet(
                 onDismissRequest = { showSettings.value = false },
                 sheetState = sheetState,
-                containerColor = Color(0xFF1A1A2E)
+                containerColor = Color(0xFF111116)
             ) {
                 SettingsSheet(
-                    updateStatus = updateStatus.value,
                     isCheckingUpdate = isCheckingUpdate.value,
                     hasUpdate = updateAvailable.value != null,
                     onCheckUpdate = {
                         if (!isCheckingUpdate.value) {
                             scope.launch {
                                 isCheckingUpdate.value = true
-                                val update = updateAvailable.value ?: run {
-                                    updateStatus.value = "Suche ..."
-                                    withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
-                                }
+                                val update = updateAvailable.value
+                                    ?: withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
                                 if (update == null) {
-                                    updateStatus.value = "Kein Update gefunden"
                                     isCheckingUpdate.value = false
                                 } else {
                                     updateAvailable.value = update
-                                    updateStatus.value = "Lädt v${update.versionName} ..."
                                     val apk = withContext(Dispatchers.IO) {
                                         AppUpdateRepository.download(context, update)
                                     }
                                     if (apk == null) {
-                                        updateStatus.value = "Download fehlgeschlagen"
                                         isCheckingUpdate.value = false
                                     } else {
                                         showSettings.value = false
@@ -441,20 +401,18 @@ private fun CountdownDivider() {
 private fun BottomSection(
     s: HomeState,
     isRefreshing: Boolean,
-    updateStatus: String,
     hasUpdateBadge: Boolean,
     onRefresh: () -> Unit,
-    onSpeakWeather: () -> Unit,
 ) {
     Column {
-        WeatherCard(s, onSpeakWeather)
-        Spacer(modifier = Modifier.height(8.dp))
+        WeatherCard(s, isRefreshing, onRefresh)
+        Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${s.weatherStatus} · $updateStatus",
+                text = s.weatherStatus,
                 color = Color(0xA6FFFFFF),
                 fontSize = 10.sp,
                 fontFamily = Montserrat,
@@ -467,19 +425,13 @@ private fun BottomSection(
                         .size(7.dp)
                         .background(Color(0xFFFF4444), shape = RoundedCornerShape(4.dp))
                 )
-                Spacer(Modifier.width(6.dp))
             }
-            SecondaryActionButton(
-                text = if (isRefreshing) "Lädt …" else "Wetter",
-                enabled = !isRefreshing,
-                onClick = onRefresh
-            )
         }
     }
 }
 
 @Composable
-private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
+private fun WeatherCard(s: HomeState, isRefreshing: Boolean, onRefresh: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -488,14 +440,14 @@ private fun WeatherCard(s: HomeState, onSpeakWeather: () -> Unit) {
             .padding(horizontal = 14.dp, vertical = 9.dp)
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_speaker_subtle),
-            contentDescription = "Wetterbericht abspielen",
+            painter = painterResource(R.drawable.ic_refresh_subtle),
+            contentDescription = "Wetter aktualisieren",
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .size(17.dp)
-                .clickable(onClick = onSpeakWeather)
+                .clickable(enabled = !isRefreshing, onClick = onRefresh)
                 .padding(1.dp),
-            alpha = 0.55f
+            alpha = if (isRefreshing) 0.25f else 0.55f
         )
         if (s.weather == null) {
             Text(
@@ -640,7 +592,6 @@ private fun FactCard(fact: String) {
 
 @Composable
 private fun SettingsSheet(
-    updateStatus: String,
     isCheckingUpdate: Boolean,
     hasUpdate: Boolean,
     onCheckUpdate: () -> Unit,
@@ -664,11 +615,11 @@ private fun SettingsSheet(
         )
         SettingsRow(
             icon = if (hasUpdate) "🔴" else "✓",
-            label = if (hasUpdate) "Update verfügbar" else "App aktuell",
-            detail = updateStatus,
+            label = "Version v${BuildConfig.VERSION_NAME}",
+            detail = if (hasUpdate) "Update verfügbar" else "Aktuellste Version",
             actionLabel = when {
                 isCheckingUpdate -> "Lädt …"
-                hasUpdate -> "Jetzt installieren"
+                hasUpdate -> "Installieren"
                 else -> "Prüfen"
             },
             onAction = onCheckUpdate,
@@ -891,10 +842,10 @@ private data class HomeState(
             val ageMillis = (System.currentTimeMillis() - lastFetch).coerceAtLeast(0L)
             val minutes = TimeUnit.MILLISECONDS.toMinutes(ageMillis)
             if (minutes < 1) return "Gerade aktualisiert"
-            if (minutes < 60) return "Vor $minutes Min."
+            if (minutes < 60) return "Vor $minutes Min. aktualisiert"
 
             val hours = TimeUnit.MILLISECONDS.toHours(ageMillis)
-            return "Vor $hours Std."
+            return "Vor $hours Std. aktualisiert"
         }
     }
 }
