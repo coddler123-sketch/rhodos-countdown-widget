@@ -91,10 +91,15 @@ private fun RhodosHome(padding: PaddingValues) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
+    val reloadDone = remember { mutableStateOf(false) }
     val isCheckingUpdate = remember { mutableStateOf(false) }
     val updateAvailable = remember { mutableStateOf<AppUpdate?>(null) }
     val showSettings = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(reloadDone.value) {
+        if (reloadDone.value) { delay(1_500); reloadDone.value = false }
+    }
 
     LaunchedEffect(Unit) {
         // Stiller Update-Check beim Start
@@ -152,10 +157,13 @@ private fun RhodosHome(padding: PaddingValues) {
             CountdownSection(s)
             Spacer(Modifier.height(20.dp))
             FactCard(s.factOfTheDay)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(10.dp))
+            HighlightCard(rhodosHighlightOfTheDay())
+            Spacer(Modifier.height(12.dp))
             BottomSection(
                 s = s,
                 isRefreshing = isRefreshing.value,
+                reloadDone = reloadDone.value,
                 hasUpdateBadge = updateAvailable.value != null,
                 onRefresh = {
                     if (!isRefreshing.value) {
@@ -169,6 +177,7 @@ private fun RhodosHome(padding: PaddingValues) {
                             RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
                             state.value = HomeState.load(context)
                             isRefreshing.value = false
+                            reloadDone.value = true
                         }
                     }
                 }
@@ -401,11 +410,12 @@ private fun CountdownDivider() {
 private fun BottomSection(
     s: HomeState,
     isRefreshing: Boolean,
+    reloadDone: Boolean,
     hasUpdateBadge: Boolean,
     onRefresh: () -> Unit,
 ) {
     Column {
-        WeatherCard(s, isRefreshing, onRefresh)
+        WeatherCard(s, isRefreshing, reloadDone, onRefresh)
         Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -431,7 +441,7 @@ private fun BottomSection(
 }
 
 @Composable
-private fun WeatherCard(s: HomeState, isRefreshing: Boolean, onRefresh: () -> Unit) {
+private fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefresh: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -439,16 +449,25 @@ private fun WeatherCard(s: HomeState, isRefreshing: Boolean, onRefresh: () -> Un
             .background(Color(0x26FFFFFF))
             .padding(horizontal = 14.dp, vertical = 9.dp)
     ) {
-        Image(
-            painter = painterResource(R.drawable.ic_refresh_subtle),
-            contentDescription = "Wetter aktualisieren",
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(17.dp)
-                .clickable(enabled = !isRefreshing, onClick = onRefresh)
-                .padding(1.dp),
-            alpha = if (isRefreshing) 0.25f else 0.55f
-        )
+        if (reloadDone) {
+            Text(
+                text = "✓",
+                color = Color(0xFF66DD88),
+                fontSize = 14.sp,
+                modifier = Modifier.align(Alignment.TopEnd).padding(1.dp)
+            )
+        } else {
+            Image(
+                painter = painterResource(R.drawable.ic_refresh_subtle),
+                contentDescription = "Wetter aktualisieren",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(17.dp)
+                    .clickable(enabled = !isRefreshing, onClick = onRefresh)
+                    .padding(1.dp),
+                alpha = if (isRefreshing) 0.25f else 0.55f
+            )
+        }
         if (s.weather == null) {
             Text(
                 text = "Kolymbia-Wetter noch nicht geladen",
@@ -542,14 +561,25 @@ private fun WeatherCard(s: HomeState, isRefreshing: Boolean, onRefresh: () -> Un
                         }
                     }
                 }
-                if (s.sunsetLabel != null) {
+                if (s.sunriseLabel != null || s.sunsetLabel != null) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "🌅  Sonnenuntergang: ${s.sunsetLabel}",
-                        color = Color(0xCCFFFFFF),
-                        fontSize = 11.sp,
-                        fontFamily = Montserrat
-                    )
+                    if (s.sunriseLabel != null) {
+                        Text(
+                            text = "🌄  Sonnenaufgang: ${s.sunriseLabel}",
+                            color = Color(0xCCFFFFFF),
+                            fontSize = 11.sp,
+                            fontFamily = Montserrat
+                        )
+                    }
+                    if (s.sunsetLabel != null) {
+                        Text(
+                            text = "🌅  Sonnenuntergang: ${s.sunsetLabel}",
+                            color = Color(0xCCFFFFFF),
+                            fontSize = 11.sp,
+                            fontFamily = Montserrat,
+                            modifier = Modifier.padding(top = if (s.sunriseLabel != null) 2.dp else 0.dp)
+                        )
+                    }
                 }
             }
         }
@@ -752,7 +782,8 @@ private data class HomeState(
     val departureDate: String,
     val departureTime: String,
     val progress: Float,
-    val sunsetLabel: String?,   // z. B. "20:43 Uhr · noch 3 Std. 12 Min."
+    val sunsetLabel: String?,
+    val sunriseLabel: String?,
     val factOfTheDay: String
 ) {
     companion object {
@@ -798,7 +829,8 @@ private data class HomeState(
                 set(Calendar.MINUTE, MINUTE); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
             }
             val rawWeather = WeatherRepository.cached(context)
-            val sunsetLabel = rawWeather?.sunsetIso?.let { parseSunsetLabel(it) }
+            val sunsetLabel = rawWeather?.sunsetIso?.let { parseSolarEventLabel(it) }
+            val sunriseLabel = rawWeather?.sunriseIso?.let { parseSolarEventLabel(it) }
             return HomeState(
                 days = remaining.days, hours = remaining.hours,
                 minutes = remaining.minutes, seconds = remaining.seconds,
@@ -812,11 +844,12 @@ private data class HomeState(
                 departureTime = tf.format(target.time),
                 progress = CountdownCalculator.progressFraction(),
                 sunsetLabel = sunsetLabel,
+                sunriseLabel = sunriseLabel,
                 factOfTheDay = rhodosFactOfTheDay()
             )
         }
 
-        private fun parseSunsetLabel(sunsetIso: String): String? {
+        private fun parseSolarEventLabel(sunsetIso: String): String? {
             return try {
                 val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
                 val sunsetTime = sdf.parse(sunsetIso) ?: return null
@@ -848,6 +881,83 @@ private data class HomeState(
             return "Vor $hours Std. aktualisiert"
         }
     }
+}
+
+@Composable
+private fun HighlightCard(highlight: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0x1AFFFFFF))
+            .padding(horizontal = 15.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(text = "📍", fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp, top = 1.dp))
+        Column {
+            Text(
+                text = "Highlight des Tages",
+                color = Color(0xBFFFFFFF),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = Montserrat
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = highlight,
+                color = Color.White,
+                fontSize = 13.sp,
+                fontFamily = Montserrat
+            )
+        }
+    }
+}
+
+private fun rhodosHighlightOfTheDay(): String {
+    val highlights = listOf(
+        "Tsambika Beach: Feiner roter Sand, ruhiges Wasser — ideal zum Entspannen. Früh morgens ist er fast leer.",
+        "Anthony Quinn Bay: Kristallklares Wasser direkt vom Fels — der perfekte Ort zum Schnorcheln.",
+        "Lindos: Weiße Häuser, blaue Kuppeln und die Akropolis über dem Meer. Am besten vor 9 Uhr besuchen.",
+        "Agathi Beach: Klein, versteckt und wunderschön — einer der schönsten Strände der Ostküste.",
+        "Rhodos Altstadt: UNESCO-Weltkulturerbe — durch mittelalterliche Gassen schlendern und die Atmosphäre genießen.",
+        "Pitaroudia probieren: Frittierte Kichererbsenpuffer — die rhodische Spezialität schlechthin.",
+        "Schmetterlingstal (Petaloudes): Tausende Jerseyspinner-Falter im Sommer — ein stilles Naturerlebnis.",
+        "Motorroller mieten: Die beste Art, die Ostküste auf eigene Faust zu erkunden.",
+        "Stegna Beach: Einheimischenstrand nördlich von Kolymbia, ruhig und unkommerziell.",
+        "Prasonissi: Die Südspitze der Insel — hier treffen Mittelmeer und Ägäis aufeinander.",
+        "Mandraki-Hafen: Die drei Windmühlen und die Bronzehirsche — für Fotos ein Muss.",
+        "Rhodischen Muskatwein trinken: PDO-geschützt, süß und aromatisch — am besten gekühlt.",
+        "Tsambika-Kloster: 300 Stufen hoch, aber der Ausblick über die Küste ist atemberaubend.",
+        "Bootsausflug nach Symi: Die benachbarte Insel mit bunten Häuserfassaden ist einen Tagesausflug wert.",
+        "Palast des Großmeisters: Beeindruckende Johanniterritter-Architektur — das Museum lohnt sich.",
+        "Melekouni kosten: Rhodisches Honig-Sesam-Gebäck — traditionell bei Hochzeiten gereicht.",
+        "Quad-Tour durch die Insel: Flexibel, abenteuerlich — perfekt für die Ostküste.",
+        "Abendspaziergang in der Altstadt: Wenn die Tagestouristen weg sind, erwacht die Magie der Gassen.",
+        "Schnorcheln bei Ladiko Bay: Kleiner Naturstrand, klares Wasser, viel zu entdecken.",
+        "Sonnenuntergang von der Stadtmauer: Die Mauer der Altstadt bietet spektakuläre Ausblicke.",
+        "Granatapfel kaufen: Im September sind sie reif — ein Symbol für Glück auf Rhodos.",
+        "Archangelos besuchen: Das Dorf ist bekannt für handgefertigte Lederstiefel.",
+        "Faliraki Wasserpark: Für einen erfrischenden Tag mit Rutschen und Pools.",
+        "Antike Kamiros: Die besterhaltene antike Stadt Rhodos — kaum Touristen, viel Atmosphäre.",
+        "Lokalen Markt erkunden: Frische Feigen, Wassermelonen und Tomaten im September.",
+        "Elli Beach in der Stadt: Lebhafter Stadtrand-Strand mit Bars und Liegestühlen.",
+        "Weinverkostung: Rhodos hat eigene Weinbaugebiete — lokale Weingüter bieten Führungen an.",
+        "Kolymbia-Eukalyptusallee: Die alte Eukalyptusstraße abends spazieren — kühl und duftend.",
+        "Gyros in der Altstadt: Die kleinen Läden in den Seitengassen machen die besten.",
+        "Aquarium Rhodos: Das älteste Aquarium Griechenlands — 1935 von den Italienern erbaut.",
+        "Frühmorgens schwimmen: Das Meer ist um 7 Uhr noch wie ein Spiegel — unvergesslich.",
+        "Dolmathes probieren: Gefüllte Weinblätter mit Reis und Kräutern — rhodische Hausmannskost.",
+        "Anthony Quinn Bay bei Sonnenuntergang: Das Licht auf dem Wasser ist zu dieser Zeit magisch.",
+        "Bootsverleih ab Kolymbia: Kleine Motorboote mieten und die Küste vom Meer aus erkunden.",
+        "Straße der Ritter: Die besterhaltene mittelalterliche Straße Europas — nachts besonders schön.",
+        "Jüdisches Viertel (La Juderia): Geschichte und Stille — das kleine Museum ist sehr bewegend.",
+        "Souvlaki am Hafen: Nach dem Altstadt-Bummel den Abend am Wasser ausklingen lassen.",
+        "Raki/Souma probieren: Rhodischer Traubenschnaps — am besten beim Wirt des Vertrauens.",
+        "Nachtbaden: Das warme Mittelmeer im September ist nachts besonders einladend.",
+        "Atavyros-Blick: Wer den Aufstieg scheut — schon von weitem ist der Berg ein Blickfang."
+    )
+    val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+    return highlights[dayOfYear % highlights.size]
 }
 
 private fun rhodosFactOfTheDay(): String {
