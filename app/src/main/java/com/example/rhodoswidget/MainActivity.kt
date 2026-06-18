@@ -50,6 +50,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import kotlin.math.min
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -95,6 +97,8 @@ private fun RhodosHome(padding: PaddingValues) {
     val isCheckingUpdate = remember { mutableStateOf(false) }
     val updateAvailable = remember { mutableStateOf<AppUpdate?>(null) }
     val showSettings = remember { mutableStateOf(false) }
+    val showGallery = remember { mutableStateOf(false) }
+    val pinnedImage = remember { mutableStateOf(Images.getPinnedImage(context)) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(reloadDone.value) {
@@ -236,9 +240,28 @@ private fun RhodosHome(padding: PaddingValues) {
                         }
                         context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, msg) }, "Countdown teilen"))
                         showSettings.value = false
+                    },
+                    onOpenGallery = {
+                        showSettings.value = false
+                        showGallery.value = true
                     }
                 )
             }
+        }
+
+        if (showGallery.value) {
+            GallerySheet(
+                onDismissRequest = { showGallery.value = false },
+                onSelectImage = { newImage ->
+                    Images.setPinnedImage(context, newImage)
+                    pinnedImage.value = newImage
+                    RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
+                    state.value = HomeState.load(context)
+                    showGallery.value = false
+                },
+                currentImageName = Images.currentImageName(context),
+                pinnedImageName = pinnedImage.value
+            )
         }
     }
 }
@@ -627,7 +650,8 @@ private fun SettingsSheet(
     isCheckingUpdate: Boolean,
     hasUpdate: Boolean,
     onCheckUpdate: () -> Unit,
-    onShare: () -> Unit
+    onShare: () -> Unit,
+    onOpenGallery: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -656,6 +680,13 @@ private fun SettingsSheet(
             },
             onAction = onCheckUpdate,
             enabled = !isCheckingUpdate
+        )
+        SettingsRow(
+            icon = "🖼",
+            label = "Hintergrundbild",
+            detail = "Bildergalerie & Favoriten",
+            actionLabel = "Galerie",
+            onAction = onOpenGallery
         )
         SettingsRow(
             icon = "↗",
@@ -1068,4 +1099,164 @@ private fun rhodosFactOfTheDay(): String {
     )
     val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
     return facts[dayOfYear % facts.size]
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GallerySheet(
+    onDismissRequest: () -> Unit,
+    onSelectImage: (String?) -> Unit,
+    currentImageName: String,
+    pinnedImageName: String?
+) {
+    val context = LocalContext.current
+    val images = remember { Images.allImageNames }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+        containerColor = Color(0xFF111116),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .background(Color(0x40FFFFFF), RoundedCornerShape(2.dp))
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.85f)
+                .padding(horizontal = 20.dp)
+        ) {
+            Text(
+                text = "Hintergrundbild Galerie",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Kachel für automatischen Wechsel
+            val isAuto = pinnedImageName == null || pinnedImageName == "auto"
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isAuto) Color(0x33FFFFFF) else Color(0x12FFFFFF))
+                    .clickable { onSelectImage(null) }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "🔄", fontSize = 20.sp, modifier = Modifier.padding(end = 12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Täglicher automatischer Bildwechsel",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Montserrat
+                    )
+                    Text(
+                        text = "Jeden Tag ein neues Rhodos-Foto als Vorfreude",
+                        color = Color(0x99FFFFFF),
+                        fontSize = 11.sp,
+                        fontFamily = Montserrat
+                    )
+                }
+                if (isAuto) {
+                    Text(text = "✓", color = Color(0xFF66DD88), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Grid für die Bilder
+            androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f).padding(bottom = 24.dp)
+            ) {
+                items(images.size) { index ->
+                    val imageName = images[index]
+                    val isSelected = pinnedImageName == imageName
+                    val isCurrentRotation = isAuto && currentImageName == imageName
+                    val displayName = Images.displayNameOf(imageName)
+                    val drawableId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x12FFFFFF))
+                            .clickable { onSelectImage(imageName) }
+                    ) {
+                        if (drawableId != 0) {
+                            Image(
+                                painter = painterResource(drawableId),
+                                contentDescription = displayName,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        // Dunkler Verlauf für Lesbarkeit des Ortsnamens
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(Color.Transparent, Color(0xAA000000), Color(0xDD000000))
+                                    )
+                                )
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .background(Color(0xFF66DD88), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("Gepinnt", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                } else if (isCurrentRotation) {
+                                    Box(
+                                        modifier = Modifier
+                                            .background(Color(0xFF44AAFF), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("Aktiv (Auto)", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = displayName,
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = Montserrat,
+                                maxLines = 2
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
