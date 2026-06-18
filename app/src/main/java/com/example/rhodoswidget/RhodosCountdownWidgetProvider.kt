@@ -54,6 +54,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_phrase_container, View.GONE)
                     views.setTextViewText(R.id.widget_arrival_message,
                         context.getString(R.string.widget_vacation_line1))
                     val image = Images.resourceOfTheDay(context)
@@ -63,6 +64,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
+                    views.setViewVisibility(R.id.widget_phrase_container, View.GONE)
                     views.setTextViewText(R.id.widget_arrival_message,
                         context.getString(R.string.widget_arrival_message))
                     views.setImageViewResource(R.id.widget_background_image, ARRIVAL_BACKGROUND)
@@ -71,6 +73,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setViewVisibility(R.id.widget_countdown_row, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.GONE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
+                    views.setViewVisibility(R.id.widget_phrase_container, View.VISIBLE)
                     views.setTextViewText(R.id.widget_days, remaining.days.toString())
                     views.setTextViewText(R.id.widget_hours, remaining.hours.toString().padStart(2, '0'))
                     views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))

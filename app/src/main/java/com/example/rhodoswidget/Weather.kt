@@ -72,15 +72,7 @@ object WeatherReportFormatter {
             rainText + forecastSentence
     }
 
-    private fun shortWeekday(dateIso: String): String = when (weekdayIndex(dateIso)) {
-        1 -> "Mo"
-        2 -> "Di"
-        3 -> "Mi"
-        4 -> "Do"
-        5 -> "Fr"
-        6 -> "Sa"
-        else -> "So"
-    }
+    private fun shortWeekday(dateIso: String): String = dateIso.toShortGermanWeekday()
 
     private fun longWeekday(dateIso: String): String = when (weekdayIndex(dateIso)) {
         1 -> "Montag"

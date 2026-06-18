@@ -1,6 +1,8 @@
 package com.example.rhodoswidget
 
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 data class RemainingTime(
@@ -29,7 +31,7 @@ object CountdownCalculator {
     private const val START_MONTH = Calendar.SEPTEMBER
     private const val START_DAY = 20
 
-    fun progressFraction(): Float {
+    fun progressFraction(now: Calendar = Calendar.getInstance()): Float {
         val start = Calendar.getInstance().apply {
             set(Calendar.YEAR, START_YEAR)
             set(Calendar.MONTH, START_MONTH)
@@ -37,14 +39,13 @@ object CountdownCalculator {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
-        val total = (departureCalendar().timeInMillis - start.timeInMillis).toFloat()
-        val elapsed = (Calendar.getInstance().timeInMillis - start.timeInMillis).toFloat()
+        val total = (departureCalendar(now).timeInMillis - start.timeInMillis).toFloat()
+        val elapsed = (now.timeInMillis - start.timeInMillis).toFloat()
         return (elapsed / total).coerceIn(0f, 1f)
     }
 
-    fun calculate(): RemainingTime {
-        val now = Calendar.getInstance()
-        val target = departureCalendar()
+    fun calculate(now: Calendar = Calendar.getInstance()): RemainingTime {
+        val target = departureCalendar(now)
         val arrivalDayStart = midnight(target.clone() as Calendar)
         val remainingMillis = (target.timeInMillis - now.timeInMillis).coerceAtLeast(0L)
         val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
@@ -59,13 +60,13 @@ object CountdownCalculator {
             minutes = minutes,
             seconds = seconds,
             isReached = now.timeInMillis >= arrivalDayStart.timeInMillis,
-            isOnVacation = now.timeInMillis >= arrivalCalendar().timeInMillis
+            isOnVacation = now.timeInMillis >= arrivalCalendar(now).timeInMillis
         )
     }
 
-    fun daysUntilDeparture(): Int {
-        val today = midnight(Calendar.getInstance())
-        val departure = midnight(departureCalendar())
+    fun daysUntilDeparture(now: Calendar = Calendar.getInstance()): Int {
+        val today = midnight(now.clone() as Calendar)
+        val departure = midnight(departureCalendar(now))
         val diffDays = (departure.timeInMillis - today.timeInMillis) / 86_400_000.0
         return Math.round(diffDays).toInt()
     }
@@ -77,7 +78,7 @@ object CountdownCalculator {
         set(Calendar.MILLISECOND, 0)
     }
 
-    private fun arrivalCalendar() = Calendar.getInstance().apply {
+    private fun arrivalCalendar(now: Calendar) = (now.clone() as Calendar).apply {
         set(Calendar.YEAR, DEPARTURE_YEAR)
         set(Calendar.MONTH, DEPARTURE_MONTH)
         set(Calendar.DAY_OF_MONTH, DEPARTURE_DAY)
@@ -87,7 +88,7 @@ object CountdownCalculator {
         set(Calendar.MILLISECOND, 0)
     }
 
-    private fun departureCalendar() = Calendar.getInstance().apply {
+    private fun departureCalendar(now: Calendar) = (now.clone() as Calendar).apply {
         set(Calendar.YEAR, DEPARTURE_YEAR)
         set(Calendar.MONTH, DEPARTURE_MONTH)
         set(Calendar.DAY_OF_MONTH, DEPARTURE_DAY)
@@ -95,5 +96,26 @@ object CountdownCalculator {
         set(Calendar.MINUTE, DEPARTURE_MINUTE)
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
+    }
+}
+
+/**
+ * Hilfsfunktion, um ein ISO-Datum ("yyyy-MM-dd") in ein deutsches Wochentagskürzel ("Mo", "Di" etc.) umzuwandeln.
+ */
+fun String.toShortGermanWeekday(): String {
+    return try {
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(this) ?: return "?"
+        val cal = Calendar.getInstance().apply { time = date }
+        when (cal.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.MONDAY -> "Mo"
+            Calendar.TUESDAY -> "Di"
+            Calendar.WEDNESDAY -> "Mi"
+            Calendar.THURSDAY -> "Do"
+            Calendar.FRIDAY -> "Fr"
+            Calendar.SATURDAY -> "Sa"
+            else -> "So"
+        }
+    } catch (e: Exception) {
+        "?"
     }
 }

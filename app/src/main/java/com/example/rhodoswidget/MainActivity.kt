@@ -347,14 +347,16 @@ private fun CountdownSection(s: HomeState) {
                 }
             }
         }
-        Spacer(modifier = Modifier.height(28.dp))
-        Text(
-            text = "„${s.phrase}“",
-            color = Color.White,
-            fontSize = 19.sp,
-            fontWeight = FontWeight.Medium,
-            fontFamily = Montserrat
-        )
+        if (!s.isOnVacation) {
+            Spacer(modifier = Modifier.height(28.dp))
+            Text(
+                text = "„${s.phrase}“",
+                color = Color.White,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = Montserrat
+            )
+        }
     }
 }
 
@@ -741,19 +743,7 @@ private fun UpdateButton(isChecking: Boolean, hasUpdate: Boolean, onClick: () ->
     }
 }
 
-private fun shortWeekday(dateIso: String): String {
-    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(dateIso) ?: return "?"
-    val cal = Calendar.getInstance().apply { time = date }
-    return when (cal.get(Calendar.DAY_OF_WEEK)) {
-        Calendar.MONDAY -> "Mo"
-        Calendar.TUESDAY -> "Di"
-        Calendar.WEDNESDAY -> "Mi"
-        Calendar.THURSDAY -> "Do"
-        Calendar.FRIDAY -> "Fr"
-        Calendar.SATURDAY -> "Sa"
-        else -> "So"
-    }
-}
+private fun shortWeekday(dateIso: String): String = dateIso.toShortGermanWeekday()
 
 private data class ForecastEntry(val weekday: String, val iconRes: Int, val minTemp: Int, val maxTemp: Int)
 
@@ -787,11 +777,11 @@ private data class HomeState(
     val factOfTheDay: String
 ) {
     companion object {
-        private const val YEAR = 2026
-        private const val MONTH = Calendar.SEPTEMBER
-        private const val DAY = 20
-        private const val HOUR = 14
-        private const val MINUTE = 30
+        private val YEAR = CountdownCalculator.DEPARTURE_YEAR
+        private val MONTH = CountdownCalculator.DEPARTURE_MONTH
+        private val DAY = CountdownCalculator.DEPARTURE_DAY
+        private val HOUR = CountdownCalculator.DEPARTURE_HOUR
+        private val MINUTE = CountdownCalculator.DEPARTURE_MINUTE
 
         fun load(context: android.content.Context): HomeState {
             val remaining = CountdownCalculator.calculate()
@@ -851,10 +841,14 @@ private data class HomeState(
 
         private fun parseSolarEventLabel(sunsetIso: String): String? {
             return try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
+                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US).apply {
+                    timeZone = java.util.TimeZone.getTimeZone("Europe/Athens")
+                }
                 val sunsetTime = sdf.parse(sunsetIso) ?: return null
                 val now = System.currentTimeMillis()
-                val timeLabel = SimpleDateFormat("HH:mm", Locale.GERMAN).format(sunsetTime)
+                val timeLabel = SimpleDateFormat("HH:mm", Locale.GERMAN).apply {
+                    timeZone = java.util.TimeZone.getTimeZone("Europe/Athens")
+                }.format(sunsetTime)
                 val diffMillis = sunsetTime.time - now
                 if (diffMillis > 0) {
                     val h = TimeUnit.MILLISECONDS.toHours(diffMillis)
