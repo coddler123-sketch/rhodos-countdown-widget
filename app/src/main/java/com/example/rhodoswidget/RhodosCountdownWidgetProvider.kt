@@ -52,6 +52,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
             when {
                 remaining.isOnVacation -> {
                     views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
+                    views.setViewVisibility(R.id.widget_progress_bar, View.GONE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_phrase_container, View.GONE)
@@ -62,6 +63,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                 }
                 remaining.isReached -> {
                     views.setViewVisibility(R.id.widget_countdown_row, View.GONE)
+                    views.setViewVisibility(R.id.widget_progress_bar, View.GONE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
                     views.setViewVisibility(R.id.widget_phrase_container, View.GONE)
@@ -79,6 +81,9 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))
                     val image = Images.resourceOfTheDay(context)
                     if (image != 0) views.setImageViewResource(R.id.widget_background_image, image)
+                    val progress = (CountdownCalculator.progressFraction() * 1000).toInt()
+                    views.setProgressBar(R.id.widget_progress_bar, 1000, progress, false)
+                    views.setViewVisibility(R.id.widget_progress_bar, View.VISIBLE)
                 }
             }
             applyWeather(context, views)

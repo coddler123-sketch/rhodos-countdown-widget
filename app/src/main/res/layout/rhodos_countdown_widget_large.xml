@@ -247,6 +247,16 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Fortschrittsbalken -->
+        <ProgressBar
+            android:id="@+id/widget_progress_bar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="8dp"
+            android:max="1000"
+            android:progressDrawable="@drawable/widget_progress_drawable" />
+
         <!-- Abflugtag / Urlaub: ersetzt den Countdown -->
         <TextView
             android:id="@+id/widget_arrival_message"
