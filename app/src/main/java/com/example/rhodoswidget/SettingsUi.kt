@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,21 +54,24 @@ fun SettingsSheet(
                 else -> "Prüfen"
             },
             onAction = onCheckUpdate,
-            enabled = !isCheckingUpdate
+            enabled = !isCheckingUpdate,
+            actionTag = "settings-check-update"
         )
         SettingsRow(
             icon = "🖼",
             label = "Hintergrundbild",
             detail = "Bildergalerie & Favoriten",
             actionLabel = "Galerie",
-            onAction = onOpenGallery
+            onAction = onOpenGallery,
+            actionTag = "settings-open-gallery"
         )
         SettingsRow(
             icon = "↗",
             label = "Countdown teilen",
             detail = "Via WhatsApp, SMS, …",
             actionLabel = "Teilen",
-            onAction = onShare
+            onAction = onShare,
+            actionTag = "settings-share"
         )
     }
 }
@@ -79,7 +83,8 @@ private fun SettingsRow(
     detail: String,
     actionLabel: String,
     onAction: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    actionTag: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -90,7 +95,12 @@ private fun SettingsRow(
             Text(text = label, color = Color.White, fontSize = 14.sp, fontFamily = Montserrat, fontWeight = FontWeight.SemiBold)
             Text(text = detail, color = Color(0x99FFFFFF), fontSize = 11.sp, fontFamily = Montserrat)
         }
-        SecondaryActionButton(text = actionLabel, enabled = enabled, onClick = onAction)
+        SecondaryActionButton(
+            text = actionLabel,
+            enabled = enabled,
+            onClick = onAction,
+            modifier = Modifier.testTag(actionTag)
+        )
     }
 }
 

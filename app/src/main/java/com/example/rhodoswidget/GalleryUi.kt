@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,6 +82,7 @@ fun GallerySheet(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (isAuto) Color(0x33FFFFFF) else Color(0x12FFFFFF))
+                    .testTag("gallery-auto-image")
                     .clickable { onSelectImage(null) }
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -127,6 +129,7 @@ fun GallerySheet(
                             .height(130.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0x12FFFFFF))
+                            .testTag("gallery-image-$imageName")
                             .clickable { onSelectImage(imageName) }
                     ) {
                         if (drawableId != 0) {
