@@ -10,3 +10,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# WorkManager initializes its Room database via reflection in release builds.
+-keep class androidx.work.impl.**_Impl {
+    public <init>(...);
+}
