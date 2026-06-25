@@ -81,7 +81,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))
                     val image = Images.resourceOfTheDay(context)
                     if (image != 0) views.setImageViewResource(R.id.widget_background_image, image)
-                    val progress = (CountdownCalculator.progressFraction() * 1000).toInt()
+                    val progress = widgetProgressValue(CountdownCalculator.progressFraction())
                     views.setProgressBar(R.id.widget_progress_bar, 1000, progress, false)
                     views.setViewVisibility(R.id.widget_progress_bar, View.VISIBLE)
                 }
@@ -102,6 +102,9 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
             )
             ids.forEach { id -> updateLargeWidget(context, manager, id) }
         }
+
+        internal fun widgetProgressValue(progressFraction: Float): Int =
+            (progressFraction.coerceIn(0f, 1f) * 1000).toInt()
 
         private fun applyWeather(context: Context, views: RemoteViews) {
             val weather = WeatherRepository.cached(context) ?: return
