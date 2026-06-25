@@ -119,7 +119,7 @@ fun GallerySheet(
                     val isSelected = pinnedImageName == imageName
                     val isCurrentRotation = isAuto && currentImageName == imageName
                     val displayName = Images.displayNameOf(imageName)
-                    val drawableId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+                    val drawableId = Images.resourceOf(imageName)
 
                     Box(
                         modifier = Modifier

@@ -13,48 +13,56 @@ import java.util.concurrent.TimeUnit
  */
 object Images {
 
-    private val resourceNames = listOf(
-        "prasonisi_rhodes_023",
-        "rhodes_old_town_027",
-        "rhodos_1906364",
-        "rhodos_02_tsambika_strand_sunset",
-        "greek_alley_whitewashed_019",
-        "rhodos_1364599",
-        "rhodes_island_castle_fg0v9vo1hwtndkqc",
-        "lindos_white_houses_bougainvillea_001",
-        "rhodos_1906323",
-        "palace_of_the_grand_master_rhodes_005",
-        "anthony_quinn_bay_rhodes_001",
-        "rhodes_old_town_004",
-        "rhodes_greece_landscape_032",
-        "relax_hotel_kolymbia",
-        "prasonisi_rhodes_006",
-        "wp13333024_rhodes_greece_wallpapers",
-        "lindos_donkey_path_002",
-        "rhodes_greece_landscape_027",
-        "rhodos_1906335",
-        "kfuhlert_rhodes_4404841_1920",
-        "prasonisi_rhodes_003",
-        "rhodes_old_town_015",
-        "gemini_cropped_preview",
-        "rhodes_greece_landscape_010",
-        "rhodos_392463",
-        "dimitrisvetsikas1969_castle_7462448_1920",
-        "rhodes_greece_landscape_014",
-        "lindos_white_houses_bougainvillea_002",
-        "rhodos_52368489088_f2f1a9f33c_k",
-        "rhodes_old_town_009",
-        "prasonisi_rhodes_024",
-        "wallpaperswide_com_lindos_village_rhodes_island_greece_wallpaper_1920x1080",
-        "rhodes_old_town_019",
-        "rhodes_greece_landscape_025",
-        "rhodos_1906329",
-        "rhodes_greece_landscape_003",
-        "prasonisi_rhodes_028",
-        "rhodos_1906326",
-        "rhodos_1906319",
-        "relax_hotel_kolymbia"
+    private data class ImageAsset(val name: String, val resId: Int)
+
+    private val resources = listOf(
+        ImageAsset("prasonisi_rhodes_023", R.drawable.prasonisi_rhodes_023),
+        ImageAsset("rhodes_old_town_027", R.drawable.rhodes_old_town_027),
+        ImageAsset("rhodos_1906364", R.drawable.rhodos_1906364),
+        ImageAsset("rhodos_02_tsambika_strand_sunset", R.drawable.rhodos_02_tsambika_strand_sunset),
+        ImageAsset("greek_alley_whitewashed_019", R.drawable.greek_alley_whitewashed_019),
+        ImageAsset("rhodos_1364599", R.drawable.rhodos_1364599),
+        ImageAsset("rhodes_island_castle_fg0v9vo1hwtndkqc", R.drawable.rhodes_island_castle_fg0v9vo1hwtndkqc),
+        ImageAsset("lindos_white_houses_bougainvillea_001", R.drawable.lindos_white_houses_bougainvillea_001),
+        ImageAsset("rhodos_1906323", R.drawable.rhodos_1906323),
+        ImageAsset("palace_of_the_grand_master_rhodes_005", R.drawable.palace_of_the_grand_master_rhodes_005),
+        ImageAsset("anthony_quinn_bay_rhodes_001", R.drawable.anthony_quinn_bay_rhodes_001),
+        ImageAsset("rhodes_old_town_004", R.drawable.rhodes_old_town_004),
+        ImageAsset("rhodes_greece_landscape_032", R.drawable.rhodes_greece_landscape_032),
+        ImageAsset("relax_hotel_kolymbia", R.drawable.relax_hotel_kolymbia),
+        ImageAsset("prasonisi_rhodes_006", R.drawable.prasonisi_rhodes_006),
+        ImageAsset("wp13333024_rhodes_greece_wallpapers", R.drawable.wp13333024_rhodes_greece_wallpapers),
+        ImageAsset("lindos_donkey_path_002", R.drawable.lindos_donkey_path_002),
+        ImageAsset("rhodes_greece_landscape_027", R.drawable.rhodes_greece_landscape_027),
+        ImageAsset("rhodos_1906335", R.drawable.rhodos_1906335),
+        ImageAsset("kfuhlert_rhodes_4404841_1920", R.drawable.kfuhlert_rhodes_4404841_1920),
+        ImageAsset("prasonisi_rhodes_003", R.drawable.prasonisi_rhodes_003),
+        ImageAsset("rhodes_old_town_015", R.drawable.rhodes_old_town_015),
+        ImageAsset("gemini_cropped_preview", R.drawable.gemini_cropped_preview),
+        ImageAsset("rhodes_greece_landscape_010", R.drawable.rhodes_greece_landscape_010),
+        ImageAsset("rhodos_392463", R.drawable.rhodos_392463),
+        ImageAsset("dimitrisvetsikas1969_castle_7462448_1920", R.drawable.dimitrisvetsikas1969_castle_7462448_1920),
+        ImageAsset("rhodes_greece_landscape_014", R.drawable.rhodes_greece_landscape_014),
+        ImageAsset("lindos_white_houses_bougainvillea_002", R.drawable.lindos_white_houses_bougainvillea_002),
+        ImageAsset("rhodos_52368489088_f2f1a9f33c_k", R.drawable.rhodos_52368489088_f2f1a9f33c_k),
+        ImageAsset("rhodes_old_town_009", R.drawable.rhodes_old_town_009),
+        ImageAsset("prasonisi_rhodes_024", R.drawable.prasonisi_rhodes_024),
+        ImageAsset(
+            "wallpaperswide_com_lindos_village_rhodes_island_greece_wallpaper_1920x1080",
+            R.drawable.wallpaperswide_com_lindos_village_rhodes_island_greece_wallpaper_1920x1080
+        ),
+        ImageAsset("rhodes_old_town_019", R.drawable.rhodes_old_town_019),
+        ImageAsset("rhodes_greece_landscape_025", R.drawable.rhodes_greece_landscape_025),
+        ImageAsset("rhodos_1906329", R.drawable.rhodos_1906329),
+        ImageAsset("rhodes_greece_landscape_003", R.drawable.rhodes_greece_landscape_003),
+        ImageAsset("prasonisi_rhodes_028", R.drawable.prasonisi_rhodes_028),
+        ImageAsset("rhodos_1906326", R.drawable.rhodos_1906326),
+        ImageAsset("rhodos_1906319", R.drawable.rhodos_1906319),
+        ImageAsset("relax_hotel_kolymbia", R.drawable.relax_hotel_kolymbia)
     )
+
+    private val resourceNames = resources.map { it.name }
+    private val resourcesByName = resources.associateBy { it.name }
 
     private const val PREFS_SETTINGS = "rhodos_settings"
     private const val KEY_PINNED_IMAGE = "pinned_image_name"
@@ -73,7 +81,7 @@ object Images {
 
     fun currentImageName(context: Context): String {
         val pinned = getPinnedImage(context)
-        if (pinned != null && pinned != "auto") return pinned
+        if (pinned != null && pinned != "auto" && pinned in allImageNames) return pinned
 
         val now = Calendar.getInstance()
         val localMillis = now.timeInMillis +
@@ -86,8 +94,11 @@ object Images {
     /** Drawable-Resource fuer das heutige Hintergrundbild. */
     fun resourceOfTheDay(context: Context): Int {
         val name = currentImageName(context)
-        return context.resources.getIdentifier(name, "drawable", context.packageName)
+        return resourceOf(name)
     }
+
+    fun resourceOf(resourceName: String): Int =
+        resourcesByName[resourceName]?.resId ?: resources.first().resId
 
     fun displayNameOf(resourceName: String): String = when (resourceName) {
         "prasonisi_rhodes_023" -> "Doppelbucht Porto Timoni (Korfu)"
