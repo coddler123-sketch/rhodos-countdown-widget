@@ -32,6 +32,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,6 +85,7 @@ fun GallerySheet(
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (isAuto) Color(0x33FFFFFF) else Color(0x12FFFFFF))
                     .testTag("gallery-auto-image")
+                    .semantics { contentDescription = "Automatischen Bildwechsel auswaehlen" }
                     .clickable { onSelectImage(null) }
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -130,6 +133,7 @@ fun GallerySheet(
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0x12FFFFFF))
                             .testTag("gallery-image-$imageName")
+                            .semantics { contentDescription = "$displayName als Hintergrundbild auswaehlen" }
                             .clickable { onSelectImage(imageName) }
                     ) {
                         if (drawableId != 0) {
