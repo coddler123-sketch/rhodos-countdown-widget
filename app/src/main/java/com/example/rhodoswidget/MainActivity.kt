@@ -77,9 +77,7 @@ private fun RhodosHome(padding: PaddingValues) {
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
     val reloadDone = remember { mutableStateOf(false) }
-    val isCheckingUpdate = remember { mutableStateOf(false) }
-    val updateAvailable = remember { mutableStateOf<AppUpdate?>(null) }
-    val showUpdateDialog = remember { mutableStateOf(false) }
+    val updateController = remember(context) { AppUpdateController(context) }
     val showSettings = remember { mutableStateOf(false) }
     val showGallery = remember { mutableStateOf(false) }
     val pinnedImage = remember { mutableStateOf(Images.getPinnedImage(context)) }
@@ -89,13 +87,8 @@ private fun RhodosHome(padding: PaddingValues) {
         if (reloadDone.value) { delay(1_500); reloadDone.value = false }
     }
 
-    LaunchedEffect(Unit) {
-        // Stiller Update-Check beim Start
-        val found = withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
-        if (found != null) {
-            updateAvailable.value = found
-            showUpdateDialog.value = true
-        }
+    LaunchedEffect(updateController) {
+        updateController.checkOnStartup()
     }
 
     LaunchedEffect(Unit) {
@@ -143,22 +136,18 @@ private fun RhodosHome(padding: PaddingValues) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
-            updateAvailable.value?.let { update ->
+            updateController.availableUpdate?.let { update ->
                 UpdateBanner(
                     update = update,
-                    isDownloading = isCheckingUpdate.value,
+                    isDownloading = updateController.isWorking,
                     onClick = {
-                        if (!isCheckingUpdate.value) {
+                        if (!updateController.isWorking) {
                             scope.launch {
-                                isCheckingUpdate.value = true
-                                val apk = withContext(Dispatchers.IO) {
-                                    AppUpdateRepository.download(context, update)
-                                }
-                                isCheckingUpdate.value = false
-                                if (apk != null) {
-                                    context.startActivity(AppUpdateRepository.installIntent(context, apk))
-                                } else {
-                                    Toast.makeText(context, "Fehler beim Herunterladen des Updates.", Toast.LENGTH_SHORT).show()
+                                when (updateController.install(update)) {
+                                    UpdateInstallResult.DOWNLOAD_FAILED -> showUpdateDownloadError(context)
+                                    UpdateInstallResult.INSTALLED,
+                                    UpdateInstallResult.NOT_AVAILABLE,
+                                    UpdateInstallResult.BUSY -> Unit
                                 }
                             }
                         }
@@ -178,7 +167,7 @@ private fun RhodosHome(padding: PaddingValues) {
                 s = s,
                 isRefreshing = isRefreshing.value,
                 reloadDone = reloadDone.value,
-                hasUpdateBadge = updateAvailable.value != null,
+                hasUpdateBadge = updateController.availableUpdate != null,
                 onRefresh = {
                     if (!isRefreshing.value) {
                         scope.launch {
@@ -207,28 +196,18 @@ private fun RhodosHome(padding: PaddingValues) {
                 containerColor = Color(0xFF111116)
             ) {
                 SettingsSheet(
-                    isCheckingUpdate = isCheckingUpdate.value,
-                    hasUpdate = updateAvailable.value != null,
+                    isCheckingUpdate = updateController.isWorking,
+                    hasUpdate = updateController.availableUpdate != null,
                     onCheckUpdate = {
-                        if (!isCheckingUpdate.value) {
+                        if (!updateController.isWorking) {
                             scope.launch {
-                                isCheckingUpdate.value = true
-                                val update = updateAvailable.value
-                                    ?: withContext(Dispatchers.IO) { AppUpdateRepository.checkLatest() }
-                                if (update == null) {
-                                    isCheckingUpdate.value = false
-                                } else {
-                                    updateAvailable.value = update
-                                    val apk = withContext(Dispatchers.IO) {
-                                        AppUpdateRepository.download(context, update)
-                                    }
-                                    if (apk == null) {
-                                        isCheckingUpdate.value = false
-                                    } else {
+                                when (updateController.checkAndInstall()) {
+                                    UpdateInstallResult.INSTALLED -> {
                                         showSettings.value = false
-                                        context.startActivity(AppUpdateRepository.installIntent(context, apk))
-                                        isCheckingUpdate.value = false
                                     }
+                                    UpdateInstallResult.DOWNLOAD_FAILED -> showUpdateDownloadError(context)
+                                    UpdateInstallResult.NOT_AVAILABLE,
+                                    UpdateInstallResult.BUSY -> Unit
                                 }
                             }
                         }
@@ -274,25 +253,20 @@ private fun RhodosHome(padding: PaddingValues) {
             )
         }
 
-        if (showUpdateDialog.value) {
-            updateAvailable.value?.let { update ->
+        if (updateController.showStartupDialog) {
+            updateController.availableUpdate?.let { update ->
                 StartupUpdateDialog(
                     update = update,
-                    isDownloading = isCheckingUpdate.value,
-                    onDismiss = { showUpdateDialog.value = false },
+                    isDownloading = updateController.isWorking,
+                    onDismiss = updateController::dismissStartupDialog,
                     onInstall = {
-                        if (!isCheckingUpdate.value) {
+                        if (!updateController.isWorking) {
                             scope.launch {
-                                isCheckingUpdate.value = true
-                                val apk = withContext(Dispatchers.IO) {
-                                    AppUpdateRepository.download(context, update)
-                                }
-                                isCheckingUpdate.value = false
-                                if (apk != null) {
-                                    showUpdateDialog.value = false
-                                    context.startActivity(AppUpdateRepository.installIntent(context, apk))
-                                } else {
-                                    Toast.makeText(context, "Fehler beim Herunterladen des Updates.", Toast.LENGTH_SHORT).show()
+                                when (updateController.install(update)) {
+                                    UpdateInstallResult.INSTALLED -> updateController.dismissStartupDialog()
+                                    UpdateInstallResult.DOWNLOAD_FAILED -> showUpdateDownloadError(context)
+                                    UpdateInstallResult.NOT_AVAILABLE,
+                                    UpdateInstallResult.BUSY -> Unit
                                 }
                             }
                         }
@@ -301,6 +275,14 @@ private fun RhodosHome(padding: PaddingValues) {
             }
         }
     }
+}
+
+private fun showUpdateDownloadError(context: android.content.Context) {
+    Toast.makeText(
+        context,
+        "Fehler beim Herunterladen des Updates.",
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 @Composable
