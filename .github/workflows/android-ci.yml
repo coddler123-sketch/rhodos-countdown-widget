@@ -36,8 +36,14 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
+      - name: Run Android lint
+        run: ./gradlew lintDebug
+
       - name: Build debug APK
         run: ./gradlew assembleDebug
+
+      - name: Build optimized release APK
+        run: ./gradlew assembleRelease
 
   ui-smoke-test:
     name: UI smoke test

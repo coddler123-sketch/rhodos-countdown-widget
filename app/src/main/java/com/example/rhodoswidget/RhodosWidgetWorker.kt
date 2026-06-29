@@ -60,8 +60,8 @@ class RhodosWidgetWorker(
         // einmal pro Stunde innerhalb des Fensters greift.
         private val MIN_FETCH_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(58)
 
-        private const val PERIODIC_WORK = "rhodos_widget_periodic"
-        private const val ONE_TIME_WORK = "rhodos_widget_now"
+        internal const val PERIODIC_WORK = "rhodos_widget_periodic"
+        internal const val ONE_TIME_WORK = "rhodos_widget_now"
 
         /** Regelmaessiger 15-Minuten-Refresh (Anzeige + ggf. Wetter). */
         fun schedulePeriodic(context: Context) {
@@ -82,6 +82,14 @@ class RhodosWidgetWorker(
                 .build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(ONE_TIME_WORK, ExistingWorkPolicy.REPLACE, request)
+        }
+
+        /** Stoppt alle Widget-Arbeit, nachdem das letzte Widget entfernt wurde. */
+        fun cancelAll(context: Context) {
+            WorkManager.getInstance(context).apply {
+                cancelUniqueWork(PERIODIC_WORK)
+                cancelUniqueWork(ONE_TIME_WORK)
+            }
         }
     }
 }

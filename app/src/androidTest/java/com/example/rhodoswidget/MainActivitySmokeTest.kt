@@ -2,6 +2,7 @@ package com.example.rhodoswidget
 
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -52,7 +54,7 @@ class MainActivitySmokeTest {
     }
 
     @Test
-    fun galleryImageSelectionReturnsToMainScreen() {
+    fun galleryImageSelectionPersistsAfterActivityRecreation() {
         composeRule.onNodeWithTag("settings-button").performClick()
         composeRule.onNodeWithTag("settings-open-gallery").performClick()
 
@@ -60,6 +62,14 @@ class MainActivitySmokeTest {
 
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
         composeRule.onNodeWithText("Unser Urlaubs-Countdown").assertIsDisplayed()
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        assertEquals("prasonisi_rhodes_023", Images.getPinnedImage(context))
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.onNodeWithTag("settings-button").performClick()
+        composeRule.onNodeWithTag("settings-open-gallery").performClick()
+        composeRule.onNodeWithTag("gallery-image-prasonisi_rhodes_023").assertIsSelected()
     }
 
     private fun clearPinnedImage() {

@@ -34,6 +34,11 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDisabled(context: Context) {
+        RhodosWidgetWorker.cancelAll(context)
+        super.onDisabled(context)
+    }
+
     companion object {
         const val ACTION_REFRESH = "com.example.rhodoswidget.ACTION_REFRESH"
 
