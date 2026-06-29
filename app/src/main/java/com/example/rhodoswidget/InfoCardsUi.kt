@@ -37,7 +37,7 @@ fun FactCard(fact: String) {
             Text(
                 text = "Rhodos-Fakt des Tages",
                 color = Color(0xBFFFFFFF),
-                fontSize = 10.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = Montserrat
             )
@@ -67,7 +67,7 @@ fun HighlightCard(highlight: String) {
             Text(
                 text = "Highlight des Tages",
                 color = Color(0xBFFFFFFF),
-                fontSize = 10.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = Montserrat
             )

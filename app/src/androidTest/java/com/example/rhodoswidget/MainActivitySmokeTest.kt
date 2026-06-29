@@ -2,6 +2,7 @@ package com.example.rhodoswidget
 
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -68,7 +69,7 @@ class MainActivitySmokeTest {
         composeRule.activityRule.scenario.recreate()
         composeRule.onNodeWithTag("settings-button").performClick()
         composeRule.onNodeWithTag("settings-open-gallery").performClick()
-        composeRule.onNodeWithText("Gepinnt").assertIsDisplayed()
+        composeRule.onNodeWithTag("gallery-image-prasonisi_rhodes_023").assertIsSelected()
     }
 
     private fun clearPinnedImage() {

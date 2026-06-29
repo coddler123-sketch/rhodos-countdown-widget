@@ -23,6 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,16 +61,33 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                 modifier = Modifier.align(Alignment.TopEnd).padding(1.dp)
             )
         } else {
-            Image(
-                painter = painterResource(R.drawable.ic_refresh_subtle),
-                contentDescription = "Wetter aktualisieren",
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .size(17.dp)
+                    .size(48.dp)
                     .clickable(enabled = !isRefreshing, onClick = onRefresh)
-                    .padding(1.dp),
-                alpha = if (isRefreshing) 0.25f else 0.55f
-            )
+                    .clearAndSetSemantics {
+                        contentDescription = "Wetter aktualisieren"
+                        if (isRefreshing) {
+                            disabled()
+                        } else {
+                            onClick {
+                                onRefresh()
+                                true
+                            }
+                        }
+                    }
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_refresh_subtle),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(17.dp)
+                        .padding(1.dp),
+                    alpha = if (isRefreshing) 0.25f else 0.55f
+                )
+            }
         }
         if (s.weather == null) {
             Text(
@@ -74,13 +95,13 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                 color = Color(0xE6FFFFFF),
                 fontSize = 13.sp,
                 fontFamily = Montserrat,
-                modifier = Modifier.padding(end = 28.dp)
+                modifier = Modifier.padding(end = 48.dp)
             )
         } else {
             Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(end = 28.dp)
+                    modifier = Modifier.padding(end = 48.dp)
                 ) {
                     Image(
                         painter = painterResource(s.weather.iconRes),
@@ -94,7 +115,7 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                         Text(
                             text = "Kolymbia jetzt",
                             color = Color(0xBFFFFFFF),
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = Montserrat
                         )
@@ -119,7 +140,7 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                     color = Color(0xCCFFFFFF),
                     fontSize = 11.sp,
                     fontFamily = Montserrat,
-                    modifier = Modifier.padding(end = 28.dp)
+                    modifier = Modifier.padding(end = 48.dp)
                 )
                 if (s.weather.forecastDays.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(7.dp))
@@ -134,7 +155,7 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                                 Text(
                                     text = day.weekday,
                                     color = Color(0xBFFFFFFF),
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     fontFamily = Montserrat
                                 )
                                 Image(
@@ -154,7 +175,7 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                                 Text(
                                     text = "${day.minTemp}°",
                                     color = Color(0xBFFFFFFF),
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     fontFamily = Montserrat
                                 )
                             }

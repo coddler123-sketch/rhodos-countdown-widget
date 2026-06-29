@@ -2,7 +2,6 @@ package com.example.rhodoswidget
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -32,8 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,8 +89,20 @@ fun GallerySheet(
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (isAuto) Color(0x33FFFFFF) else Color(0x12FFFFFF))
                     .testTag("gallery-auto-image")
-                    .semantics { contentDescription = "Automatischen Bildwechsel auswaehlen" }
-                    .clickable { onSelectImage(null) }
+                    .selectable(
+                        selected = isAuto,
+                        role = Role.RadioButton,
+                        onClick = { onSelectImage(null) }
+                    )
+                    .clearAndSetSemantics {
+                        contentDescription = "Automatischen Bildwechsel auswählen"
+                        role = Role.RadioButton
+                        selected = isAuto
+                        onClick {
+                            onSelectImage(null)
+                            true
+                        }
+                    }
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -133,13 +149,25 @@ fun GallerySheet(
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0x12FFFFFF))
                             .testTag("gallery-image-$imageName")
-                            .semantics { contentDescription = "$displayName als Hintergrundbild auswaehlen" }
-                            .clickable { onSelectImage(imageName) }
+                            .selectable(
+                                selected = isSelected,
+                                role = Role.RadioButton,
+                                onClick = { onSelectImage(imageName) }
+                            )
+                            .clearAndSetSemantics {
+                                contentDescription = "$displayName als Hintergrundbild auswählen"
+                                role = Role.RadioButton
+                                selected = isSelected
+                                onClick {
+                                    onSelectImage(imageName)
+                                    true
+                                }
+                            }
                     ) {
                         if (drawableId != 0) {
                             Image(
                                 painter = painterResource(drawableId),
-                                contentDescription = displayName,
+                                contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -170,7 +198,7 @@ fun GallerySheet(
                                             .background(Color(0xFF66DD88), RoundedCornerShape(8.dp))
                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
-                                        Text("Gepinnt", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                        Text("Gepinnt", color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                                     }
                                 } else if (isCurrentRotation) {
                                     Box(
@@ -178,7 +206,7 @@ fun GallerySheet(
                                             .background(Color(0xFF44AAFF), RoundedCornerShape(8.dp))
                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
-                                        Text("Aktiv (Auto)", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                        Text("Aktiv (Auto)", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }

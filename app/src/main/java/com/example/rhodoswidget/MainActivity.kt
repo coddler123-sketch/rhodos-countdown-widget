@@ -44,8 +44,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -313,16 +314,28 @@ private fun HeaderSection(s: HomeState, onSettings: () -> Unit) {
             CountdownProgress(s.progress)
         }
         // Dezentes Gear-Icon oben rechts
-        Text(
-            text = "⚙",
-            fontSize = 18.sp,
-            color = Color(0x80FFFFFF),
+        Box(
             modifier = Modifier
                 .padding(top = 4.dp, start = 8.dp)
+                .size(48.dp)
                 .testTag("settings-button")
-                .semantics { contentDescription = "Einstellungen oeffnen" }
                 .clickable(onClick = onSettings)
-        )
+                .clearAndSetSemantics {
+                    contentDescription = "Einstellungen öffnen"
+                    onClick {
+                        onSettings()
+                        true
+                    }
+                }
+        ) {
+            Text(
+                text = "⚙",
+                fontSize = 18.sp,
+                color = Color(0x80FFFFFF),
+                modifier = Modifier
+                    .align(Alignment.Center)
+            )
+        }
     }
 }
 
@@ -363,7 +376,7 @@ private fun BottomSection(
             Text(
                 text = s.weatherStatus,
                 color = Color(0xA6FFFFFF),
-                fontSize = 10.sp,
+                fontSize = 11.sp,
                 fontFamily = Montserrat,
                 maxLines = 1,
                 modifier = Modifier.weight(1f)
