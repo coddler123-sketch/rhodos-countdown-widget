@@ -64,16 +64,45 @@ class MainActivity : ComponentActivity() {
         setContent {
             RhodosWidgetTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    RhodosHome(padding)
+                    RhodosApp(padding)
                 }
             }
         }
     }
 }
 
+@Composable
+private fun RhodosApp(padding: PaddingValues) {
+    val context = LocalContext.current
+    val controller = remember(context) { NewsController(context.applicationContext) }
+    val showNews = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(controller) { controller.refresh() }
+
+    if (showNews.value) {
+        NewsScreen(
+            state = controller.state,
+            padding = padding,
+            onBack = { showNews.value = false },
+            onRefresh = { scope.launch { controller.refresh() } }
+        )
+    } else {
+        RhodosHome(
+            padding = padding,
+            newsState = controller.state,
+            onOpenNews = { showNews.value = true }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RhodosHome(padding: PaddingValues) {
+private fun RhodosHome(
+    padding: PaddingValues,
+    newsState: NewsUiState,
+    onOpenNews: () -> Unit
+) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
@@ -160,6 +189,8 @@ private fun RhodosHome(padding: PaddingValues) {
             Spacer(Modifier.height(36.dp))
             CountdownSection(s)
             Spacer(Modifier.height(20.dp))
+            NewsTicker(newsState, onOpenNews)
+            Spacer(Modifier.height(12.dp))
             FactCard(s.factOfTheDay)
             Spacer(Modifier.height(10.dp))
             HighlightCard(rhodosHighlightOfTheDay())

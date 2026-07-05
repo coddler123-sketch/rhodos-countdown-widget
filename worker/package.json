@@ -1,0 +1,14 @@
+{
+  "name": "rhodos-news-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/index.js && node --test",
+    "smoke:sources": "node scripts/smoke-sources.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.107.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-05T08:00:00Z",
+  "sources": [
+    { "name": "Rodiaki", "status": "ok", "count": 8 },
+    { "name": "RodosReport", "status": "unavailable", "count": 0 }
+  ],
+  "items": [
+    {
+      "id": "rodiaki-12345",
+      "originalTitle": "Νέα ακτοπλοϊκή σύνδεση για τη Ρόδο",
+      "germanTitle": "Neue Fährverbindung für Rhodos angekündigt",
+      "germanSummary": "Die neue Verbindung soll Reisenden in der Sommersaison zusätzliche Abfahrten bieten.",
+      "originalUrl": "https://www.rodiaki.gr/article/12345",
+      "publishedAt": "2026-07-05T07:35:00Z",
+      "source": "Rodiaki",
+      "category": "TRAVEL",
+      "imageUrl": null
+    }
+  ]
+}
