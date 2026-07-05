@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { classify, parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "../src/sources.js";
+import { classify, extractArticleText, parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "../src/sources.js";
+import { truncateSummary } from "../src/index.js";
 
 test("parses a WordPress RSS item", () => {
   const xml = `<rss><channel><item><title><![CDATA[Νέα πτήση για τη Ρόδο]]></title><link>https://www.dimokratiki.gr/a</link><pubDate>Sun, 05 Jul 2026 08:00:00 GMT</pubDate><description><![CDATA[<p>Περίληψη</p>]]></description><category>Τουρισμός</category></item></channel></rss>`;
@@ -27,4 +28,24 @@ test("extracts unique Rodiaki article links", () => {
 
 test("classifies weather warnings", () => {
   assert.equal(classify("Πυρκαγιά στη Ρόδο"), "WEATHER");
+});
+
+test("extracts articleBody from JSON-LD without markup", () => {
+  const body = "Α".repeat(350);
+  const html = `<script type="application/ld+json">${JSON.stringify({ "@type": "NewsArticle", articleBody: body })}</script>`;
+  assert.equal(extractArticleText(html), body);
+});
+
+test("falls back to semantic article content", () => {
+  const paragraph = "Τοπική είδηση από τη Ρόδο. ".repeat(20);
+  const html = `<article><nav>Navigation</nav><p>${paragraph}</p><script>tracking()</script></article>`;
+  const result = extractArticleText(html);
+  assert.match(result, /Τοπική είδηση/);
+  assert.doesNotMatch(result, /Navigation|tracking/);
+});
+
+test("truncates a long summary at a complete sentence", () => {
+  const result = truncateSummary(`${"Ein vollständiger Satz. ".repeat(90)}Unvollständig`, 300);
+  assert.ok(result.length <= 300);
+  assert.ok(result.endsWith("."));
 });

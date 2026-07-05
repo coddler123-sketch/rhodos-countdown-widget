@@ -4,6 +4,8 @@ Cloudflare Worker für den deutschen News-Feed der Android-App.
 
 Aktive Quellenadapter: Rodiaki, Dimokratiki, RodosReport und Stadt Rhodos. Nicht erreichbare Quellen werden übersprungen und im JSON-Feld `sources` als `unavailable` ausgewiesen; der letzte erfolgreiche Gesamtfeed bleibt dadurch verfügbar.
 
+`GET /api/news/:id` liefert eine serverseitig erzeugte deutsche Leseansicht. Der Worker akzeptiert nur IDs aus dem aktuellen Feed, speichert keinen Originalartikel und cached ausschließlich Zusammenfassung und Stichpunkte für sieben Tage.
+
 ## Lokal prüfen
 
 ```powershell

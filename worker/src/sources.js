@@ -62,6 +62,33 @@ export function parseRodiakiArticleLinks(html, limit = 10) {
   return [...new Set(links)].slice(0, limit);
 }
 
+export function extractArticleText(html) {
+  const jsonLdBodies = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)]
+    .flatMap((match) => jsonLdNodes(match[1]))
+    .map((node) => node?.articleBody)
+    .filter((value) => typeof value === "string")
+    .map(decodeEntities);
+  const jsonLdBody = jsonLdBodies.sort((a, b) => b.length - a.length)[0];
+  if (jsonLdBody?.length >= 300) return jsonLdBody.slice(0, 12_000);
+
+  const articleHtml = /<article\b[^>]*>([\s\S]*?)<\/article>/i.exec(html)?.[1] ?? "";
+  const cleaned = decodeEntities(
+    articleHtml
+      .replace(/<(script|style|nav|aside|form|footer)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<br\s*\/?\s*>|<\/p>|<\/h[1-6]>/gi, "\n")
+  );
+  return cleaned.length >= 300 ? cleaned.slice(0, 12_000) : "";
+}
+
+function jsonLdNodes(raw) {
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value : value["@graph"] ?? [value];
+  } catch {
+    return [];
+  }
+}
+
 export function classify(text) {
   const value = text.toLocaleLowerCase("el");
   if (/καιρ|πυρκαγ|φωτιά|βροχ|καύσω|σεισμ/.test(value)) return "WEATHER";

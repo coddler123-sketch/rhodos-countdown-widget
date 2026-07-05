@@ -1,4 +1,4 @@
-import { parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "./sources.js";
+import { extractArticleText, parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "./sources.js";
 
 const CACHE_KEY = "latest-news-v1";
 const SOURCES = [
@@ -39,6 +39,10 @@ export default {
         return response(JSON.stringify({ error: "News sind momentan nicht verfügbar." }), 503);
       }
     }
+    const detailMatch = request.method === "GET" && url.pathname.match(/^\/api\/news\/([a-z0-9-]+)$/i);
+    if (detailMatch) {
+      return articleDetail(decodeURIComponent(detailMatch[1]), env);
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/refresh") {
       if (!env.REFRESH_TOKEN || request.headers.get("Authorization") !== `Bearer ${env.REFRESH_TOKEN}`) {
         return response(JSON.stringify({ error: "Unauthorized" }), 401);
@@ -58,6 +62,46 @@ export default {
     ctx.waitUntil(refreshNews(env).catch((error) => console.error("scheduled refresh failed", error)));
   }
 };
+
+async function articleDetail(id, env) {
+  const detailKey = `news-detail-v2:${id}`;
+  const cached = await env.NEWS_CACHE.get(detailKey);
+  if (cached) return response(cached);
+
+  const feedRaw = await env.NEWS_CACHE.get(CACHE_KEY);
+  const article = feedRaw && JSON.parse(feedRaw).items?.find((item) => item.id === id);
+  if (!article) return response(JSON.stringify({ error: "Meldung nicht gefunden." }), 404);
+
+  try {
+    const sourceResponse = await fetch(article.originalUrl, {
+      headers: { "User-Agent": "RhodosCountdownNews/1.0 (+news summarizer; contact app owner)" },
+      signal: AbortSignal.timeout(12_000)
+    });
+    if (!sourceResponse.ok) throw new Error(`Source HTTP ${sourceResponse.status}`);
+    const contentType = sourceResponse.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/html")) throw new Error("Source is not HTML");
+    const articleText = extractArticleText(await sourceResponse.text());
+    if (!articleText) throw new Error("No usable article text");
+
+    const detail = await summarizeArticle(article, articleText, env);
+    const payload = JSON.stringify({
+      schemaVersion: 1,
+      id: article.id,
+      germanTitle: article.germanTitle,
+      germanDetail: detail.germanDetail,
+      keyPoints: detail.keyPoints,
+      source: article.source,
+      publishedAt: article.publishedAt,
+      originalUrl: article.originalUrl,
+      generatedAt: new Date().toISOString()
+    });
+    await env.NEWS_CACHE.put(detailKey, payload, { expirationTtl: 604_800 });
+    return response(payload);
+  } catch (error) {
+    console.error("article detail failed", id, error);
+    return response(JSON.stringify({ error: "Die deutsche Leseansicht ist für diesen Artikel nicht verfügbar." }), 502);
+  }
+}
 
 export async function refreshNews(env) {
   const settled = await Promise.allSettled(SOURCES.map(async (source) => {
@@ -141,6 +185,70 @@ async function translate(article, env) {
     germanTitle: String(json.germanTitle).trim(),
     germanSummary: String(json.germanSummary).trim().slice(0, 300)
   };
+}
+
+async function summarizeArticle(article, articleText, env) {
+  const prompt = `Erstelle für einen deutschsprachigen Rhodos-Reisebegleiter eine eigenständig formulierte, sachliche Zusammenfassung dieses griechischen Nachrichtenartikels. Verwende 3 bis 5 kurze Absätze. Keine wörtlichen Zitate, keine Spekulationen und keine Informationen außerhalb des Textes. germanDetail darf höchstens 1800 Zeichen lang sein. Schreibe außerdem genau 3 bis 5 kurze Stichpunkte in keyPointsText, je einer pro Zeile und ohne Nummerierung. Antworte nur als JSON mit den beiden Textfeldern germanDetail und keyPointsText.\n\nTitel: ${article.originalTitle}\n\nArtikeltext:\n${articleText}`;
+  const request = {
+    messages: [
+      { role: "system", content: "Du fasst griechische Lokalnachrichten natürlich auf Deutsch zusammen und antwortest nur mit gültigem JSON." },
+      { role: "user", content: prompt }
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        type: "object",
+        properties: {
+          germanDetail: { type: "string" },
+          keyPointsText: { type: "string" }
+        },
+        required: ["germanDetail", "keyPointsText"]
+      }
+    },
+    max_tokens: 900,
+    temperature: 0.2
+  };
+
+  let lastError;
+  for (const structured of [true, false]) {
+    try {
+      const currentRequest = structured ? request : { ...request, response_format: undefined };
+      const result = await env.AI.run(env.AI_MODEL, currentRequest);
+      const output = typeof result === "string" ? result : result.response;
+      const json = typeof output === "object" && output !== null
+        ? output
+        : JSON.parse(String(output).match(/\{[\s\S]*\}/)?.[0] ?? "");
+      const germanDetail = truncateSummary(String(json.germanDetail ?? "").trim());
+      let keyPoints = String(json.keyPointsText ?? "")
+        .split(/\r?\n|•/)
+        .map((point) => point.replace(/^\s*(?:[-*]|\d+[.)])\s*/, "").trim())
+        .filter(Boolean)
+        .slice(0, 5);
+      if (keyPoints.length < 3) keyPoints = pointsFromSummary(germanDetail);
+      if (!germanDetail || keyPoints.length < 3) throw new Error("Invalid detail response");
+      return { germanDetail, keyPoints };
+    } catch (error) {
+      lastError = error;
+      console.error("detail model attempt failed", structured ? "structured" : "fallback", error);
+    }
+  }
+  throw lastError ?? new Error("Detail model failed");
+}
+
+function pointsFromSummary(value) {
+  return (value.match(/[^.!?]+[.!?]+/g) ?? [])
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 25)
+    .slice(0, 5);
+}
+
+export function truncateSummary(value, maxLength = 1_800) {
+  if (value.length <= maxLength) return value;
+  const candidate = value.slice(0, maxLength);
+  const sentenceEnd = Math.max(candidate.lastIndexOf("."), candidate.lastIndexOf("!"), candidate.lastIndexOf("?"));
+  if (sentenceEnd >= Math.floor(maxLength * 0.65)) return candidate.slice(0, sentenceEnd + 1);
+  const wordEnd = candidate.lastIndexOf(" ");
+  return `${candidate.slice(0, wordEnd > 0 ? wordEnd : maxLength).trim()}…`;
 }
 
 function response(body, status = 200) {

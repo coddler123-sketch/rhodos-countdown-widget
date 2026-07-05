@@ -37,6 +37,26 @@ data class NewsArticle(
     val imageUrl: String?
 )
 
+data class NewsDetail(
+    val id: String,
+    val germanTitle: String,
+    val germanDetail: String,
+    val keyPoints: List<String>,
+    val source: String,
+    val publishedAt: String,
+    val originalUrl: String
+)
+
+sealed interface NewsDetailUiState {
+    data object Loading : NewsDetailUiState
+    data class Content(
+        val detail: NewsDetail,
+        val isCached: Boolean,
+        val warning: String? = null
+    ) : NewsDetailUiState
+    data class Error(val message: String) : NewsDetailUiState
+}
+
 sealed interface NewsUiState {
     data object Loading : NewsUiState
     data class Content(
@@ -166,3 +186,90 @@ data class ParsedNews(
     val raw: String,
     val fromCache: Boolean
 )
+
+class NewsDetailController(
+    private val context: Context,
+    private val article: NewsArticle
+) {
+    var state: NewsDetailUiState by mutableStateOf(loadCached() ?: NewsDetailUiState.Loading)
+        private set
+
+    suspend fun load() {
+        val previous = state as? NewsDetailUiState.Content
+        if (previous == null) state = NewsDetailUiState.Loading
+        runCatching { fetchDetail() }
+            .onSuccess { detail ->
+                saveCache(detail.raw)
+                state = NewsDetailUiState.Content(detail.value, isCached = false)
+            }
+            .onFailure {
+                Log.w("RhodosNews", "News detail failed", it)
+                state = previous?.copy(
+                    warning = "Aktualisierung nicht möglich – gespeicherte Zusammenfassung wird angezeigt."
+                ) ?: NewsDetailUiState.Error(
+                    "Die deutsche Leseansicht ist für diesen Artikel gerade nicht verfügbar."
+                )
+            }
+    }
+
+    private suspend fun fetchDetail(): ParsedNewsDetail = withContext(Dispatchers.IO) {
+        check(BuildConfig.NEWS_API_URL.isNotBlank()) { "News-Backend ist nicht konfiguriert" }
+        val endpoint = "${BuildConfig.NEWS_API_URL.trimEnd('/')}/${article.id}"
+        val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8_000
+            readTimeout = 45_000
+            setRequestProperty("Accept", "application/json")
+        }
+        try {
+            check(connection.responseCode in 200..299) { "HTTP ${connection.responseCode}" }
+            parse(connection.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun loadCached(): NewsDetailUiState.Content? {
+        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(cacheKey(article.id), null) ?: return null
+        return runCatching { parse(raw) }.getOrNull()?.let {
+            NewsDetailUiState.Content(it.value, isCached = true)
+        }
+    }
+
+    private fun saveCache(raw: String) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putString(cacheKey(article.id), raw).apply()
+    }
+
+    companion object {
+        private const val PREFS = "rhodos_news_details"
+
+        private fun cacheKey(id: String) = "detail_$id"
+
+        internal fun parse(raw: String): ParsedNewsDetail {
+            val root = JSONObject(raw)
+            val originalUrl = root.getString("originalUrl")
+            require(originalUrl.startsWith("https://")) { "Nur HTTPS-Links sind erlaubt" }
+            val pointsJson = root.getJSONArray("keyPoints")
+            val points = buildList {
+                for (index in 0 until pointsJson.length()) {
+                    pointsJson.optString(index).takeIf(String::isNotBlank)?.let(::add)
+                }
+            }
+            require(points.size >= 3) { "Zu wenige Stichpunkte" }
+            val detail = NewsDetail(
+                id = root.getString("id"),
+                germanTitle = root.getString("germanTitle"),
+                germanDetail = root.getString("germanDetail"),
+                keyPoints = points.take(5),
+                source = root.getString("source"),
+                publishedAt = root.getString("publishedAt"),
+                originalUrl = originalUrl
+            )
+            return ParsedNewsDetail(detail, raw)
+        }
+    }
+}
+
+data class ParsedNewsDetail(val value: NewsDetail, val raw: String)

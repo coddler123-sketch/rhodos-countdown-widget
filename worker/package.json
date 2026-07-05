@@ -5,6 +5,7 @@
   "scripts": {
     "check": "node --check src/index.js && node --test",
     "smoke:sources": "node scripts/smoke-sources.js",
+    "smoke:detail": "node scripts/smoke-detail.js",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

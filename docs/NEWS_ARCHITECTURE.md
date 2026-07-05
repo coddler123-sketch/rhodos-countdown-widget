@@ -22,6 +22,8 @@ NEWS_API_URL=https://example.net/api/news
 
 Das JSON-Schema steht in `news-api-example.json`. Kategorien sind `RHODOS`, `DODECANESE`, `TRAVEL`, `WEATHER` und `EVENTS`.
 
+`GET /api/news/{id}` erzeugt beim ersten Öffnen eine ausführlichere deutsche Zusammenfassung und drei bis fünf Stichpunkte. Der extrahierte Originaltext verlässt den Worker nicht und wird nicht gespeichert; im KV-Cache liegt für sieben Tage ausschließlich das deutsche Ergebnis. Der Vertrag steht in `news-detail-api-example.json`.
+
 ## Backend-Empfehlung
 
 Eine kleine Cloudflare Worker-, Firebase Function- oder Cloud-Run-Function genügt:

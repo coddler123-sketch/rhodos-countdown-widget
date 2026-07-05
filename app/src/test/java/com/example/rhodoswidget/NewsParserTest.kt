@@ -25,4 +25,14 @@ class NewsParserTest {
             """{"items":[{"id":"1","originalTitle":"x","germanTitle":"x","germanSummary":"x","originalUrl":"http://example.com","publishedAt":"2026-07-05T08:00:00Z","source":"x","category":"RHODOS"}]}"""
         )
     }
+
+    @Test
+    fun parseDetail_mapsGermanReaderPayload() {
+        val result = NewsDetailController.parse(
+            """{"id":"rodiaki-1","germanTitle":"Titel","germanDetail":"Ausführliche Zusammenfassung.","keyPoints":["Punkt 1","Punkt 2","Punkt 3"],"source":"Rodiaki","publishedAt":"2026-07-05T08:00:00Z","originalUrl":"https://www.rodiaki.gr/article/1"}"""
+        )
+
+        assertEquals("Titel", result.value.germanTitle)
+        assertEquals(3, result.value.keyPoints.size)
+    }
 }

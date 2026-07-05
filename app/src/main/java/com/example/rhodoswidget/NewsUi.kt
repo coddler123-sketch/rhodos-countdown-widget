@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +113,8 @@ fun NewsScreen(
     state: NewsUiState,
     padding: PaddingValues,
     onBack: () -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onOpenDetail: (NewsArticle) -> Unit
 ) {
     var selected by remember { mutableStateOf(NewsCategory.ALL) }
     val articles = (state as? NewsUiState.Content)?.articles.orEmpty().filter {
@@ -137,7 +139,10 @@ fun NewsScreen(
                 Button(
                     onClick = onRefresh,
                     enabled = (state as? NewsUiState.Content)?.isRefreshing != true,
-                    colors = ButtonDefaults.buttonColors(containerColor = Sea)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Sea,
+                        contentColor = Color.White
+                    )
                 ) { Text("Aktualisieren") }
             }
             Row(
@@ -149,7 +154,17 @@ fun NewsScreen(
                         selected = selected == category,
                         onClick = { selected = category },
                         label = { Text(category.label) },
-                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Sand, selectedLabelColor = Color(0xFF174954))
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = Color.White.copy(alpha = 0.45f),
+                            labelColor = Sea,
+                            selectedContainerColor = Sand,
+                            selectedLabelColor = Color(0xFF174954)
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (selected == category) Sea.copy(alpha = 0.24f)
+                            else Sea.copy(alpha = 0.55f)
+                        )
                     )
                 }
             }
@@ -166,7 +181,7 @@ fun NewsScreen(
                     val content = state as NewsUiState.Content
                     content.warning?.let { item { Text(it, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
                     if (content.isCached) item { Text("Offline verfügbar · zuletzt geladener Stand", color = Sea, fontSize = 12.sp) }
-                    items(articles, key = NewsArticle::id) { NewsCard(it) }
+                    items(articles, key = NewsArticle::id) { NewsCard(it, onOpenDetail) }
                     item { Text("Automatisch aus dem Griechischen übersetzt", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
                 }
             }
@@ -175,7 +190,7 @@ fun NewsScreen(
 }
 
 @Composable
-private fun NewsCard(article: NewsArticle) {
+private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) {
     val context = LocalContext.current
     Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(18.dp)) {
@@ -185,7 +200,7 @@ private fun NewsCard(article: NewsArticle) {
             Spacer(Modifier.height(8.dp))
             Text(article.germanSummary, color = Color(0xFF496268), fontSize = 14.sp, lineHeight = 20.sp)
             Spacer(Modifier.height(12.dp))
-            Text("${article.source} · ${formatDate(article.publishedAt)}", color = Color.Gray, fontSize = 12.sp)
+            Text("${article.source} · ${formatNewsDate(article.publishedAt)}", color = Color.Gray, fontSize = 12.sp)
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -197,11 +212,7 @@ private fun NewsCard(article: NewsArticle) {
                 ) { Text("Original", color = Sea, fontWeight = FontWeight.SemiBold) }
                 Spacer(Modifier.width(6.dp))
                 Button(
-                    onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, translatedArticleUri(article.originalUrl))
-                        )
-                    },
+                    onClick = { onOpenDetail(article) },
                     colors = ButtonDefaults.buttonColors(containerColor = Sun, contentColor = Color(0xFF3D2B00))
                 ) { Text("Deutsch lesen", fontWeight = FontWeight.Bold) }
             }
@@ -222,18 +233,9 @@ private fun NewsMessage(message: String, onRetry: (() -> Unit)? = null) {
     }
 }
 
-private fun formatDate(value: String): String = runCatching {
+internal fun formatNewsDate(value: String): String = runCatching {
     val inputPattern = if (value.contains('.')) "yyyy-MM-dd'T'HH:mm:ss.SSSX" else "yyyy-MM-dd'T'HH:mm:ssX"
     val input = SimpleDateFormat(inputPattern, Locale.ROOT)
     val output = SimpleDateFormat("dd.MM., HH:mm 'Uhr'", Locale.GERMANY)
     output.format(requireNotNull(input.parse(value)))
 }.getOrDefault(value)
-
-private fun translatedArticleUri(originalUrl: String): Uri = Uri.Builder()
-    .scheme("https")
-    .authority("translate.google.com")
-    .appendPath("translate")
-    .appendQueryParameter("sl", "el")
-    .appendQueryParameter("tl", "de")
-    .appendQueryParameter("u", originalUrl)
-    .build()

@@ -76,16 +76,25 @@ private fun RhodosApp(padding: PaddingValues) {
     val context = LocalContext.current
     val controller = remember(context) { NewsController(context.applicationContext) }
     val showNews = remember { mutableStateOf(false) }
+    val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(controller) { controller.refresh() }
 
-    if (showNews.value) {
+    val article = selectedArticle.value
+    if (article != null) {
+        NewsDetailScreen(
+            article = article,
+            padding = padding,
+            onBack = { selectedArticle.value = null }
+        )
+    } else if (showNews.value) {
         NewsScreen(
             state = controller.state,
             padding = padding,
             onBack = { showNews.value = false },
-            onRefresh = { scope.launch { controller.refresh() } }
+            onRefresh = { scope.launch { controller.refresh() } },
+            onOpenDetail = { selectedArticle.value = it }
         )
     } else {
         RhodosHome(
