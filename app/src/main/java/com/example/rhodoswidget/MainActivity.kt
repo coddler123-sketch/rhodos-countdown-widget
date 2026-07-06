@@ -3,6 +3,7 @@ package com.example.rhodoswidget
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -82,6 +83,13 @@ private fun RhodosApp(padding: PaddingValues) {
     LaunchedEffect(controller) { controller.refresh() }
 
     val article = selectedArticle.value
+    BackHandler(enabled = article != null) {
+        selectedArticle.value = null
+    }
+    BackHandler(enabled = article == null && showNews.value) {
+        showNews.value = false
+    }
+
     if (article != null) {
         NewsDetailScreen(
             article = article,

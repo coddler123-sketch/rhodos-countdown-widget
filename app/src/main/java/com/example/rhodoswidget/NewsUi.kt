@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,6 +74,7 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("news-ticker")
             .border(1.dp, Color(0x665DB7BE), shape)
             .clickable(onClick = onOpenNews),
         colors = CardDefaults.cardColors(containerColor = Color(0xD9FFF8E8)),
@@ -213,6 +215,7 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
                 Spacer(Modifier.width(6.dp))
                 Button(
                     onClick = { onOpenDetail(article) },
+                    modifier = Modifier.testTag("news-open-detail"),
                     colors = ButtonDefaults.buttonColors(containerColor = Sun, contentColor = Color(0xFF3D2B00))
                 ) { Text("Deutsch lesen", fontWeight = FontWeight.Bold) }
             }
