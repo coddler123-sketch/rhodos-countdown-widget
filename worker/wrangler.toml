@@ -12,6 +12,11 @@ binding = "AI"
 [[kv_namespaces]]
 binding = "NEWS_CACHE"
 
+[[d1_databases]]
+binding = "NEWS_DB"
+database_name = "rhodos-news-db"
+database_id = "49c42ec0-a828-4497-92c2-4ce73c7bdd0c"
+
 [triggers]
 crons = ["17 */4 * * *"]
 

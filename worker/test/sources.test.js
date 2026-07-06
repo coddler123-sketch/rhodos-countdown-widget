@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { classify, extractArticleText, parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "../src/sources.js";
-import { truncateSummary } from "../src/index.js";
+import { deduplicateArticles, truncateSummary } from "../src/index.js";
 
 test("parses a WordPress RSS item", () => {
   const xml = `<rss><channel><item><title><![CDATA[Νέα πτήση για τη Ρόδο]]></title><link>https://www.dimokratiki.gr/a</link><pubDate>Sun, 05 Jul 2026 08:00:00 GMT</pubDate><description><![CDATA[<p>Περίληψη</p>]]></description><category>Τουρισμός</category></item></channel></rss>`;
@@ -48,4 +48,40 @@ test("truncates a long summary at a complete sentence", () => {
   const result = truncateSummary(`${"Ein vollständiger Satz. ".repeat(90)}Unvollständig`, 300);
   assert.ok(result.length <= 300);
   assert.ok(result.endsWith("."));
+});
+
+test("deduplicates similar headlines from different sources", () => {
+  const base = {
+    teaser: "Teaser",
+    category: "RHODOS"
+  };
+  const articles = [
+    {
+      ...base,
+      id: "a",
+      source: "Rodiaki",
+      originalUrl: "https://example.com/a",
+      originalTitle: "Μεγάλη πυρκαγιά σήμερα κοντά στην πόλη της Ρόδου",
+      publishedAt: "2026-07-06T10:00:00Z"
+    },
+    {
+      ...base,
+      id: "b",
+      source: "Dimokratiki",
+      originalUrl: "https://example.com/b",
+      originalTitle: "Μεγάλη πυρκαγιά κοντά στην πόλη της Ρόδου σήμερα",
+      publishedAt: "2026-07-06T09:30:00Z"
+    }
+  ];
+
+  assert.deepEqual(deduplicateArticles(articles).map((article) => article.id), ["a"]);
+});
+
+test("keeps similar headlines when they are published on different days", () => {
+  const articles = [
+    { id: "new", originalTitle: "Νέα πτήση από Αθήνα προς Ρόδο το καλοκαίρι", publishedAt: "2026-07-06T10:00:00Z" },
+    { id: "old", originalTitle: "Νέα πτήση από Αθήνα προς Ρόδο το καλοκαίρι", publishedAt: "2026-07-04T10:00:00Z" }
+  ];
+
+  assert.equal(deduplicateArticles(articles).length, 2);
 });

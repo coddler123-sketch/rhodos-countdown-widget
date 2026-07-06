@@ -69,7 +69,8 @@ async function articleDetail(id, env) {
   if (cached) return response(cached);
 
   const feedRaw = await env.NEWS_CACHE.get(CACHE_KEY);
-  const article = feedRaw && JSON.parse(feedRaw).items?.find((item) => item.id === id);
+  const currentArticle = feedRaw && JSON.parse(feedRaw).items?.find((item) => item.id === id);
+  const article = currentArticle ?? await loadArchivedArticle(id, env);
   if (!article) return response(JSON.stringify({ error: "Meldung nicht gefunden." }), 404);
 
   try {
@@ -104,6 +105,7 @@ async function articleDetail(id, env) {
 }
 
 export async function refreshNews(env) {
+  const checkedAt = new Date().toISOString();
   const settled = await Promise.allSettled(SOURCES.map(async (source) => {
     const result = await fetch(source.url, {
       headers: { "User-Agent": "RhodosCountdownNews/1.0 (+news aggregator; contact app owner)" }
@@ -115,15 +117,19 @@ export async function refreshNews(env) {
   settled.filter((result) => result.status === "rejected")
     .forEach((result) => console.error("source failed", result.reason));
 
-  const unique = [...new Map(raw.map((article) => [normalizeTitle(article.originalTitle), article])).values()]
-    .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+  const unique = deduplicateArticles(raw)
     .slice(0, Number(env.MAX_ARTICLES || 10));
   if (!unique.length) throw new Error("No source returned usable articles");
 
   const items = [];
   for (const article of unique) {
     try {
-      items.push({ ...article, ...await translate(article, env), imageUrl: null });
+      const contentHash = await hashArticle(article);
+      const stored = await loadStoredTranslation(article.id, env);
+      const translated = stored?.content_hash === contentHash
+        ? { germanTitle: stored.german_title, germanSummary: stored.german_summary }
+        : await translate(article, env);
+      items.push({ ...article, ...translated, imageUrl: null, contentHash });
     } catch (error) {
       console.error("translation failed", article.id, error);
     }
@@ -133,9 +139,17 @@ export async function refreshNews(env) {
   const sourceStatus = settled.map((result, index) => ({
     name: SOURCES[index].name,
     status: result.status === "fulfilled" ? "ok" : "unavailable",
-    count: result.status === "fulfilled" ? result.value.articles.length : 0
+    count: result.status === "fulfilled" ? result.value.articles.length : 0,
+    error: result.status === "rejected" ? errorMessage(result.reason) : null
   }));
-  const payload = { schemaVersion: 1, generatedAt: new Date().toISOString(), sources: sourceStatus, items };
+  try {
+    await persistAggregation(items, sourceStatus, checkedAt, env);
+  } catch (error) {
+    console.error("aggregation persistence failed", error);
+  }
+  const publicItems = items.map(({ contentHash: _contentHash, ...article }) => article);
+  const publicSources = sourceStatus.map(({ error: _error, ...source }) => source);
+  const payload = { schemaVersion: 1, generatedAt: new Date().toISOString(), sources: publicSources, items: publicItems };
   await env.NEWS_CACHE.put(CACHE_KEY, JSON.stringify(payload));
   return payload;
 }
@@ -145,6 +159,111 @@ function normalizeTitle(title) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
+}
+
+export function deduplicateArticles(articles) {
+  const sorted = [...articles].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+  const unique = [];
+  for (const article of sorted) {
+    const duplicate = unique.some((candidate) => {
+      const age = Math.abs(Date.parse(candidate.publishedAt) - Date.parse(article.publishedAt));
+      return age <= 36 * 60 * 60 * 1_000 && titleSimilarity(candidate.originalTitle, article.originalTitle) >= 0.72;
+    });
+    if (!duplicate) unique.push(article);
+  }
+  return unique;
+}
+
+function titleSimilarity(left, right) {
+  const leftNormalized = normalizeTitle(left);
+  const rightNormalized = normalizeTitle(right);
+  if (leftNormalized === rightNormalized) return 1;
+  const leftTokens = new Set(leftNormalized.split(" ").filter((token) => token.length > 2));
+  const rightTokens = new Set(rightNormalized.split(" ").filter((token) => token.length > 2));
+  if (leftTokens.size < 4 || rightTokens.size < 4) return 0;
+  const intersection = [...leftTokens].filter((token) => rightTokens.has(token)).length;
+  return intersection / new Set([...leftTokens, ...rightTokens]).size;
+}
+
+async function hashArticle(article) {
+  const data = new TextEncoder().encode(`${normalizeTitle(article.originalTitle)}\n${article.teaser.trim()}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function loadStoredTranslation(id, env) {
+  if (!env.NEWS_DB) return null;
+  try {
+    return await env.NEWS_DB.prepare(
+      "SELECT content_hash, german_title, german_summary FROM articles WHERE id = ?"
+    ).bind(id).first();
+  } catch (error) {
+    console.error("translation cache lookup failed", id, error);
+    return null;
+  }
+}
+
+async function loadArchivedArticle(id, env) {
+  if (!env.NEWS_DB) return null;
+  try {
+    const row = await env.NEWS_DB.prepare(
+      "SELECT id, original_title, german_title, german_summary, original_url, published_at, source, category, image_url FROM articles WHERE id = ?"
+    ).bind(id).first();
+    return row && {
+      id: row.id,
+      originalTitle: row.original_title,
+      germanTitle: row.german_title,
+      germanSummary: row.german_summary,
+      originalUrl: row.original_url,
+      publishedAt: row.published_at,
+      source: row.source,
+      category: row.category,
+      imageUrl: row.image_url
+    };
+  } catch (error) {
+    console.error("archive lookup failed", id, error);
+    return null;
+  }
+}
+
+async function persistAggregation(items, sourceStatus, checkedAt, env) {
+  if (!env.NEWS_DB) return;
+  const articleStatements = items.map((article) => env.NEWS_DB.prepare(`
+    INSERT INTO articles (
+      id, original_title, german_title, german_summary, teaser, original_url,
+      published_at, source, category, image_url, content_hash, first_seen_at, last_seen_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      original_title = excluded.original_title,
+      german_title = excluded.german_title,
+      german_summary = excluded.german_summary,
+      teaser = excluded.teaser,
+      original_url = excluded.original_url,
+      published_at = excluded.published_at,
+      source = excluded.source,
+      category = excluded.category,
+      image_url = excluded.image_url,
+      content_hash = excluded.content_hash,
+      last_seen_at = excluded.last_seen_at
+  `).bind(
+    article.id, article.originalTitle, article.germanTitle, article.germanSummary, article.teaser,
+    article.originalUrl, article.publishedAt, article.source, article.category, article.imageUrl,
+    article.contentHash, checkedAt, checkedAt
+  ));
+  const healthStatements = sourceStatus.map((source) => env.NEWS_DB.prepare(`
+    INSERT INTO source_health (source, status, article_count, error, last_checked_at)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(source) DO UPDATE SET
+      status = excluded.status,
+      article_count = excluded.article_count,
+      error = excluded.error,
+      last_checked_at = excluded.last_checked_at
+  `).bind(source.name, source.status, source.count, source.error, checkedAt));
+  await env.NEWS_DB.batch([...articleStatements, ...healthStatements]);
+}
+
+function errorMessage(error) {
+  return String(error instanceof Error ? error.message : error).slice(0, 300);
 }
 
 async function loadRodiaki(homepage) {
