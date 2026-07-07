@@ -39,6 +39,9 @@ export default {
         return response(JSON.stringify({ error: "News sind momentan nicht verfügbar." }), 503);
       }
     }
+    if (request.method === "GET" && url.pathname === "/api/status") {
+      return response(JSON.stringify(await buildStatus(env)));
+    }
     const detailMatch = request.method === "GET" && url.pathname.match(/^\/api\/news\/([a-z0-9-]+)$/i);
     if (detailMatch) {
       return articleDetail(decodeURIComponent(detailMatch[1]), env);
@@ -152,6 +155,75 @@ export async function refreshNews(env) {
   const payload = { schemaVersion: 1, generatedAt: new Date().toISOString(), sources: publicSources, items: publicItems };
   await env.NEWS_CACHE.put(CACHE_KEY, JSON.stringify(payload));
   return payload;
+}
+
+export async function buildStatus(env, now = new Date()) {
+  const cacheRaw = await env.NEWS_CACHE.get(CACHE_KEY);
+  const cached = cacheRaw ? JSON.parse(cacheRaw) : null;
+  const generatedAt = cached?.generatedAt ?? null;
+  const ageMinutes = generatedAt
+    ? Math.max(0, Math.round((now.getTime() - Date.parse(generatedAt)) / 60_000))
+    : null;
+  const archive = await loadArchiveStatus(env);
+  const sources = archive.sources.length ? archive.sources : (cached?.sources ?? []);
+  const itemCount = cached?.items?.length ?? 0;
+  const unavailableSources = sources.filter((source) => source.status !== "ok").length;
+  const status = !itemCount
+    ? "empty"
+    : ageMinutes !== null && ageMinutes > 12 * 60
+      ? "stale"
+      : unavailableSources
+        ? "degraded"
+        : "ok";
+
+  return {
+    schemaVersion: 1,
+    status,
+    checkedAt: now.toISOString(),
+    lastRefresh: archive.lastCheckedAt ?? generatedAt,
+    cache: {
+      available: Boolean(cached),
+      generatedAt,
+      ageMinutes,
+      itemCount
+    },
+    archive: {
+      available: archive.available,
+      itemCount: archive.itemCount,
+      lastSeenAt: archive.lastSeenAt
+    },
+    sources: sources.map((source) => ({
+      name: source.name ?? source.source,
+      status: source.status,
+      count: source.count ?? source.article_count ?? 0,
+      lastCheckedAt: source.lastCheckedAt ?? source.last_checked_at ?? null
+    }))
+  };
+}
+
+async function loadArchiveStatus(env) {
+  if (!env.NEWS_DB) {
+    return { available: false, itemCount: null, lastSeenAt: null, lastCheckedAt: null, sources: [] };
+  }
+  try {
+    const [articleStats, health] = await Promise.all([
+      env.NEWS_DB.prepare("SELECT COUNT(*) AS count, MAX(last_seen_at) AS last_seen_at FROM articles").first(),
+      env.NEWS_DB.prepare(
+        "SELECT source, status, article_count, last_checked_at FROM source_health ORDER BY source"
+      ).all()
+    ]);
+    const sources = health.results ?? [];
+    return {
+      available: true,
+      itemCount: articleStats?.count ?? 0,
+      lastSeenAt: articleStats?.last_seen_at ?? null,
+      lastCheckedAt: sources.map((source) => source.last_checked_at).filter(Boolean).sort().at(-1) ?? null,
+      sources
+    };
+  } catch (error) {
+    console.error("status lookup failed", error);
+    return { available: false, itemCount: null, lastSeenAt: null, lastCheckedAt: null, sources: [] };
+  }
 }
 
 function normalizeTitle(title) {

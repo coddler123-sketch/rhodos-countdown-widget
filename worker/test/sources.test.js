@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { classify, extractArticleText, parseRodiakiArticleLinks, parseRodiakiJsonLd, parseWordPressRss } from "../src/sources.js";
-import { deduplicateArticles, truncateSummary } from "../src/index.js";
+import { buildStatus, deduplicateArticles, truncateSummary } from "../src/index.js";
 
 test("parses a WordPress RSS item", () => {
   const xml = `<rss><channel><item><title><![CDATA[Νέα πτήση για τη Ρόδο]]></title><link>https://www.dimokratiki.gr/a</link><pubDate>Sun, 05 Jul 2026 08:00:00 GMT</pubDate><description><![CDATA[<p>Περίληψη</p>]]></description><category>Τουρισμός</category></item></channel></rss>`;
@@ -84,4 +84,35 @@ test("keeps similar headlines when they are published on different days", () => 
   ];
 
   assert.equal(deduplicateArticles(articles).length, 2);
+});
+
+test("builds public status from cached news", async () => {
+  const status = await buildStatus({
+    NEWS_CACHE: {
+      get: async () => JSON.stringify({
+        generatedAt: "2026-07-07T08:00:00.000Z",
+        sources: [{ name: "Rodiaki", status: "ok", count: 3 }],
+        items: [{ id: "a" }, { id: "b" }]
+      })
+    }
+  }, new Date("2026-07-07T09:00:00.000Z"));
+
+  assert.equal(status.status, "ok");
+  assert.equal(status.cache.itemCount, 2);
+  assert.equal(status.cache.ageMinutes, 60);
+  assert.deepEqual(status.sources, [{ name: "Rodiaki", status: "ok", count: 3, lastCheckedAt: null }]);
+});
+
+test("marks status as degraded when a source is unavailable", async () => {
+  const status = await buildStatus({
+    NEWS_CACHE: {
+      get: async () => JSON.stringify({
+        generatedAt: "2026-07-07T08:00:00.000Z",
+        sources: [{ name: "RodosReport", status: "unavailable", count: 0 }],
+        items: [{ id: "a" }]
+      })
+    }
+  }, new Date("2026-07-07T09:00:00.000Z"));
+
+  assert.equal(status.status, "degraded");
 });
