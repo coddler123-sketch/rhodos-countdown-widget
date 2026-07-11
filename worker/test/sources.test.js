@@ -30,6 +30,19 @@ test("classifies weather warnings", () => {
   assert.equal(classify("Πυρκαγιά στη Ρόδο"), "WEATHER");
 });
 
+test("does not confuse a summit with travel", () => {
+  assert.equal(classify("Σύνοδος του ΝΑΤΟ με οπλισμένα F-16"), "RHODOS");
+});
+
+test("classifies English festival and sports titles as events", () => {
+  assert.equal(classify("Rhodes Street Food Festival"), "EVENTS");
+  assert.equal(classify("Rhodes Street Basketball 3x3"), "EVENTS");
+});
+
+test("classifies road closures as travel", () => {
+  assert.equal(classify("Προσωρινή διακοπή κυκλοφορίας στην οδό προς Ιαλυσό"), "TRAVEL");
+});
+
 test("extracts articleBody from JSON-LD without markup", () => {
   const body = "Α".repeat(350);
   const html = `<script type="application/ld+json">${JSON.stringify({ "@type": "NewsArticle", articleBody: body })}</script>`;

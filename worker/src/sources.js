@@ -92,9 +92,9 @@ function jsonLdNodes(raw) {
 export function classify(text) {
   const value = text.toLocaleLowerCase("el");
   if (/καιρ|πυρκαγ|φωτιά|βροχ|καύσω|σεισμ/.test(value)) return "WEATHER";
-  if (/πτήσ|αεροδρ|λιμάν|πλοί|κυκλοφορ|οδ|τουρισ/.test(value)) return "TRAVEL";
-  if (/εκδήλω|φεστιβάλ|συναυλ|θέατρ|πολιτισ/.test(value)) return "EVENTS";
-  if (/δωδεκάνησ|κω|κάλυμν|λέρο|κάρπαθ|πάτμο/.test(value)) return "DODECANESE";
+  if (/δωδεκάνησ|κάλυμν|λέρο|κάρπαθ|πάτμο|σύμη|κως|kalymn|leros|karpath|patmos|symi|kos/.test(value)) return "DODECANESE";
+  if (/εκδήλω|φεστιβάλ|συναυλ|θέατρ|πολιτισ|festival|concert|event|basketball|football|volleyball|marathon/.test(value)) return "EVENTS";
+  if (/πτήσ|αεροδρ|λιμάν|πλοί|κυκλοφορ|δρόμ|οδός|οδού|τουρισ|flight|airport|ferry|traffic|road closure/.test(value)) return "TRAVEL";
   return "RHODOS";
 }
 
