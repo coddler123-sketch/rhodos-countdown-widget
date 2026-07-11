@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
+import kotlin.math.max
 
 private val Sea = Color(0xFF1F8796)
 private val Sun = Color(0xFFF4B942)
@@ -138,14 +140,10 @@ fun NewsScreen(
                     Text("Aktuelles von Rhodos", color = Color(0xFF174954), fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
                     Text("Inselinfos für unterwegs", color = Sea, fontSize = 13.sp)
                 }
-                Button(
+                TextButton(
                     onClick = onRefresh,
-                    enabled = (state as? NewsUiState.Content)?.isRefreshing != true,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Sea,
-                        contentColor = Color.White
-                    )
-                ) { Text("Aktualisieren") }
+                    enabled = (state as? NewsUiState.Content)?.isRefreshing != true
+                ) { Text("Aktualisieren", color = Sea, fontWeight = FontWeight.Bold) }
             }
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
@@ -170,6 +168,12 @@ fun NewsScreen(
                     )
                 }
             }
+            Text(
+                "Weitere Filter ›",
+                color = Sea.copy(alpha = 0.72f),
+                fontSize = 11.sp,
+                modifier = Modifier.align(Alignment.End).padding(end = 20.dp, top = 2.dp)
+            )
             Spacer(Modifier.height(10.dp))
             when {
                 state is NewsUiState.Loading -> NewsMessage("Die neuesten Inselmeldungen werden geladen …")
@@ -198,11 +202,30 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
         Column(Modifier.padding(18.dp)) {
             Text(article.category.label.uppercase(), color = Sea, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(7.dp))
-            Text(article.germanTitle, color = Color(0xFF173D46), fontSize = 19.sp, fontWeight = FontWeight.Bold)
+            Text(
+                article.germanTitle,
+                color = Color(0xFF173D46),
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(Modifier.height(8.dp))
-            Text(article.germanSummary, color = Color(0xFF496268), fontSize = 14.sp, lineHeight = 20.sp)
+            Text(
+                article.germanSummary,
+                color = Color(0xFF496268),
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(Modifier.height(12.dp))
-            Text("${article.source} · ${formatNewsDate(article.publishedAt)}", color = Color.Gray, fontSize = 12.sp)
+            val relativeAge = relativeNewsAge(article.publishedAt)
+            Text(
+                "${article.source} · ${formatNewsDate(article.publishedAt)}${relativeAge?.let { " · $it" } ?: ""}",
+                color = Color.Gray,
+                fontSize = 12.sp
+            )
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -211,7 +234,7 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
             ) {
                 TextButton(
                     onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
-                ) { Text("Original", color = Sea, fontWeight = FontWeight.SemiBold) }
+                ) { Text("Auf Griechisch", color = Sea, fontWeight = FontWeight.SemiBold) }
                 Spacer(Modifier.width(6.dp))
                 Button(
                     onClick = { onOpenDetail(article) },
@@ -242,3 +265,18 @@ internal fun formatNewsDate(value: String): String = runCatching {
     val output = SimpleDateFormat("dd.MM., HH:mm 'Uhr'", Locale.GERMANY)
     output.format(requireNotNull(input.parse(value)))
 }.getOrDefault(value)
+
+internal fun relativeNewsAge(value: String, nowMillis: Long = System.currentTimeMillis()): String? = runCatching {
+    val inputPattern = if (value.contains('.')) "yyyy-MM-dd'T'HH:mm:ss.SSSX" else "yyyy-MM-dd'T'HH:mm:ssX"
+    val publishedAt = requireNotNull(SimpleDateFormat(inputPattern, Locale.ROOT).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }.parse(value)).time
+    val minutes = max(0, (nowMillis - publishedAt) / 60_000)
+    when {
+        minutes < 1 -> "gerade eben"
+        minutes < 60 -> "vor $minutes Min."
+        minutes < 24 * 60 -> "vor ${minutes / 60} Std."
+        minutes < 7 * 24 * 60 -> "vor ${minutes / (24 * 60)} Tagen"
+        else -> null
+    }
+}.getOrNull()

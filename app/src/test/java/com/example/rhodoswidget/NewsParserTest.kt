@@ -35,4 +35,12 @@ class NewsParserTest {
         assertEquals("Titel", result.value.germanTitle)
         assertEquals(3, result.value.keyPoints.size)
     }
+
+    @Test
+    fun relativeNewsAge_describesRecentArticles() {
+        assertEquals(
+            "vor 2 Std.",
+            relativeNewsAge("2026-07-11T08:00:00Z", nowMillis = 1_783_766_400_000)
+        )
+    }
 }
