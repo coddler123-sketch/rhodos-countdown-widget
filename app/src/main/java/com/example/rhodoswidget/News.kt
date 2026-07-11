@@ -48,7 +48,11 @@ data class NewsDetail(
 )
 
 sealed interface NewsDetailUiState {
-    data object Loading : NewsDetailUiState
+    data class Preview(
+        val article: NewsArticle,
+        val isLoading: Boolean = true,
+        val warning: String? = null
+    ) : NewsDetailUiState
     data class Content(
         val detail: NewsDetail,
         val isCached: Boolean,
@@ -191,12 +195,12 @@ class NewsDetailController(
     private val context: Context,
     private val article: NewsArticle
 ) {
-    var state: NewsDetailUiState by mutableStateOf(loadCached() ?: NewsDetailUiState.Loading)
+    var state: NewsDetailUiState by mutableStateOf(loadCached() ?: NewsDetailUiState.Preview(article))
         private set
 
     suspend fun load() {
         val previous = state as? NewsDetailUiState.Content
-        if (previous == null) state = NewsDetailUiState.Loading
+        if (previous == null) state = NewsDetailUiState.Preview(article)
         runCatching { fetchDetail() }
             .onSuccess { detail ->
                 saveCache(detail.raw)
@@ -206,8 +210,10 @@ class NewsDetailController(
                 Log.w("RhodosNews", "News detail failed", it)
                 state = previous?.copy(
                     warning = "Aktualisierung nicht möglich – gespeicherte Zusammenfassung wird angezeigt."
-                ) ?: NewsDetailUiState.Error(
-                    "Die deutsche Leseansicht ist für diesen Artikel gerade nicht verfügbar."
+                ) ?: NewsDetailUiState.Preview(
+                    article = article,
+                    isLoading = false,
+                    warning = "Die ausführliche Zusammenfassung ist gerade nicht verfügbar."
                 )
             }
     }

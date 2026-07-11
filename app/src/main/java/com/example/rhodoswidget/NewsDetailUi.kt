@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,14 +79,13 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
             }
 
             when (val state = controller.state) {
-                NewsDetailUiState.Loading -> Column(
-                    modifier = Modifier.fillMaxWidth().padding(48.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(color = DetailSea)
-                    Spacer(Modifier.height(16.dp))
-                    Text("Deutsche Zusammenfassung wird erstellt …", color = Color(0xFF496268))
-                }
+                is NewsDetailUiState.Preview -> DetailPreview(
+                    article = state.article,
+                    isLoading = state.isLoading,
+                    warning = state.warning,
+                    onRetry = { scope.launch { controller.load() } },
+                    onOriginal = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
+                )
                 is NewsDetailUiState.Error -> DetailError(
                     message = state.message,
                     onRetry = { scope.launch { controller.load() } },
@@ -146,6 +146,73 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DetailPreview(
+    article: NewsArticle,
+    isLoading: Boolean,
+    warning: String?,
+    onRetry: () -> Unit,
+    onOriginal: () -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(Modifier.padding(20.dp)) {
+                    Text(article.germanTitle, color = Color(0xFF173D46), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(10.dp))
+                    Text("${article.source} · ${formatNewsDate(article.publishedAt)}", color = Color.Gray, fontSize = 12.sp)
+                    Spacer(Modifier.height(18.dp))
+                    Text("Kurzüberblick", color = DetailSea, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(6.dp))
+                    Text(article.germanSummary, color = Color(0xFF496268), fontSize = 16.sp, lineHeight = 24.sp)
+                }
+            }
+        }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3D8)),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.height(22.dp).width(22.dp),
+                            color = DetailSea,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text("Ausführliche deutsche Zusammenfassung wird geladen …", color = Color(0xFF496268), fontSize = 14.sp)
+                    } else {
+                        Column {
+                            Text(warning ?: "Zusammenfassung nicht verfügbar.", color = Color(0xFF8A5B00), fontSize = 14.sp)
+                            Spacer(Modifier.height(10.dp))
+                            Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = DetailSea)) {
+                                Text("Erneut versuchen")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        item {
+            Button(
+                onClick = onOriginal,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = DetailSun, contentColor = Color(0xFF3D2B00))
+            ) { Text("Originalartikel öffnen", fontWeight = FontWeight.Bold) }
         }
     }
 }
