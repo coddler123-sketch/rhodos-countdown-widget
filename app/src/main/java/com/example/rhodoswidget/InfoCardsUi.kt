@@ -1,6 +1,7 @@
 package com.example.rhodoswidget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,5 +82,48 @@ fun HighlightCard(highlight: String) {
                 fontFamily = Montserrat
             )
         }
+    }
+}
+
+@Composable
+fun CommunityCard(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0x1AFFFFFF))
+            .testTag("community-link")
+            .clickable(onClick = onClick)
+            .padding(horizontal = 15.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "f",
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.community_title),
+                color = Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = Montserrat
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = stringResource(R.string.community_description),
+                color = Color(0xBFFFFFFF),
+                fontSize = 11.sp,
+                fontFamily = Montserrat
+            )
+        }
+        Text(
+            text = "›",
+            color = Color(0xBFFFFFFF),
+            fontSize = 24.sp
+        )
     }
 }

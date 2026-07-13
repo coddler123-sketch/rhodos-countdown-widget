@@ -1,6 +1,7 @@
 package com.example.rhodoswidget
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -57,6 +58,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+
+private const val COMMUNITY_URL = "https://www.facebook.com/groups/urlaubrhodos"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -211,6 +214,12 @@ private fun RhodosHome(
             FactCard(s.factOfTheDay)
             Spacer(Modifier.height(10.dp))
             HighlightCard(rhodosHighlightOfTheDay())
+            Spacer(Modifier.height(12.dp))
+            CommunityCard(
+                onClick = {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(COMMUNITY_URL)))
+                }
+            )
             Spacer(Modifier.height(12.dp))
             BottomSection(
                 s = s,
