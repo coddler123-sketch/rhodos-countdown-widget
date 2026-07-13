@@ -1,6 +1,7 @@
 package com.example.rhodoswidget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,107 +23,110 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun FactCard(fact: String) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0x1AFFFFFF))
-            .padding(horizontal = 15.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.Top
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
         Text(
-            text = "🏛",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(end = 10.dp, top = 1.dp)
+            text = "RHODOS-FAKT",
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
         )
-        Column {
-            Text(
-                text = "Rhodos-Fakt des Tages",
-                color = Color(0xBFFFFFFF),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = Montserrat
-            )
-            Spacer(Modifier.height(3.dp))
-            Text(
-                text = fact,
-                color = Color.White,
-                fontSize = 13.sp,
-                fontFamily = Montserrat
-            )
-        }
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = fact,
+            color = Color(0xF2FFFFFF),
+            fontSize = 12.sp,
+            lineHeight = 18.sp,
+            fontFamily = Montserrat
+        )
     }
 }
 
 @Composable
 fun HighlightCard(highlight: String) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0x1AFFFFFF))
-            .padding(horizontal = 15.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.Top
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
-        Text(text = "📍", fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp, top = 1.dp))
-        Column {
-            Text(
-                text = "Highlight des Tages",
-                color = Color(0xBFFFFFFF),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = Montserrat
-            )
-            Spacer(Modifier.height(3.dp))
-            Text(
-                text = highlight,
-                color = Color.White,
-                fontSize = 13.sp,
-                fontFamily = Montserrat
-            )
-        }
+        Text(
+            text = "HIGHLIGHT DES TAGES",
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = highlight,
+            color = Color(0xF2FFFFFF),
+            fontSize = 12.sp,
+            lineHeight = 18.sp,
+            fontFamily = Montserrat
+        )
     }
 }
 
 @Composable
 fun CommunityCard(onClick: () -> Unit) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0x1AFFFFFF))
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
             .testTag("community-link")
             .clickable(onClick = onClick)
-            .padding(horizontal = 15.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
         Text(
-            text = "f",
-            color = Color.White,
-            fontSize = 18.sp,
+            text = stringResource(R.string.community_label),
+            color = HomeAccent,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(end = 12.dp)
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
         )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.community_title),
-                color = Color.White,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = Montserrat
-            )
-            Spacer(Modifier.height(3.dp))
-            Text(
-                text = stringResource(R.string.community_description),
-                color = Color(0xBFFFFFFF),
-                fontSize = 11.sp,
-                fontFamily = Montserrat
-            )
+        Spacer(Modifier.height(5.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.community_title),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Montserrat
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.community_description),
+                    color = Color(0xCCFFFFFF),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp,
+                    fontFamily = Montserrat
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.community_action),
+                    color = HomeAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Montserrat
+                )
+            }
+            Text(text = "↗", color = HomeAccent, fontSize = 20.sp)
         }
-        Text(
-            text = "›",
-            color = Color(0xBFFFFFFF),
-            fontSize = 24.sp
-        )
     }
 }

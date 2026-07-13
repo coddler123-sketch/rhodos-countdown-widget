@@ -4,9 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -64,7 +66,14 @@ private const val COMMUNITY_URL = "https://www.facebook.com/groups/urlaubrhodos"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
         setContent {
             RhodosWidgetTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
@@ -205,8 +214,12 @@ private fun RhodosHome(
                 )
                 Spacer(Modifier.height(16.dp))
             }
-            HeaderSection(s, onSettings = { showSettings.value = true })
-            Spacer(Modifier.height(36.dp))
+            HeaderSection(
+                s = s,
+                hasUpdateBadge = updateController.availableUpdate != null,
+                onSettings = { showSettings.value = true }
+            )
+            Spacer(Modifier.height(28.dp))
             CountdownSection(s)
             Spacer(Modifier.height(20.dp))
             NewsTicker(newsState, onOpenNews)
@@ -225,7 +238,6 @@ private fun RhodosHome(
                 s = s,
                 isRefreshing = isRefreshing.value,
                 reloadDone = reloadDone.value,
-                hasUpdateBadge = updateController.availableUpdate != null,
                 onRefresh = {
                     if (!isRefreshing.value) {
                         scope.launch {
@@ -344,7 +356,7 @@ private fun showUpdateDownloadError(context: android.content.Context) {
 }
 
 @Composable
-private fun HeaderSection(s: HomeState, onSettings: () -> Unit) {
+private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () -> Unit) {
     Row(verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -375,6 +387,8 @@ private fun HeaderSection(s: HomeState, onSettings: () -> Unit) {
             modifier = Modifier
                 .padding(top = 4.dp, start = 8.dp)
                 .size(48.dp)
+                .clip(CircleShape)
+                .background(HomeCardColor)
                 .testTag("settings-button")
                 .clickable(onClick = onSettings)
                 .clearAndSetSemantics {
@@ -387,11 +401,19 @@ private fun HeaderSection(s: HomeState, onSettings: () -> Unit) {
         ) {
             Text(
                 text = "⚙",
-                fontSize = 18.sp,
-                color = Color(0x80FFFFFF),
+                fontSize = 19.sp,
+                color = Color.White,
                 modifier = Modifier
                     .align(Alignment.Center)
             )
+            if (hasUpdateBadge) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(9.dp)
+                        .background(Color(0xFFFF5A5F), CircleShape)
+                )
+            }
         }
     }
 }
@@ -420,33 +442,9 @@ private fun BottomSection(
     s: HomeState,
     isRefreshing: Boolean,
     reloadDone: Boolean,
-    hasUpdateBadge: Boolean,
     onRefresh: () -> Unit,
 ) {
-    Column {
-        WeatherCard(s, isRefreshing, reloadDone, onRefresh)
-        Spacer(modifier = Modifier.height(6.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = s.weatherStatus,
-                color = Color(0xA6FFFFFF),
-                fontSize = 11.sp,
-                fontFamily = Montserrat,
-                maxLines = 1,
-                modifier = Modifier.weight(1f)
-            )
-            if (hasUpdateBadge) {
-                Box(
-                    modifier = Modifier
-                        .size(7.dp)
-                        .background(Color(0xFFFF4444), shape = RoundedCornerShape(4.dp))
-                )
-            }
-        }
-    }
+    WeatherCard(s, isRefreshing, reloadDone, onRefresh)
 }
 
 

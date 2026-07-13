@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -72,42 +73,49 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
         }
     }
 
-    val shape = RoundedCornerShape(16.dp)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("news-ticker")
-            .border(1.dp, Color(0x665DB7BE), shape)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
             .clickable(onClick = onOpenNews),
-        colors = CardDefaults.cardColors(containerColor = Color(0xD9FFF8E8)),
-        shape = shape
+        colors = CardDefaults.cardColors(containerColor = HomeCardColor),
+        shape = HomeCardShape
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("INSEL-NEWS", color = Sea, fontWeight = FontWeight.ExtraBold, fontSize = 10.sp)
-            Spacer(Modifier.width(10.dp))
-            when {
-                articles.isNotEmpty() -> AnimatedContent(
-                    targetState = articles[index.coerceAtMost(articles.lastIndex)],
-                    modifier = Modifier.weight(1f),
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "newsTicker"
-                ) { article ->
-                    Text(
-                        article.germanTitle,
-                        color = Color(0xFF183B43),
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                state is NewsUiState.Loading -> Text("Aktuelles von Rhodos wird geladen …", color = Sea)
-                else -> Text("Aktuelles von Rhodos öffnen", color = Sea, fontWeight = FontWeight.SemiBold)
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "INSEL-NEWS",
+                    color = HomeAccent,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 10.sp,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(Modifier.weight(1f))
+                Text("Alle Meldungen  ›", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
             }
-            Spacer(Modifier.width(6.dp))
-            Text("›", color = Sea.copy(alpha = 0.72f), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(5.dp))
+            Box(modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp), contentAlignment = Alignment.CenterStart) {
+                when {
+                    articles.isNotEmpty() -> AnimatedContent(
+                        targetState = articles[index.coerceAtMost(articles.lastIndex)],
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "newsTicker"
+                    ) { article ->
+                        Text(
+                            article.germanTitle,
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    state is NewsUiState.Loading -> Text("Aktuelles von Rhodos wird geladen …", color = Color(0xCCFFFFFF), fontSize = 12.sp)
+                    else -> Text("Aktuelles von Rhodos öffnen", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
         }
     }
 }

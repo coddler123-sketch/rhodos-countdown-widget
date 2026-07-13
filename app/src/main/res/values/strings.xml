@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Rhodos Widget</string>
     <string name="community_title">Rhodos Urlaub Community</string>
-    <string name="community_description">Tipps und Erfahrungen auf Facebook öffnen</string>
+    <string name="community_label">FACEBOOK-GRUPPE</string>
+    <string name="community_description">Reisetipps und Erfahrungen austauschen</string>
+    <string name="community_action">Community öffnen</string>
 
     <!-- 4x2-Widget -->
     <string name="widget_large_name">Rhodos 4x2 Gross</string>

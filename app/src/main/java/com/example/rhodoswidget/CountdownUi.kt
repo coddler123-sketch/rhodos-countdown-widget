@@ -22,32 +22,54 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 @Composable
 fun CountdownProgress(fraction: Float) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp)
-            .height(3.dp)
-    ) {
+    Column(modifier = Modifier.padding(top = 10.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "REISEFORTSCHRITT",
+                color = Color(0xBFFFFFFF),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = Montserrat,
+                letterSpacing = 0.6.sp
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = "${(fraction * 100).roundToInt()} %",
+                color = Color(0xBFFFFFFF),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = Montserrat
+            )
+        }
+        Spacer(Modifier.height(5.dp))
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(2.dp))
-                .background(Color(0x33FFFFFF))
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(fraction)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(2.dp))
-                .background(Color(0xCCFFFFFF))
-        )
+                .fillMaxWidth()
+                .height(4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color(0x33FFFFFF))
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(HomeAccent)
+            )
+        }
     }
 }
 
@@ -86,37 +108,39 @@ fun CountdownSection(s: HomeState) {
                     CountdownDivider()
                     CountdownBlock(s.minutes.toString().padStart(2, '0'), "MIN.")
                     CountdownDivider()
-                    CountdownBlock(s.seconds.toString().padStart(2, '0'), "SEK.")
+                    CountdownBlock(s.seconds.toString().padStart(2, '0'), "SEK.", secondary = true)
                 }
             }
         }
         if (!s.isOnVacation) {
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "„${s.phrase}“",
                 color = Color.White,
-                fontSize = 19.sp,
+                fontSize = 17.sp,
+                lineHeight = 24.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = Montserrat
+                fontFamily = Montserrat,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
 @Composable
-private fun CountdownBlock(value: String, label: String) {
+private fun CountdownBlock(value: String, label: String, secondary: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            color = Color.White,
-            fontSize = 46.sp,
+            color = if (secondary) Color(0xD9FFFFFF) else Color.White,
+            fontSize = if (secondary) 38.sp else 42.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = Montserrat
         )
         Text(
             text = label,
-            color = Color(0xE6FFFFFF),
-            fontSize = 11.sp,
+            color = if (secondary) Color(0xA6FFFFFF) else Color(0xE6FFFFFF),
+            fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = Montserrat,
             letterSpacing = 1.sp
@@ -140,9 +164,9 @@ private fun CappedFontScale(maxScale: Float, content: @Composable () -> Unit) {
 private fun CountdownDivider() {
     Box(
         modifier = Modifier
-            .padding(horizontal = 14.dp)
+            .padding(horizontal = 11.dp)
             .width(1.dp)
-            .height(46.dp)
+            .height(42.dp)
             .background(Color(0x66FFFFFF))
     )
 }

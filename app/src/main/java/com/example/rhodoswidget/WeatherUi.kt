@@ -2,6 +2,7 @@ package com.example.rhodoswidget
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -49,54 +50,91 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0x26FFFFFF))
-            .padding(horizontal = 14.dp, vertical = 9.dp)
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
-        if (reloadDone) {
-            Text(
-                text = "✓",
-                color = Color(0xFF66DD88),
-                fontSize = 14.sp,
-                modifier = Modifier.align(Alignment.TopEnd).padding(1.dp)
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(48.dp)
-                    .clickable(enabled = !isRefreshing, onClick = onRefresh)
-                    .clearAndSetSemantics {
-                        contentDescription = "Wetter aktualisieren"
-                        if (isRefreshing) {
-                            disabled()
-                        } else {
-                            onClick {
-                                onRefresh()
-                                true
+        if (s.weather != null) {
+            if (reloadDone) {
+                Text(
+                    text = "✓",
+                    color = Color(0xFF66DD88),
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(1.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(48.dp)
+                        .clickable(enabled = !isRefreshing, onClick = onRefresh)
+                        .clearAndSetSemantics {
+                            contentDescription = "Wetter aktualisieren"
+                            if (isRefreshing) {
+                                disabled()
+                            } else {
+                                onClick {
+                                    onRefresh()
+                                    true
+                                }
                             }
                         }
-                    }
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_refresh_subtle),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(17.dp)
-                        .padding(1.dp),
-                    alpha = if (isRefreshing) 0.25f else 0.55f
-                )
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_refresh_subtle),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(17.dp)
+                            .padding(1.dp),
+                        alpha = if (isRefreshing) 0.25f else 0.55f
+                    )
+                }
             }
         }
         if (s.weather == null) {
-            Text(
-                text = "Kolymbia-Wetter noch nicht geladen",
-                color = Color(0xE6FFFFFF),
-                fontSize = 13.sp,
-                fontFamily = Montserrat,
-                modifier = Modifier.padding(end = 48.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "KOLYMBIA-WETTER",
+                        color = HomeAccent,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = Montserrat,
+                        letterSpacing = 0.8.sp
+                    )
+                    Spacer(Modifier.height(5.dp))
+                    Text(
+                        text = "Noch keine Wetterdaten",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Montserrat
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .width(104.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(HomeAccent.copy(alpha = 0.16f))
+                        .clickable(enabled = !isRefreshing, onClick = onRefresh)
+                        .clearAndSetSemantics {
+                            contentDescription = "Wetter jetzt laden"
+                            if (isRefreshing) disabled() else onClick { onRefresh(); true }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (isRefreshing) "Lädt …" else "Jetzt laden",
+                        color = HomeAccent,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Montserrat
+                    )
+                }
+            }
         } else {
             Column {
                 Row(
@@ -202,6 +240,14 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = s.weatherStatus,
+                    color = Color(0xA6FFFFFF),
+                    fontSize = 10.sp,
+                    fontFamily = Montserrat,
+                    maxLines = 1
+                )
             }
         }
     }
