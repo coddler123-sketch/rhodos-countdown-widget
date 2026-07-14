@@ -26,8 +26,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,20 +37,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 private val DetailSea = Color(0xFF1F8796)
 private val DetailSun = Color(0xFFF4B942)
 
 @Composable
-fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () -> Unit) {
+internal fun NewsDetailScreen(
+    article: NewsArticle,
+    padding: PaddingValues,
+    repository: NewsRepository,
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
-    val controller = remember(article.id) { NewsDetailController(context.applicationContext, article) }
-    val scope = rememberCoroutineScope()
+    val detailViewModel: NewsDetailViewModel = viewModel(
+        key = "news-detail-${article.id}",
+        factory = NewsDetailViewModel.factory(article, repository)
+    )
+    val state by detailViewModel.uiState.collectAsStateWithLifecycle()
     val listState = remember(article.id) { LazyListState() }
-    LaunchedEffect(controller) { controller.load() }
-    LaunchedEffect(controller.state) {
-        if (controller.state is NewsDetailUiState.Content) {
+    LaunchedEffect(detailViewModel) { detailViewModel.refresh() }
+    LaunchedEffect(state) {
+        if (state is NewsDetailUiState.Content) {
             withFrameNanos { }
             listState.scrollToItem(0, 0)
         }
@@ -78,17 +87,17 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
                 }
             }
 
-            when (val state = controller.state) {
+            when (val currentState = state) {
                 is NewsDetailUiState.Preview -> DetailPreview(
-                    article = state.article,
-                    isLoading = state.isLoading,
-                    warning = state.warning,
-                    onRetry = { scope.launch { controller.load() } },
+                    article = currentState.article,
+                    isLoading = currentState.isLoading,
+                    warning = currentState.warning,
+                    onRetry = detailViewModel::refresh,
                     onOriginal = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
                 )
                 is NewsDetailUiState.Error -> DetailError(
-                    message = state.message,
-                    onRetry = { scope.launch { controller.load() } },
+                    message = currentState.message,
+                    onRetry = detailViewModel::refresh,
                     onOriginal = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
                 )
                 is NewsDetailUiState.Content -> LazyColumn(
@@ -102,15 +111,15 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
                             shape = RoundedCornerShape(20.dp)
                         ) {
                             Column(Modifier.padding(20.dp)) {
-                                Text(state.detail.germanTitle, color = Color(0xFF173D46), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                                Text(currentState.detail.germanTitle, color = Color(0xFF173D46), fontSize = 22.sp, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(10.dp))
                                 Text(
-                                    "${state.detail.source} · ${formatNewsDate(state.detail.publishedAt)}",
+                                    "${currentState.detail.source} · ${formatNewsDate(currentState.detail.publishedAt)}",
                                     color = Color.Gray,
                                     fontSize = 12.sp
                                 )
                                 Spacer(Modifier.height(18.dp))
-                                Text(state.detail.germanDetail, color = Color(0xFF496268), fontSize = 16.sp, lineHeight = 24.sp)
+                                Text(currentState.detail.germanDetail, color = Color(0xFF496268), fontSize = 16.sp, lineHeight = 24.sp)
                             }
                         }
                     }
@@ -122,14 +131,14 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
                             Column(Modifier.padding(18.dp)) {
                                 Text("Das Wichtigste", color = Color(0xFF174954), fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(8.dp))
-                                state.detail.keyPoints.forEach { point ->
+                                currentState.detail.keyPoints.forEach { point ->
                                     Text("• $point", color = Color(0xFF496268), modifier = Modifier.padding(vertical = 4.dp))
                                 }
                             }
                         }
                     }
-                    state.warning?.let { warning -> item { Text(warning, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
-                    if (state.isCached) item { Text("Offline verfügbar · gespeicherte Zusammenfassung", color = DetailSea, fontSize = 12.sp) }
+                    currentState.warning?.let { warning -> item { Text(warning, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
+                    if (currentState.isCached) item { Text("Offline verfügbar · gespeicherte Zusammenfassung", color = DetailSea, fontSize = 12.sp) }
                     item {
                         Text(
                             "KI-gestützt zusammengefasst · Maßgeblich ist der Originalartikel.",
@@ -139,7 +148,7 @@ fun NewsDetailScreen(article: NewsArticle, padding: PaddingValues, onBack: () ->
                     }
                     item {
                         Button(
-                            onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(state.detail.originalUrl))) },
+                            onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentState.detail.originalUrl))) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = DetailSun, contentColor = Color(0xFF3D2B00))
                         ) { Text("Originalartikel öffnen", fontWeight = FontWeight.Bold) }

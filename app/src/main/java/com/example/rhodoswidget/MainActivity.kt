@@ -56,6 +56,8 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rhodoswidget.ui.theme.RhodosWidgetTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -89,13 +91,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun RhodosApp(padding: PaddingValues) {
     val context = LocalContext.current
-    val controller = remember(context) { NewsController(context.applicationContext) }
+    val newsRepository = remember(context) {
+        DefaultNewsRepository(context.applicationContext, BuildConfig.NEWS_API_URL)
+    }
+    val newsViewModel: NewsViewModel = viewModel(factory = NewsViewModel.factory(newsRepository))
+    val newsState by newsViewModel.uiState.collectAsStateWithLifecycle()
     val showNews = remember { mutableStateOf(false) }
     val showCompass = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(controller) { controller.refresh() }
 
     val article = selectedArticle.value
     BackHandler(enabled = article != null) {
@@ -112,14 +115,15 @@ private fun RhodosApp(padding: PaddingValues) {
         NewsDetailScreen(
             article = article,
             padding = padding,
+            repository = newsRepository,
             onBack = { selectedArticle.value = null }
         )
     } else if (showNews.value) {
         NewsScreen(
-            state = controller.state,
+            state = newsState,
             padding = padding,
             onBack = { showNews.value = false },
-            onRefresh = { scope.launch { controller.refresh() } },
+            onRefresh = newsViewModel::refresh,
             onOpenDetail = { selectedArticle.value = it }
         )
     } else if (showCompass.value) {
@@ -127,7 +131,7 @@ private fun RhodosApp(padding: PaddingValues) {
     } else {
         RhodosHome(
             padding = padding,
-            newsState = controller.state,
+            newsState = newsState,
             onOpenNews = { showNews.value = true },
             onOpenCompass = { showCompass.value = true }
         )
