@@ -66,6 +66,8 @@ object Images {
 
     private const val PREFS_SETTINGS = "rhodos_settings"
     private const val KEY_PINNED_IMAGE = "pinned_image_name"
+    private const val KEY_BACKGROUND_DIM = "background_dim"
+    private const val DEFAULT_BACKGROUND_DIM = 0.65f
 
     val allImageNames: List<String> = resourceNames.distinct()
 
@@ -79,10 +81,26 @@ object Images {
         prefs.edit().putString(KEY_PINNED_IMAGE, name).apply()
     }
 
+    fun getBackgroundDim(context: Context): Float =
+        context.getSharedPreferences(PREFS_SETTINGS, Context.MODE_PRIVATE)
+            .getFloat(KEY_BACKGROUND_DIM, DEFAULT_BACKGROUND_DIM)
+            .coerceIn(0.4f, 0.9f)
+
+    fun setBackgroundDim(context: Context, value: Float) {
+        context.getSharedPreferences(PREFS_SETTINGS, Context.MODE_PRIVATE)
+            .edit()
+            .putFloat(KEY_BACKGROUND_DIM, value.coerceIn(0.4f, 0.9f))
+            .apply()
+    }
+
     fun currentImageName(context: Context): String {
         val pinned = getPinnedImage(context)
         if (pinned != null && pinned != "auto" && pinned in allImageNames) return pinned
 
+        return rotationImageName()
+    }
+
+    fun rotationImageName(): String {
         val now = Calendar.getInstance()
         val localMillis = now.timeInMillis +
             now.get(Calendar.ZONE_OFFSET) + now.get(Calendar.DST_OFFSET)

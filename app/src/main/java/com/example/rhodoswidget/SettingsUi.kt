@@ -60,7 +60,7 @@ fun SettingsSheet(
         SettingsRow(
             icon = "🖼",
             label = "Hintergrundbild",
-            detail = "Bildergalerie & Favoriten",
+            detail = "Vorschau, Auswahl & Abdunklung",
             actionLabel = "Galerie",
             onAction = onOpenGallery,
             actionTag = "settings-open-gallery"

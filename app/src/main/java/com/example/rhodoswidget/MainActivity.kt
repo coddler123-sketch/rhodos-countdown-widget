@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -36,6 +37,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,6 +91,7 @@ private fun RhodosApp(padding: PaddingValues) {
     val context = LocalContext.current
     val controller = remember(context) { NewsController(context.applicationContext) }
     val showNews = remember { mutableStateOf(false) }
+    val showCompass = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -100,6 +103,9 @@ private fun RhodosApp(padding: PaddingValues) {
     }
     BackHandler(enabled = article == null && showNews.value) {
         showNews.value = false
+    }
+    BackHandler(enabled = article == null && !showNews.value && showCompass.value) {
+        showCompass.value = false
     }
 
     if (article != null) {
@@ -116,11 +122,14 @@ private fun RhodosApp(padding: PaddingValues) {
             onRefresh = { scope.launch { controller.refresh() } },
             onOpenDetail = { selectedArticle.value = it }
         )
+    } else if (showCompass.value) {
+        CompassScreen(padding = padding, onBack = { showCompass.value = false })
     } else {
         RhodosHome(
             padding = padding,
             newsState = controller.state,
-            onOpenNews = { showNews.value = true }
+            onOpenNews = { showNews.value = true },
+            onOpenCompass = { showCompass.value = true }
         )
     }
 }
@@ -130,16 +139,20 @@ private fun RhodosApp(padding: PaddingValues) {
 private fun RhodosHome(
     padding: PaddingValues,
     newsState: NewsUiState,
-    onOpenNews: () -> Unit
+    onOpenNews: () -> Unit,
+    onOpenCompass: () -> Unit
 ) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
     val isRefreshing = remember { mutableStateOf(false) }
     val reloadDone = remember { mutableStateOf(false) }
+    val weatherError = remember { mutableStateOf(false) }
     val updateController = remember(context) { AppUpdateController(context) }
     val showSettings = remember { mutableStateOf(false) }
     val showGallery = remember { mutableStateOf(false) }
     val pinnedImage = remember { mutableStateOf(Images.getPinnedImage(context)) }
+    val backgroundDim = remember { mutableStateOf(Images.getBackgroundDim(context)) }
+    val animatedDim by animateFloatAsState(backgroundDim.value, label = "backgroundDim")
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(reloadDone.value) {
@@ -148,6 +161,18 @@ private fun RhodosHome(
 
     LaunchedEffect(updateController) {
         updateController.checkOnStartup()
+    }
+
+    LaunchedEffect("weather-autoload") {
+        if (state.value.weather == null && !isRefreshing.value) {
+            isRefreshing.value = true
+            val success = fetchAndSaveWeather(context)
+            weatherError.value = !success
+            if (success) RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
+            state.value = HomeState.load(context)
+            isRefreshing.value = false
+            reloadDone.value = success
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -183,7 +208,11 @@ private fun RhodosHome(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color(0xCC000000), Color(0x99000000), Color(0xE6000000))
+                        listOf(
+                            Color.Black.copy(alpha = (animatedDim + 0.15f).coerceAtMost(0.95f)),
+                            Color.Black.copy(alpha = (animatedDim - 0.10f).coerceAtLeast(0.25f)),
+                            Color.Black.copy(alpha = (animatedDim + 0.25f).coerceAtMost(0.95f))
+                        )
                     )
                 )
         )
@@ -228,6 +257,8 @@ private fun RhodosHome(
             Spacer(Modifier.height(10.dp))
             HighlightCard(rhodosHighlightOfTheDay())
             Spacer(Modifier.height(12.dp))
+            CompassCard(onClick = onOpenCompass)
+            Spacer(Modifier.height(12.dp))
             CommunityCard(
                 onClick = {
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(COMMUNITY_URL)))
@@ -238,19 +269,17 @@ private fun RhodosHome(
                 s = s,
                 isRefreshing = isRefreshing.value,
                 reloadDone = reloadDone.value,
+                hasError = weatherError.value,
                 onRefresh = {
                     if (!isRefreshing.value) {
                         scope.launch {
                             isRefreshing.value = true
-                            withContext(Dispatchers.IO) {
-                                WeatherRepository.fetch()?.let {
-                                    WeatherRepository.save(context, it)
-                                }
-                            }
-                            RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
+                            val success = fetchAndSaveWeather(context)
+                            weatherError.value = !success
+                            if (success) RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
                             state.value = HomeState.load(context)
                             isRefreshing.value = false
-                            reloadDone.value = true
+                            reloadDone.value = success
                         }
                     }
                 }
@@ -311,15 +340,18 @@ private fun RhodosHome(
         if (showGallery.value) {
             GallerySheet(
                 onDismissRequest = { showGallery.value = false },
-                onSelectImage = { newImage ->
+                onApply = { newImage, newDim ->
                     Images.setPinnedImage(context, newImage)
+                    Images.setBackgroundDim(context, newDim)
                     pinnedImage.value = newImage
+                    backgroundDim.value = newDim
                     RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(context)
                     state.value = HomeState.load(context)
                     showGallery.value = false
                 },
-                currentImageName = Images.currentImageName(context),
-                pinnedImageName = pinnedImage.value
+                currentImageName = Images.rotationImageName(),
+                pinnedImageName = pinnedImage.value,
+                backgroundDim = backgroundDim.value
             )
         }
 
@@ -442,10 +474,18 @@ private fun BottomSection(
     s: HomeState,
     isRefreshing: Boolean,
     reloadDone: Boolean,
+    hasError: Boolean,
     onRefresh: () -> Unit,
 ) {
-    WeatherCard(s, isRefreshing, reloadDone, onRefresh)
+    WeatherCard(s, isRefreshing, reloadDone, hasError, onRefresh)
 }
+
+private suspend fun fetchAndSaveWeather(context: android.content.Context): Boolean =
+    withContext(Dispatchers.IO) {
+        val weather = WeatherRepository.fetch() ?: return@withContext false
+        WeatherRepository.save(context, weather)
+        true
+    }
 
 
 

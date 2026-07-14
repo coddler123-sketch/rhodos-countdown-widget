@@ -130,6 +130,9 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
         private const val STALE_ALPHA = 0.5f
 
         private fun phraseOfTheDay(context: Context): String {
+            countdownMilestone(CountdownCalculator.daysUntilDeparture().toLong())?.let {
+                return it.message
+            }
             val quotes = context.resources.getStringArray(R.array.widget_phrases)
             val index = (quotes.size - 1 - CountdownCalculator.daysUntilDeparture())
                 .coerceIn(0, quotes.size - 1)

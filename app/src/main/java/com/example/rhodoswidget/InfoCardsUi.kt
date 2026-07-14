@@ -16,10 +16,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+
+@Composable
+fun CompassCard(onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
+            .testTag("compass-link")
+            .clickable {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .padding(horizontal = 16.dp, vertical = 13.dp)
+    ) {
+        Text("RHODOS KOMPASS", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+        Spacer(Modifier.height(5.dp))
+        Text("13 Tipps aus der Community", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
+        Spacer(Modifier.height(4.dp))
+        Text("Strände, Essen, Unterkünfte und Mobilität entdecken  ›", color = Color(0xCCFFFFFF), fontSize = 11.sp, lineHeight = 16.sp, fontFamily = Montserrat)
+    }
+}
 
 @Composable
 fun FactCard(fact: String) {
@@ -81,6 +107,7 @@ fun HighlightCard(highlight: String) {
 
 @Composable
 fun CommunityCard(onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,7 +115,10 @@ fun CommunityCard(onClick: () -> Unit) {
             .background(HomeCardColor)
             .border(1.dp, HomeCardBorder, HomeCardShape)
             .testTag("community-link")
-            .clickable(onClick = onClick)
+            .clickable {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
             .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
         Text(

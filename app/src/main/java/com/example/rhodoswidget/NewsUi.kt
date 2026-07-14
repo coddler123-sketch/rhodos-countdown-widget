@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,13 +43,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,8 +74,10 @@ private val Sand = Color(0xFFFFF3D8)
 fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
     val articles = (state as? NewsUiState.Content)?.articles.orEmpty().take(10)
     var index by remember(articles) { mutableIntStateOf(0) }
-    LaunchedEffect(articles) {
-        while (articles.size > 1) {
+    var isPaused by rememberSaveable { mutableStateOf(false) }
+    val haptics = LocalHapticFeedback.current
+    LaunchedEffect(articles, isPaused) {
+        while (articles.size > 1 && !isPaused) {
             delay(6_000)
             index = (index + 1) % articles.size
         }
@@ -76,6 +86,7 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .testTag("news-ticker")
             .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
             .clickable(onClick = onOpenNews),
@@ -92,25 +103,50 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
                     letterSpacing = 0.8.sp
                 )
                 Spacer(Modifier.weight(1f))
-                Text("Alle Meldungen  ›", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .testTag("news-ticker-pause")
+                        .clickable {
+                            isPaused = !isPaused
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                        .clearAndSetSemantics {
+                            contentDescription = if (isPaused) "News-Rotation fortsetzen" else "News-Rotation pausieren"
+                            onClick { isPaused = !isPaused; true }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(if (isPaused) "▶" else "Ⅱ", color = HomeAccent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            Spacer(Modifier.height(5.dp))
-            Box(modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp), contentAlignment = Alignment.CenterStart) {
+            Box(modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp), contentAlignment = Alignment.CenterStart) {
                 when {
                     articles.isNotEmpty() -> AnimatedContent(
                         targetState = articles[index.coerceAtMost(articles.lastIndex)],
                         transitionSpec = { fadeIn() togetherWith fadeOut() },
                         label = "newsTicker"
                     ) { article ->
-                        Text(
-                            article.germanTitle,
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Column {
+                            Text(
+                                article.germanTitle,
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            val age = relativeNewsAge(article.publishedAt)
+                            Text(
+                                listOfNotNull(article.source.takeIf { it.isNotBlank() }, age).joinToString(" · "),
+                                color = Color(0x99FFFFFF),
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                     state is NewsUiState.Loading -> Text("Aktuelles von Rhodos wird geladen …", color = Color(0xCCFFFFFF), fontSize = 12.sp)
                     else -> Text("Aktuelles von Rhodos öffnen", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)

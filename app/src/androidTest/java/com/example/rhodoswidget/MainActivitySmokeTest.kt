@@ -5,9 +5,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.Espresso.pressBack
@@ -51,7 +53,7 @@ class MainActivitySmokeTest {
 
         composeRule.onNodeWithTag("settings-open-gallery").performClick()
 
-        composeRule.onNodeWithText("Hintergrundbild Galerie").assertIsDisplayed()
+        composeRule.onNodeWithText("Hintergrund gestalten").assertIsDisplayed()
         composeRule.onNodeWithTag("gallery-auto-image").assertIsDisplayed()
     }
 
@@ -61,6 +63,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("settings-open-gallery").performClick()
 
         composeRule.onNodeWithTag("gallery-image-prasonisi_rhodes_023").performClick()
+        composeRule.onNodeWithTag("gallery-apply").performClick()
 
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
         composeRule.onNodeWithText("Unser Urlaubs-Countdown").assertIsDisplayed()
@@ -72,6 +75,23 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("settings-button").performClick()
         composeRule.onNodeWithTag("settings-open-gallery").performClick()
         composeRule.onNodeWithTag("gallery-image-prasonisi_rhodes_023").assertIsSelected()
+    }
+
+    @Test
+    fun compassOpensFromHomeAndReturns() {
+        composeRule.onNodeWithTag("compass-link").performScrollTo().performClick()
+        composeRule.onNodeWithText("Rhodos Kompass").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+
+        pressBack()
+
+        composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
+    }
+
+    @Test
+    fun newsRotationCanBePaused() {
+        composeRule.onNodeWithContentDescription("News-Rotation pausieren").performClick()
+        composeRule.onNodeWithContentDescription("News-Rotation fortsetzen").assertIsDisplayed()
     }
 
     @Test

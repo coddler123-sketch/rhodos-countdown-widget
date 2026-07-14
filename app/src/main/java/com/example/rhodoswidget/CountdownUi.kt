@@ -1,5 +1,8 @@
 package com.example.rhodoswidget
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,6 +112,37 @@ fun CountdownSection(s: HomeState) {
                     CountdownBlock(s.minutes.toString().padStart(2, '0'), "MIN.")
                     CountdownDivider()
                     CountdownBlock(s.seconds.toString().padStart(2, '0'), "SEK.", secondary = true)
+                }
+            }
+            countdownMilestone(s.days)?.let { milestone ->
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn() + expandVertically()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .padding(top = 18.dp)
+                            .clip(HomeCardShape)
+                            .background(HomeAccent.copy(alpha = 0.18f))
+                            .padding(horizontal = 18.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            milestone.title,
+                            color = HomeAccent,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = Montserrat,
+                            letterSpacing = 0.8.sp
+                        )
+                        Text(
+                            milestone.message,
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = Montserrat
+                        )
+                    }
                 }
             }
         }

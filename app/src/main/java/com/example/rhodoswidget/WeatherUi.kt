@@ -46,7 +46,13 @@ data class WeatherSnapshot(
 )
 
 @Composable
-fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefresh: () -> Unit) {
+fun WeatherCard(
+    s: HomeState,
+    isRefreshing: Boolean,
+    reloadDone: Boolean,
+    hasError: Boolean,
+    onRefresh: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,7 +112,11 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                     )
                     Spacer(Modifier.height(5.dp))
                     Text(
-                        text = "Noch keine Wetterdaten",
+                        text = when {
+                            isRefreshing -> "Wetter wird geladen"
+                            hasError -> "Wetter konnte nicht geladen werden"
+                            else -> "Noch keine Wetterdaten"
+                        },
                         color = Color.White,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -127,7 +137,11 @@ fun WeatherCard(s: HomeState, isRefreshing: Boolean, reloadDone: Boolean, onRefr
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isRefreshing) "Lädt …" else "Jetzt laden",
+                        text = when {
+                            isRefreshing -> "Lädt …"
+                            hasError -> "Erneut"
+                            else -> "Jetzt laden"
+                        },
                         color = HomeAccent,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
