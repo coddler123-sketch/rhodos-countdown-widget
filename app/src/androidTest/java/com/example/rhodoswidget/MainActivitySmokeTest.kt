@@ -12,7 +12,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.espresso.Espresso.pressBack
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -113,6 +112,13 @@ class MainActivitySmokeTest {
         pressBack()
 
         composeRule.onNodeWithText("Aktuelles von Rhodos").assertIsDisplayed()
+    }
+
+    private fun pressBack() {
+        composeRule.activityRule.scenario.onActivity {
+            it.onBackPressedDispatcher.onBackPressed()
+        }
+        composeRule.waitForIdle()
     }
 
     private fun clearPinnedImage() {
