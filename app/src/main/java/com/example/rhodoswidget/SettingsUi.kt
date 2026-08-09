@@ -47,7 +47,7 @@ fun SettingsSheet(
         SettingsRow(
             icon = if (hasUpdate) "🔴" else "✓",
             label = "Version v${BuildConfig.VERSION_NAME}",
-            detail = if (hasUpdate) "Update verfügbar" else "Aktuellste Version",
+            detail = if (hasUpdate) "Aktualisierung verfügbar" else "Aktuellste Version",
             actionLabel = when {
                 isCheckingUpdate -> "Lädt …"
                 hasUpdate -> "Installieren"
@@ -67,8 +67,8 @@ fun SettingsSheet(
         )
         SettingsRow(
             icon = "↗",
-            label = "Countdown teilen",
-            detail = "Via WhatsApp, SMS, …",
+            label = "Urlaubsvorfreude teilen",
+            detail = "Über WhatsApp, SMS, …",
             actionLabel = "Teilen",
             onAction = onShare,
             actionTag = "settings-share"

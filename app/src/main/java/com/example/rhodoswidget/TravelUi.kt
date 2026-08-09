@@ -1,7 +1,12 @@
 package com.example.rhodoswidget
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,6 +67,32 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
     }
     var notes by remember(context) {
         mutableStateOf(TravelPreferences.notes(context))
+    }
+    var transitDocuments by remember(context) {
+        mutableStateOf(LiveTravelRepository.cachedTransit(context))
+    }
+    var events by remember(context) {
+        mutableStateOf(LiveTravelRepository.cachedEvents(context))
+    }
+    var eventTranslations by remember(context) {
+        mutableStateOf(TravelTranslationRepository.cached(context, events))
+    }
+    var isTranslationLoading by remember { mutableStateOf(false) }
+    var isTranslationPending by remember { mutableStateOf(false) }
+    var selectedSchedule by remember { mutableStateOf<TransitDocument?>(null) }
+    var isLiveLoading by remember { mutableStateOf(false) }
+    var liveRefreshFailed by remember { mutableStateOf(false) }
+    var showingCachedLiveData by remember { mutableStateOf(transitDocuments.isNotEmpty() || events.isNotEmpty()) }
+    var alertsEnabled by remember(context) {
+        mutableStateOf(TravelAlertSettings.isEnabled(context))
+    }
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            TravelAlertSettings.setEnabled(context.applicationContext, true)
+            alertsEnabled = true
+        }
     }
     val weather = WeatherRepository.cached(context)
     val openSource: (String) -> Unit = { url ->
@@ -90,10 +122,62 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
             }
         }
     }
+    val refreshLiveData: () -> Unit = {
+        if (!isLiveLoading) {
+            scope.launch {
+                isLiveLoading = true
+                liveRefreshFailed = false
+                val (freshTransit, freshEvents) = withContext(Dispatchers.IO) {
+                    LiveTravelRepository.fetchTransit() to LiveTravelRepository.fetchEvents()
+                }
+                freshTransit?.let {
+                    transitDocuments = it
+                    LiveTravelRepository.saveTransit(context.applicationContext, it)
+                }
+                freshEvents?.let {
+                    events = it
+                    LiveTravelRepository.saveEvents(context.applicationContext, it)
+                }
+                liveRefreshFailed = freshTransit == null || freshEvents == null
+                showingCachedLiveData = liveRefreshFailed
+                isLiveLoading = false
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         val ageMillis = System.currentTimeMillis() - (marineWeather?.fetchedAtMillis ?: 0L)
         if (marineWeather == null || ageMillis > 3 * 60 * 60 * 1000L) refreshMarine()
+        refreshLiveData()
+    }
+    LaunchedEffect(events) {
+        val missingTranslation = events.any { event ->
+            event.id !in eventTranslations &&
+                (TravelTranslationRepository.containsGreek(event.title) ||
+                    TravelTranslationRepository.containsGreek(event.venue.orEmpty()))
+        }
+        if (missingTranslation) {
+            isTranslationLoading = true
+            eventTranslations = withContext(Dispatchers.IO) {
+                TravelTranslationRepository.translateMissing(context.applicationContext, events)
+            }
+            isTranslationPending = events.any { event ->
+                TravelTranslationRepository.containsGreek(event.title) && event.id !in eventTranslations
+            }
+            isTranslationLoading = false
+        } else {
+            isTranslationPending = false
+        }
+    }
+
+    selectedSchedule?.let { document ->
+        TransitPdfScreen(
+            padding = padding,
+            document = document,
+            onBack = { selectedSchedule = null },
+            onOpenSource = { openSource(document.sourceUrl) }
+        )
+        return
     }
 
     LazyColumn(
@@ -126,8 +210,35 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
                 )
             )
         }
+        item { SectionLabel(R.string.travel_alerts_section) }
+        item {
+            TravelAlertsCard(
+                enabled = alertsEnabled,
+                onEnabledChange = { enabled ->
+                    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        TravelAlertSettings.setEnabled(context.applicationContext, enabled)
+                        alertsEnabled = enabled
+                    }
+                }
+            )
+        }
         item { SectionLabel(R.string.travel_bus_section) }
         item { BusOverviewCard() }
+        item {
+            LiveTimetablesCard(
+                documents = transitDocuments,
+                isLoading = isLiveLoading,
+                refreshFailed = liveRefreshFailed,
+                isCached = showingCachedLiveData,
+                onRefresh = refreshLiveData,
+                onOpen = { selectedSchedule = it }
+            )
+        }
         items(travelSources, key = { it.url }) { source ->
             TravelSourceCard(source = source, onOpen = { openSource(source.url) })
         }
@@ -142,6 +253,22 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
             )
         }
         item { SectionLabel(R.string.travel_transport_section) }
+        item {
+            LiveEventsCard(
+                events = events,
+                translations = eventTranslations,
+                isTranslationLoading = isTranslationLoading,
+                isTranslationPending = isTranslationPending,
+                isLoading = isLiveLoading,
+                refreshFailed = liveRefreshFailed,
+                isCached = showingCachedLiveData,
+                onRefresh = refreshLiveData,
+                onOpen = { openSource(it.url) },
+                onTranslationInfo = {
+                    runCatching { uriHandler.openUri("https://translate.google.com/") }
+                }
+            )
+        }
         items(ferryAndEventSources, key = { it.url }) { source ->
             TravelSourceCard(source = source, onOpen = { openSource(source.url) })
         }

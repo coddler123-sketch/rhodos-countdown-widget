@@ -27,8 +27,8 @@ internal class NewsViewModel(
             if (!repository.isConfigured) {
                 _uiState.value = previous?.copy(
                     isRefreshing = false,
-                    warning = "News-Backend ist noch nicht konfiguriert."
-                ) ?: NewsUiState.Empty("News-Backend ist noch nicht konfiguriert.")
+                    warning = "Der Nachrichtendienst ist noch nicht eingerichtet."
+                ) ?: NewsUiState.Empty("Der Nachrichtendienst ist noch nicht eingerichtet.")
                 return@launch
             }
 

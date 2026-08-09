@@ -45,16 +45,16 @@ data class CompassTip(
 
 internal val compassTips = listOf(
     CompassTip("Essen", "Taverne Akti", "Als sehr lecker, günstig und besonders freundlich empfohlen.", "35 Reaktionen · aktueller Beitrag"),
-    CompassTip("Essen", "Stama", "Kleine Speisekarte und besonders herzlicher Service wurden positiv hervorgehoben.", "Ergänzende Community-Empfehlung"),
+    CompassTip("Essen", "Stama", "Kleine Speisekarte und besonders herzlicher Service wurden positiv hervorgehoben.", "Ergänzende Empfehlung aus der Gruppe"),
     CompassTip("Strände", "Tsambika / Tsampika", "Mehrfach positiv genannt, aktuell aber gut besucht. Links am Strand wurden Restaurant und Liegen erwähnt.", "Besucherandrang beachten"),
     CompassTip("Strände", "Stegna", "Strand und Essen vor Ort wurden positiv bewertet; auch hier kann es voller werden.", "Aktueller Erfahrungsbericht"),
-    CompassTip("Strände", "Pefkoi Plakia Beach", "Die Blue Waves Cantine wurde als versteckter Hotspot für eine Pause am Meer genannt.", "Konkreter Fund aus dem Feed"),
+    CompassTip("Strände", "Pefkoi Plakia Beach", "Die Blue Waves Cantine wurde als besonderer Ort für eine Pause am Meer genannt.", "Konkreter Fund aus den Beiträgen"),
     CompassTip("Unterkünfte", "Elysium bei Faliraki", "Hotel, Strand, Service und Lage wurden in einem aktuellen Gastbericht sehr positiv bewertet.", "Einzelne positive Erfahrung"),
     CompassTip("Strände", "Elli Beach", "Ein aktueller Beitrag berichtet von mehr Müll als in den Vorjahren.", "Einzelne aktuelle Beobachtung"),
     CompassTip("Stadt", "Mandraki vor Sonnenaufgang", "Früh am Morgen sorgen ruhiges Licht, Altstadtkulisse und einlaufende Schiffe für eine besondere Stimmung.", "Konkreter Zeitpunkt"),
     CompassTip("Unterkünfte", "Kresten Palace", "Mehrere positive Rückmeldungen; zum Strand führt ein steiler Weg bergab und wieder hinauf.", "Mehrere Erfahrungen"),
     CompassTip("Unterkünfte", "Lydia Maris Resort", "Ein wiederkehrender Gast beschreibt den Aufenthalt erneut als sehr angenehm.", "Bericht eines Stammgasts"),
-    CompassTip("Unterkünfte", "Esperides Beach Family", "Mehrfach als Familienhotel mit Pool, direkter Meerlage und gutem Essen unterstützt.", "Community-Tipp für Familien"),
+    CompassTip("Unterkünfte", "Esperides Beach Family", "Mehrfach als Familienhotel mit Pool, direkter Meerlage und gutem Essen unterstützt.", "Gruppentipp für Familien"),
     CompassTip("Unterkünfte", "Blue Sea Beach", "Positiver erster Eindruck, aber für einen Abendbummel deutlich außerhalb von Faliraki.", "Lage und Transfer prüfen"),
     CompassTip("Mobilität", "Mietwagenbedingungen prüfen", "Selbstbeteiligung, Kaution, Shuttle und Versicherung vor der Buchung schriftlich bestätigen lassen.", "Praktischer Warnhinweis")
 )
@@ -82,11 +82,11 @@ fun CompassScreen(padding: PaddingValues, onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = onBack) { Text("‹ Zurück", color = HomeAccent) }
                     Spacer(Modifier.weight(1f))
-                    Text("13 COMMUNITY-TIPPS", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("13 TIPPS AUS DER GRUPPE", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
                 Text("Rhodos Kompass", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
                 Text(
-                    "Fester Stand aus sichtbaren Community-Beiträgen. Angaben bitte vor Ort prüfen.",
+                    "Fester Stand aus sichtbaren Gruppenbeiträgen. Angaben bitte vor Ort prüfen.",
                     color = Color(0xBFFFFFFF), fontSize = 12.sp, lineHeight = 18.sp, fontFamily = Montserrat
                 )
                 Spacer(Modifier.height(12.dp))

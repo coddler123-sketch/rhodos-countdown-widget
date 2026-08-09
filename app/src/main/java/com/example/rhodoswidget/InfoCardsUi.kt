@@ -41,7 +41,7 @@ fun CompassCard(onClick: () -> Unit) {
     ) {
         Text("RHODOS KOMPASS", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
         Spacer(Modifier.height(5.dp))
-        Text("13 Tipps aus der Community", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
+        Text("13 Tipps aus der Urlaubsgruppe", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
         Spacer(Modifier.height(4.dp))
         Text("Strände, Essen, Unterkünfte und Mobilität entdecken  ›", color = Color(0xCCFFFFFF), fontSize = 11.sp, lineHeight = 16.sp, fontFamily = Montserrat)
     }
@@ -129,7 +129,7 @@ fun HighlightCard(highlight: String) {
             .padding(horizontal = 16.dp, vertical = 13.dp)
     ) {
         Text(
-            text = "HIGHLIGHT DES TAGES",
+            text = "TAGESHÖHEPUNKT",
             color = HomeAccent,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,

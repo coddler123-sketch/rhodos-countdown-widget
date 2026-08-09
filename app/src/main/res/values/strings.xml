@@ -1,26 +1,60 @@
 <resources>
     <string name="app_name">Rhodos Widget</string>
-    <string name="community_title">Rhodos Urlaub Community</string>
+    <string name="community_title">Rhodos-Urlaubsgruppe</string>
     <string name="community_label">FACEBOOK-GRUPPE</string>
     <string name="community_description">Reisetipps und Erfahrungen austauschen</string>
-    <string name="community_action">Community öffnen</string>
+    <string name="community_action">Gruppe öffnen</string>
 
     <!-- Urlaubshelfer -->
     <string name="travel_card_label">URLAUBSHELFER</string>
     <string name="travel_card_title">Unterwegs auf Rhodos</string>
     <string name="travel_card_description">Busse, Ausflüge und Hilfe vor Ort</string>
     <string name="travel_back">‹ Zurück</string>
-    <string name="travel_screen_label">OFFLINE VERFÜGBAR</string>
+    <string name="travel_screen_label">OHNE INTERNET VERFÜGBAR</string>
     <string name="travel_screen_title">Unterwegs</string>
     <string name="travel_screen_intro">Wichtige Verbindungen und Ideen für euren Urlaub. Saisonale Angaben bitte vor der Fahrt an der offiziellen Quelle prüfen.</string>
     <string name="travel_bus_section">BUSSE AB KOLYMBIA</string>
+    <string name="travel_live_timetables_title">Aktuelle Fahrpläne</string>
+    <string name="travel_live_timetables_description">Direkt von KTEL und RODA geladen. Bitte kurzfristige Änderungen vor Ort beachten.</string>
+    <string name="travel_live_loading">Aktuelle Daten werden geladen …</string>
+    <string name="travel_live_empty">Zurzeit sind keine aktuellen Dokumente verfügbar.</string>
+    <string name="travel_live_cached">Gespeicherte Anzeige: zuletzt erfolgreich geladene Daten.</string>
+    <string name="travel_live_failed">Aktualisierung fehlgeschlagen. Gespeicherte Daten bleiben verfügbar.</string>
+    <string name="travel_live_refresh">Aktualisieren</string>
+    <string name="travel_timetable_open">Fahrplan ansehen</string>
+    <string name="travel_timetable_operator">%1$s · offizielles PDF</string>
+    <string name="travel_pdf_title">FAHRPLAN</string>
+    <string name="travel_pdf_loading">Fahrplan wird geladen …</string>
+    <string name="travel_pdf_failed">Der Fahrplan konnte nicht geladen werden.</string>
+    <string name="travel_pdf_page">Seite %1$d von %2$d</string>
+    <string name="travel_pdf_previous">Vorherige Seite</string>
+    <string name="travel_pdf_next">Nächste Seite</string>
+    <string name="travel_pdf_zoom_in">Vergrößern</string>
+    <string name="travel_pdf_zoom_out">Einpassen</string>
+    <string name="travel_pdf_retry">Erneut versuchen</string>
+    <string name="travel_pdf_german_help_show">Deutsche Lesehilfe anzeigen</string>
+    <string name="travel_pdf_german_help_hide">Deutsche Lesehilfe ausblenden</string>
+    <string name="travel_pdf_german_help_title">DEUTSCHE LESEHILFE</string>
+    <string name="travel_pdf_ktel_help">BUS TIMETABLE = Busfahrplan · FROM = von · TO = nach · PRICE = Preis · SCHEDULES = Abfahrtszeiten</string>
+    <string name="travel_pdf_roda_help">WEST COAST BUS INFORMATION = Busfahrplan Westküste · MONDAY–FRIDAY = Montag–Freitag · SATURDAY = Samstag · SUNDAY = Sonntag · RODOS TO … = Rhodos nach …</string>
+    <string name="travel_pdf_german_help_note">Ortsnamen, Preise und Uhrzeiten bleiben unverändert. Maßgeblich ist immer der offizielle Originalfahrplan.</string>
+    <string name="travel_german_timetable_tab">Deutsche Übersicht</string>
+    <string name="travel_original_pdf_tab">Original-PDF</string>
+    <string name="travel_german_timetable_title">KTEL-Busfahrplan Rhodos</string>
+    <string name="travel_german_timetable_validity">Gültig: %1$s</string>
+    <string name="travel_german_timetable_note">Deutsche Leseübersicht nach dem offiziellen KTEL-Dokument. Kurzfristige Änderungen sind möglich; maßgeblich bleibt die Original-PDF.</string>
+    <string name="travel_german_timetable_from_lindos">ABFAHRT VON LINDOS</string>
+    <string name="travel_german_timetable_to_lindos">NACH LINDOS</string>
+    <string name="travel_german_timetable_to">Nach %1$s</string>
+    <string name="travel_german_timetable_from">Von %1$s</string>
+    <string name="travel_german_timetable_departures">ABFAHRTSZEITEN</string>
     <string name="travel_bus_intro">Direkte oder praktische Verbindungen zu den wichtigsten Zielen:</string>
     <string name="travel_bus_rhodes">Rhodos-Stadt</string>
     <string name="travel_bus_lindos">Lindos</string>
-    <string name="travel_bus_tsambika">Tsambika Beach</string>
-    <string name="travel_bus_seven_springs">Seven Springs</string>
-    <string name="travel_bus_kallithea">Kallithea Springs</string>
-    <string name="travel_sources_hint">Fahrpläne ändern sich saisonal. Deshalb zeigen wir immer die offizielle Quelle statt gespeicherter, möglicherweise veralteter Abfahrtszeiten.</string>
+    <string name="travel_bus_tsambika">Tsambika-Strand</string>
+    <string name="travel_bus_seven_springs">Sieben Quellen</string>
+    <string name="travel_bus_kallithea">Kallithea-Thermen</string>
+    <string name="travel_sources_hint">Die offiziellen PDFs werden bei jeder Aktualisierung neu geprüft und auf dem Gerät gespeichert. Kurzfristige Änderungen bitte zusätzlich vor Ort beachten.</string>
     <string name="travel_ktel_title">KTEL Rodou</string>
     <string name="travel_ktel_description">Fahrpläne für Kolymbia, Lindos und die Ostküste</string>
     <string name="travel_roda_title">RODA / Gemeinde Rhodos</string>
@@ -33,10 +67,10 @@
     <string name="travel_old_town_title">Rhodos-Altstadt</string>
     <string name="travel_old_town_meta">Bus · halber oder ganzer Tag</string>
     <string name="travel_old_town_description">Großmeisterpalast, Ritterstraße und Mandraki lassen sich gut zu Fuß verbinden.</string>
-    <string name="travel_seven_springs_title">Seven Springs</string>
+    <string name="travel_seven_springs_title">Sieben Quellen</string>
     <string name="travel_seven_springs_meta">Bus oder Auto · 2 bis 3 Stunden</string>
     <string name="travel_seven_springs_description">Schattiger Naturausflug nahe Kolymbia. Im Tunnel kann es nass und rutschig sein.</string>
-    <string name="travel_tsambika_title">Tsambika Beach</string>
+    <string name="travel_tsambika_title">Tsambika-Strand</string>
     <string name="travel_tsambika_meta">Bus oder Taxi · Strandtag</string>
     <string name="travel_tsambika_description">Breiter Sandstrand in der Nähe von Kolymbia. Sonnenschutz und Rückfahrt vorab einplanen.</string>
     <string name="travel_more_information">Mehr Informationen ↗</string>
@@ -66,9 +100,14 @@
     <string name="travel_marine_calm">Ruhige Bedingungen für einen Strandtag.</string>
     <string name="travel_marine_caution">Wind und Wellen vor Ort besonders beachten.</string>
     <string name="travel_plan_section">HEUTE PASSEND</string>
+    <string name="travel_alerts_section">REISEHINWEISE</string>
+    <string name="travel_alerts_title">Hinweise einschalten</string>
+    <string name="travel_alerts_description">Freiwillige Meldungen zu hohem UV-Wert, auffälligem Wind oder Wellen und Veranstaltungen innerhalb der nächsten 24 Stunden.</string>
+    <string name="travel_alerts_enabled">Aktiv · höchstens ein Hinweis je Anlass und Tag.</string>
+    <string name="travel_alerts_disabled">Ausgeschaltet · die App sendet keine Reisehinweise.</string>
     <string name="travel_plan_lindos_title">Lindos früh besuchen</string>
     <string name="travel_plan_lindos_reason">Am Morgen sind Hitze und Andrang meist angenehmer.</string>
-    <string name="travel_plan_shade_title">Seven Springs oder eine schattige Pause</string>
+    <string name="travel_plan_shade_title">Sieben Quellen oder eine schattige Pause</string>
     <string name="travel_plan_shade_reason">Bei hoher UV-Belastung die Mittagssonne besser meiden.</string>
     <string name="travel_plan_inland_title">Heute lieber ein Ziel an Land</string>
     <string name="travel_plan_inland_reason">Stärkerer Wind oder höhere Wellen sprechen gegen einen Bootstag.</string>
@@ -79,6 +118,16 @@
     <string name="travel_plan_evening_title">Abend in Rhodos-Stadt</string>
     <string name="travel_plan_evening_reason">Mandraki und Altstadt sind am Abend besonders angenehm.</string>
     <string name="travel_transport_section">FÄHREN &amp; VERANSTALTUNGEN</string>
+    <string name="travel_live_events_title">Aktuelle Veranstaltungen</string>
+    <string name="travel_live_events_description">Offizieller Veranstaltungskalender der Gemeinde Rhodos.</string>
+    <string name="travel_live_events_empty">Momentan sind keine kommenden Veranstaltungen eingetragen.</string>
+    <string name="travel_event_venue">Ort: %1$s</string>
+    <string name="travel_event_open">Details öffnen</string>
+    <string name="travel_translation_loading">Deutsche Übersetzung wird vorbereitet …</string>
+    <string name="travel_translation_wifi">Die deutsche Übersetzung wird bei einer WLAN-Verbindung nachgeladen.</string>
+    <string name="travel_translation_original">Original: %1$s</string>
+    <string name="travel_translation_attribution">Mit Google Translate übersetzt ↗</string>
+    <string name="travel_translation_disclaimer">Automatische Übersetzungen können Fehler enthalten. Maßgeblich ist der griechische Originaltext.</string>
     <string name="travel_sebeco_title">SEBECO Lines: Symi</string>
     <string name="travel_sebeco_description">Direkte Fährverbindungen zwischen Rhodos und Symi</string>
     <string name="travel_seadreams_title">Sea Dreams: Marmaris</string>
@@ -88,7 +137,7 @@
     <string name="travel_favorite_add">Merken</string>
     <string name="travel_favorite_remove">Gemerkt</string>
     <string name="travel_map_action">Auf Karte öffnen</string>
-    <string name="travel_offline_hint">Beschreibung und Favorit funktionieren offline; für die Karte wird eine installierte Karten-App benötigt.</string>
+    <string name="travel_offline_hint">Beschreibung und Favorit funktionieren ohne Internet; für die Karte wird eine installierte Karten-App benötigt.</string>
     <string name="travel_help_more">WEITERE HILFE</string>
     <string name="travel_police">Polizei</string>
     <string name="travel_ambulance">Rettungsdienst</string>
@@ -103,7 +152,7 @@
     <string name="travel_list_progress">%1$d von %2$d erledigt</string>
     <string name="travel_check_documents">Ausweise und Reiseunterlagen</string>
     <string name="travel_check_insurance">Versicherung und Gesundheitskarte</string>
-    <string name="travel_check_booking">Buchungsbestätigungen offline speichern</string>
+    <string name="travel_check_booking">Buchungsbestätigungen auf dem Gerät speichern</string>
     <string name="travel_check_driving">Führerschein und Mietwagenunterlagen</string>
     <string name="travel_check_sun">Sonnenschutz und Kopfbedeckung</string>
     <string name="travel_check_charger">Ladegeräte und Powerbank</string>
@@ -113,10 +162,10 @@
     <string name="travel_notes_saved">Notizen werden automatisch nur auf diesem Gerät gespeichert.</string>
 
     <!-- 4x2-Widget -->
-    <string name="widget_large_name">Rhodos 4x2 Gross</string>
-    <string name="widget_large_description">Rhodos 4x2 grosses Countdown-Widget</string>
+    <string name="widget_large_name">Rhodos 4x2 Groß</string>
+    <string name="widget_large_description">Großes 4x2-Widget für den Rhodos-Urlaub</string>
     <string name="widget_large_title">RHODOS</string>
-    <string name="widget_subtitle">Unser Urlaubs-Countdown</string>
+    <string name="widget_subtitle">Bis zu unserem Abflug</string>
     <string name="widget_background_description">Rhodos-Bild</string>
     <string name="widget_favorite_description">Favorit</string>
     <string name="widget_weather_description">Wetter</string>
@@ -142,7 +191,7 @@
         <item>Zeit für Inselträume.</item>
         <item>Sommer wartet auf uns.</item>
         <item>Sonne in Sicht.</item>
-        <item>Der Countdown läuft.</item>
+        <item>Die Tage sind gezählt.</item>
         <item>Urlaub wird geladen.</item>
         <item>Die Auszeit kommt.</item>
         <item>Das Meer ruft.</item>

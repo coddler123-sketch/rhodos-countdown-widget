@@ -68,6 +68,10 @@ import java.util.Calendar
 private const val COMMUNITY_URL = "https://www.facebook.com/groups/urlaubrhodos"
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_OPEN_TRAVEL = "open_travel"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
@@ -81,7 +85,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             RhodosWidgetTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    RhodosApp(padding)
+                    RhodosApp(padding, startInTravel = intent.getBooleanExtra(EXTRA_OPEN_TRAVEL, false))
                 }
             }
         }
@@ -89,7 +93,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun RhodosApp(padding: PaddingValues) {
+private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
     val context = LocalContext.current
     val newsRepository = remember(context) {
         DefaultNewsRepository(context.applicationContext, BuildConfig.NEWS_API_URL)
@@ -98,7 +102,7 @@ private fun RhodosApp(padding: PaddingValues) {
     val newsState by newsViewModel.uiState.collectAsStateWithLifecycle()
     val showNews = remember { mutableStateOf(false) }
     val showCompass = remember { mutableStateOf(false) }
-    val showTravel = remember { mutableStateOf(false) }
+    val showTravel = remember { mutableStateOf(startInTravel) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
 
     val article = selectedArticle.value
@@ -414,7 +418,7 @@ private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () 
                 letterSpacing = 5.sp
             )
             Text(
-                text = "Unser Urlaubs-Countdown",
+                text = "Bis zu unserem Rhodos-Urlaub",
                 color = Color(0xE6FFFFFF),
                 fontSize = 15.sp,
                 fontFamily = Montserrat
@@ -529,15 +533,15 @@ private suspend fun fetchAndSaveWeather(context: android.content.Context): Boole
 
 private fun rhodosHighlightOfTheDay(): String {
     val highlights = listOf(
-        "Tsambika Beach: Feiner roter Sand, ruhiges Wasser — ideal zum Entspannen. Früh morgens ist er fast leer.",
+        "Tsambika-Strand: Feiner roter Sand, ruhiges Wasser — ideal zum Entspannen. Früh morgens ist er fast leer.",
         "Anthony Quinn Bay: Kristallklares Wasser direkt vom Fels — der perfekte Ort zum Schnorcheln.",
         "Lindos: Weiße Häuser, blaue Kuppeln und die Akropolis über dem Meer. Am besten vor 9 Uhr besuchen.",
-        "Agathi Beach: Klein, versteckt und wunderschön — einer der schönsten Strände der Ostküste.",
+        "Agathi-Strand: Klein, versteckt und wunderschön — einer der schönsten Strände der Ostküste.",
         "Rhodos Altstadt: UNESCO-Weltkulturerbe — durch mittelalterliche Gassen schlendern und die Atmosphäre genießen.",
         "Pitaroudia probieren: Frittierte Kichererbsenpuffer — die rhodische Spezialität schlechthin.",
         "Schmetterlingstal (Petaloudes): Tausende Jerseyspinner-Falter im Sommer — ein stilles Naturerlebnis.",
         "Motorroller mieten: Die beste Art, die Ostküste auf eigene Faust zu erkunden.",
-        "Stegna Beach: Einheimischenstrand nördlich von Kolymbia, ruhig und unkommerziell.",
+        "Stegna-Strand: Einheimischenstrand nördlich von Kolymbia, ruhig und unkommerziell.",
         "Prasonissi: Die Südspitze der Insel — hier treffen Mittelmeer und Ägäis aufeinander.",
         "Mandraki-Hafen: Die drei Windmühlen und die Bronzehirsche — für Fotos ein Muss.",
         "Rhodischen Muskatwein trinken: PDO-geschützt, süß und aromatisch — am besten gekühlt.",
@@ -554,7 +558,7 @@ private fun rhodosHighlightOfTheDay(): String {
         "Faliraki Wasserpark: Für einen erfrischenden Tag mit Rutschen und Pools.",
         "Antike Kamiros: Die besterhaltene antike Stadt Rhodos — kaum Touristen, viel Atmosphäre.",
         "Lokalen Markt erkunden: Frische Feigen, Wassermelonen und Tomaten im September.",
-        "Elli Beach in der Stadt: Lebhafter Stadtrand-Strand mit Bars und Liegestühlen.",
+        "Elli-Strand in der Stadt: Lebhafter Stadtstrand mit Bars und Liegestühlen.",
         "Weinverkostung: Rhodos hat eigene Weinbaugebiete — lokale Weingüter bieten Führungen an.",
         "Kolymbia-Eukalyptusallee: Die alte Eukalyptusstraße abends spazieren — kühl und duftend.",
         "Gyros in der Altstadt: Die kleinen Läden in den Seitengassen machen die besten.",

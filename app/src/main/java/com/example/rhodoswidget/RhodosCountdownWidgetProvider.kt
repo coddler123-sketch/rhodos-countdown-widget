@@ -80,7 +80,14 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
                     views.setViewVisibility(R.id.widget_countdown_row, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_arrival_message, View.GONE)
                     views.setViewVisibility(R.id.widget_vacation_subtitle, View.GONE)
-                    views.setViewVisibility(R.id.widget_phrase_container, View.VISIBLE)
+                    views.setViewVisibility(
+                        R.id.widget_phrase_container,
+                        if (shouldShowWidgetPhrase(context.resources.configuration.fontScale)) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+                    )
                     views.setTextViewText(R.id.widget_days, remaining.days.toString())
                     views.setTextViewText(R.id.widget_hours, remaining.hours.toString().padStart(2, '0'))
                     views.setTextViewText(R.id.widget_minutes, remaining.minutes.toString().padStart(2, '0'))
@@ -110,6 +117,8 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
 
         internal fun widgetProgressValue(progressFraction: Float): Int =
             (progressFraction.coerceIn(0f, 1f) * 1000).toInt()
+
+        internal fun shouldShowWidgetPhrase(fontScale: Float): Boolean = fontScale < 1.3f
 
         private fun applyWeather(context: Context, views: RemoteViews) {
             val weather = WeatherRepository.cached(context) ?: return

@@ -34,10 +34,16 @@
 
             <TextView
                 android:id="@+id/widget_large_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autoSizeMaxTextSize="21sp"
+                android:autoSizeMinTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
                 android:includeFontPadding="false"
                 android:letterSpacing="0.12"
+                android:maxLines="1"
                 android:shadowColor="#CC000000"
                 android:shadowDx="0"
                 android:shadowDy="1"
@@ -54,12 +60,6 @@
                 android:layout_marginLeft="8dp"
                 android:contentDescription="@string/widget_favorite_description"
                 android:src="@drawable/ic_heart_outline" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="" />
 
             <LinearLayout
                 android:id="@+id/widget_weather_pill"
@@ -108,9 +108,14 @@
 
         <TextView
             android:id="@+id/widget_subtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:autoSizeMaxTextSize="12sp"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
             android:shadowColor="#CC000000"
             android:shadowDx="0"
             android:shadowDy="1"
@@ -122,23 +127,28 @@
         <!-- Countdown: TAGE | STD. | MIN. -->
         <LinearLayout
             android:id="@+id/widget_countdown_row"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:minWidth="58dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/widget_days"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoSizeMaxTextSize="38sp"
+                    android:autoSizeMinTextSize="24sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:maxLines="1"
                     android:shadowColor="#CC000000"
@@ -151,9 +161,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:autoSizeMaxTextSize="11sp"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.06"
                     android:text="@string/widget_days_label"
@@ -171,16 +186,21 @@
                 android:contentDescription="@null" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:minWidth="58dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/widget_hours"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoSizeMaxTextSize="38sp"
+                    android:autoSizeMinTextSize="24sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:maxLines="1"
                     android:shadowColor="#CC000000"
@@ -193,9 +213,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:autoSizeMaxTextSize="11sp"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.06"
                     android:text="@string/widget_hours_label"
@@ -213,16 +238,21 @@
                 android:contentDescription="@null" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:minWidth="58dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/widget_minutes"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoSizeMaxTextSize="38sp"
+                    android:autoSizeMinTextSize="24sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:maxLines="1"
                     android:shadowColor="#CC000000"
@@ -235,9 +265,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:autoSizeMaxTextSize="11sp"
+                    android:autoSizeMinTextSize="8sp"
+                    android:autoSizeStepGranularity="1sp"
+                    android:autoSizeTextType="uniform"
+                    android:gravity="center"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.06"
                     android:text="@string/widget_minutes_label"
@@ -260,10 +295,15 @@
         <!-- Abflugtag / Urlaub: ersetzt den Countdown -->
         <TextView
             android:id="@+id/widget_arrival_message"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:autoSizeMaxTextSize="27sp"
+            android:autoSizeMinTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
             android:includeFontPadding="false"
+            android:maxLines="2"
             android:shadowColor="#CC000000"
             android:shadowDx="0"
             android:shadowDy="2"
@@ -276,10 +316,15 @@
 
         <TextView
             android:id="@+id/widget_vacation_subtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:autoSizeMaxTextSize="15sp"
+            android:autoSizeMinTextSize="11sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
             android:includeFontPadding="false"
+            android:maxLines="2"
             android:shadowColor="#CC000000"
             android:shadowDx="0"
             android:shadowDy="1"
@@ -292,7 +337,7 @@
         <!-- Spruch des Tages -->
         <LinearLayout
             android:id="@+id/widget_phrase_container"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:background="@drawable/widget_date_chip_background"
@@ -312,8 +357,13 @@
 
             <TextView
                 android:id="@+id/widget_phrase_value"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:autoSizeMaxTextSize="13sp"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:text="@string/widget_phrase"

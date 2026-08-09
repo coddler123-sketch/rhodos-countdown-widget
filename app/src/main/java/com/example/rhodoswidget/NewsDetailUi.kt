@@ -83,7 +83,7 @@ internal fun NewsDetailScreen(
                 )
                 Column(Modifier.weight(1f)) {
                     Text("Auf Deutsch", color = Color(0xFF174954), fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Rhodos-News kurz erklärt", color = DetailSea, fontSize = 13.sp)
+                    Text("Nachrichten aus Rhodos kurz erklärt", color = DetailSea, fontSize = 13.sp)
                 }
             }
 
@@ -138,7 +138,7 @@ internal fun NewsDetailScreen(
                         }
                     }
                     currentState.warning?.let { warning -> item { Text(warning, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
-                    if (currentState.isCached) item { Text("Offline verfügbar · gespeicherte Zusammenfassung", color = DetailSea, fontSize = 12.sp) }
+                    if (currentState.isCached) item { Text("Ohne Internet verfügbar · gespeicherte Zusammenfassung", color = DetailSea, fontSize = 12.sp) }
                     item {
                         Text(
                             "KI-gestützt zusammengefasst · Maßgeblich ist der Originalartikel.",

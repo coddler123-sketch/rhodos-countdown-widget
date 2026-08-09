@@ -37,7 +37,7 @@ fun CountdownProgress(fraction: Float) {
     Column(modifier = Modifier.padding(top = 10.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "COUNTDOWN-FORTSCHRITT",
+                text = "VORFREUDE BIS ZUM ABFLUG",
                 color = Color(0xBFFFFFFF),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold,

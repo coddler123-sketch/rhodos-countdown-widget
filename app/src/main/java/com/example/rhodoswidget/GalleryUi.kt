@@ -150,7 +150,7 @@ fun GallerySheet(
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("AUTO", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(48.dp))
+                Text("AUTOMATIK", color = HomeAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(72.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Täglicher Bildwechsel", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
                     Text("Jeden Tag eine neue Rhodos-Impression", color = Color(0x99FFFFFF), fontSize = 10.sp, fontFamily = Montserrat)
@@ -234,7 +234,7 @@ private fun GalleryImage(
         )
         if (selected || currentInRotation) {
             Text(
-                if (selected) "✓" else "AUTO",
+                if (selected) "✓" else "AUTOMATIK",
                 color = Color(0xFF102126),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,

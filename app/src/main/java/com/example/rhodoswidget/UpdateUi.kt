@@ -57,7 +57,7 @@ fun UpdateBanner(
                 )
             }
             Text(
-                text = if (isDownloading) "Lade Update herunter..." else "Update v${update.versionName} verfügbar · Tippe zum Installieren",
+                text = if (isDownloading) "Lade Aktualisierung herunter …" else "Aktualisierung v${update.versionName} verfügbar · Tippe zum Installieren",
                 color = Color.White,
                 fontSize = 12.sp,
                 fontFamily = Montserrat,
@@ -88,7 +88,7 @@ fun StartupUpdateDialog(
         },
         title = {
             Text(
-                text = "Update verfügbar 🚀",
+                text = "Aktualisierung verfügbar 🚀",
                 fontFamily = Montserrat,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
@@ -116,7 +116,7 @@ fun StartupUpdateDialog(
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            text = "Wird heruntergeladen...",
+                            text = "Wird heruntergeladen …",
                             fontFamily = Montserrat,
                             fontSize = 13.sp,
                             color = Color(0xCCFFFFFF)

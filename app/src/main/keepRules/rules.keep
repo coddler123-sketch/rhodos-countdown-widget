@@ -15,3 +15,9 @@
 -keep class androidx.work.impl.**_Impl {
     public <init>(...);
 }
+
+# ML Kit discovers these registrars from Android manifest metadata.
+-keep class * implements com.google.firebase.components.ComponentRegistrar {
+    public <init>();
+    public java.util.List getComponents();
+}

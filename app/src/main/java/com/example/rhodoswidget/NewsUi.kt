@@ -230,7 +230,7 @@ fun NewsScreen(
                 ) {
                     val content = state as NewsUiState.Content
                     content.warning?.let { item { Text(it, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
-                    if (content.isCached) item { Text("Offline verfügbar · zuletzt geladener Stand", color = Sea, fontSize = 12.sp) }
+                    if (content.isCached) item { Text("Ohne Internet verfügbar · zuletzt geladener Stand", color = Sea, fontSize = 12.sp) }
                     items(articles, key = NewsArticle::id) { NewsCard(it, onOpenDetail) }
                     item { Text("Automatisch aus dem Griechischen übersetzt", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
                 }
