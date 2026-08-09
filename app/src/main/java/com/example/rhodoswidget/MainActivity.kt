@@ -98,6 +98,7 @@ private fun RhodosApp(padding: PaddingValues) {
     val newsState by newsViewModel.uiState.collectAsStateWithLifecycle()
     val showNews = remember { mutableStateOf(false) }
     val showCompass = remember { mutableStateOf(false) }
+    val showTravel = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
 
     val article = selectedArticle.value
@@ -109,6 +110,9 @@ private fun RhodosApp(padding: PaddingValues) {
     }
     BackHandler(enabled = article == null && !showNews.value && showCompass.value) {
         showCompass.value = false
+    }
+    BackHandler(enabled = article == null && !showNews.value && !showCompass.value && showTravel.value) {
+        showTravel.value = false
     }
 
     if (article != null) {
@@ -126,6 +130,8 @@ private fun RhodosApp(padding: PaddingValues) {
             onRefresh = newsViewModel::refresh,
             onOpenDetail = { selectedArticle.value = it }
         )
+    } else if (showTravel.value) {
+        TravelScreen(padding = padding, onBack = { showTravel.value = false })
     } else if (showCompass.value) {
         CompassScreen(padding = padding, onBack = { showCompass.value = false })
     } else {
@@ -133,7 +139,8 @@ private fun RhodosApp(padding: PaddingValues) {
             padding = padding,
             newsState = newsState,
             onOpenNews = { showNews.value = true },
-            onOpenCompass = { showCompass.value = true }
+            onOpenCompass = { showCompass.value = true },
+            onOpenTravel = { showTravel.value = true }
         )
     }
 }
@@ -144,7 +151,8 @@ private fun RhodosHome(
     padding: PaddingValues,
     newsState: NewsUiState,
     onOpenNews: () -> Unit,
-    onOpenCompass: () -> Unit
+    onOpenCompass: () -> Unit,
+    onOpenTravel: () -> Unit
 ) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
@@ -260,6 +268,8 @@ private fun RhodosHome(
             FactCard(s.factOfTheDay)
             Spacer(Modifier.height(10.dp))
             HighlightCard(rhodosHighlightOfTheDay())
+            Spacer(Modifier.height(12.dp))
+            TravelCard(onClick = onOpenTravel)
             Spacer(Modifier.height(12.dp))
             CompassCard(onClick = onOpenCompass)
             Spacer(Modifier.height(12.dp))

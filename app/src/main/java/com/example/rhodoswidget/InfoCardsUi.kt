@@ -48,6 +48,48 @@ fun CompassCard(onClick: () -> Unit) {
 }
 
 @Composable
+fun TravelCard(onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
+            .testTag("travel-link")
+            .clickable {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .padding(horizontal = 16.dp, vertical = 13.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.travel_card_label),
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = stringResource(R.string.travel_card_title),
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.travel_card_description),
+            color = Color(0xCCFFFFFF),
+            fontSize = 11.sp,
+            lineHeight = 16.sp,
+            fontFamily = Montserrat
+        )
+    }
+}
+
+@Composable
 fun FactCard(fact: String) {
     Column(
         modifier = Modifier

@@ -25,7 +25,8 @@ data class RhodosWeather(
     val isDay: Boolean,
     val forecast: List<RhodosForecastDay> = emptyList(),
     val sunsetIso: String? = null,
-    val sunriseIso: String? = null
+    val sunriseIso: String? = null,
+    val uvIndex: Double? = null
 ) {
     val temperatureLabel: String
         get() = "$temperatureCelsius°"
@@ -123,6 +124,7 @@ object WeatherRepository {
     private const val KEY_FORECAST = "forecast"
     private const val KEY_SUNSET = "sunset"
     private const val KEY_SUNRISE = "sunrise"
+    private const val KEY_UV_INDEX = "uv_index"
 
     /** Live-Abruf bei Open-Meteo. Gibt null zurueck, wenn etwas schiefgeht. */
     fun fetch(): RhodosWeather? {
@@ -130,7 +132,7 @@ object WeatherRepository {
             "https://api.open-meteo.com/v1/forecast" +
                 "?latitude=$LATITUDE&longitude=$LONGITUDE" +
                 "&current=temperature_2m,apparent_temperature,relative_humidity_2m," +
-                "precipitation,weather_code,wind_speed_10m,is_day" +
+                "precipitation,weather_code,wind_speed_10m,is_day,uv_index" +
                 "&daily=weather_code,temperature_2m_max,temperature_2m_min," +
                 "precipitation_probability_max,precipitation_sum,sunset,sunrise" +
                 "&timezone=auto&forecast_days=8"
@@ -155,7 +157,8 @@ object WeatherRepository {
                 isDay = current.optInt("is_day", 1) == 1,
                 forecast = parseForecast(root.optJSONObject("daily")),
                 sunsetIso = root.optJSONObject("daily")?.optJSONArray("sunset")?.optString(0),
-                sunriseIso = root.optJSONObject("daily")?.optJSONArray("sunrise")?.optString(0)
+                sunriseIso = root.optJSONObject("daily")?.optJSONArray("sunrise")?.optString(0),
+                uvIndex = current.optDouble("uv_index").takeIf { it.isFinite() }
             )
         } catch (error: Exception) {
             Log.w("RhodosWeather", "Weather fetch failed", error)
@@ -177,6 +180,7 @@ object WeatherRepository {
             .putString(KEY_FORECAST, forecastToJson(weather.forecast).toString())
             .putString(KEY_SUNSET, weather.sunsetIso)
             .putString(KEY_SUNRISE, weather.sunriseIso)
+            .putFloat(KEY_UV_INDEX, weather.uvIndex?.toFloat() ?: -1f)
             .putBoolean(KEY_HAS_DATA, true)
             .putLong(KEY_LAST_FETCH, System.currentTimeMillis())
             .apply()
@@ -201,7 +205,8 @@ object WeatherRepository {
             isDay = prefs.getBoolean(KEY_IS_DAY, true),
             forecast = forecastFromJson(prefs.getString(KEY_FORECAST, null)),
             sunsetIso = prefs.getString(KEY_SUNSET, null),
-            sunriseIso = prefs.getString(KEY_SUNRISE, null)
+            sunriseIso = prefs.getString(KEY_SUNRISE, null),
+            uvIndex = prefs.getFloat(KEY_UV_INDEX, -1f).toDouble().takeIf { it >= 0.0 }
         )
     }
 
