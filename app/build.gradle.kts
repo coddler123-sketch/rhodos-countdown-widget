@@ -25,8 +25,8 @@ android {
         applicationId = "com.example.rhodoswidget"
         minSdk = 24
         targetSdk = 36
-        versionCode = 30
-        versionName = "1.2.10"
+        versionCode = 31
+        versionName = "1.2.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "NEWS_API_URL", "\"${newsApiUrl.get()}\"")

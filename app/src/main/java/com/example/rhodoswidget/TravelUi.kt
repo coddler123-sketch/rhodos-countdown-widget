@@ -50,7 +50,11 @@ import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 @Composable
-fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
+fun TravelScreen(
+    padding: PaddingValues,
+    onBack: () -> Unit,
+    initialScheduleId: String? = null
+) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
@@ -80,6 +84,7 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
     var isTranslationLoading by remember { mutableStateOf(false) }
     var isTranslationPending by remember { mutableStateOf(false) }
     var selectedSchedule by remember { mutableStateOf<TransitDocument?>(null) }
+    var pendingScheduleId by remember(initialScheduleId) { mutableStateOf(initialScheduleId) }
     var isLiveLoading by remember { mutableStateOf(false) }
     var liveRefreshFailed by remember { mutableStateOf(false) }
     var showingCachedLiveData by remember { mutableStateOf(transitDocuments.isNotEmpty() || events.isNotEmpty()) }
@@ -169,12 +174,22 @@ fun TravelScreen(padding: PaddingValues, onBack: () -> Unit) {
             isTranslationPending = false
         }
     }
+    LaunchedEffect(transitDocuments, pendingScheduleId) {
+        pendingScheduleId?.let { scheduleId ->
+            transitDocuments.firstOrNull { it.id == scheduleId }?.let { document ->
+                selectedSchedule = document
+                pendingScheduleId = null
+            }
+        }
+    }
 
     selectedSchedule?.let { document ->
         TransitPdfScreen(
             padding = padding,
             document = document,
-            onBack = { selectedSchedule = null },
+            onBack = {
+                if (initialScheduleId != null) onBack() else selectedSchedule = null
+            },
             onOpenSource = { openSource(document.sourceUrl) }
         )
         return

@@ -147,7 +147,7 @@ fun CountdownSection(s: HomeState) {
             }
         }
         if (!s.isOnVacation) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "„${s.phrase}“",
                 color = Color.White,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,6 +85,86 @@ fun TravelCard(onClick: () -> Unit) {
             color = Color(0xCCFFFFFF),
             fontSize = 11.sp,
             lineHeight = 16.sp,
+            fontFamily = Montserrat
+        )
+    }
+}
+
+@Composable
+fun HomeQuickActions(
+    onOpenTravel: () -> Unit,
+    onOpenKolymbia: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.home_quick_actions_label),
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            HomeQuickActionCard(
+                title = stringResource(R.string.home_quick_travel_title),
+                description = stringResource(R.string.home_quick_travel_description),
+                testTag = "travel-link",
+                onClick = onOpenTravel,
+                modifier = Modifier.weight(1f)
+            )
+            HomeQuickActionCard(
+                title = stringResource(R.string.home_quick_bus_title),
+                description = stringResource(R.string.home_quick_bus_description),
+                testTag = "kolymbia-bus-link",
+                onClick = onOpenKolymbia,
+                modifier = Modifier.weight(1f),
+                emphasized = true
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeQuickActionCard(
+    title: String,
+    description: String,
+    testTag: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    emphasized: Boolean = false
+) {
+    val haptics = LocalHapticFeedback.current
+    Column(
+        modifier = modifier
+            .height(104.dp)
+            .clip(HomeCardShape)
+            .background(if (emphasized) HomeAccent.copy(alpha = 0.22f) else HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = if (emphasized) 0.85f else 0.5f), HomeCardShape)
+            .testTag(testTag)
+            .clickable {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .padding(14.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = title,
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = description,
+            color = Color(0xCCFFFFFF),
+            fontSize = 10.sp,
+            lineHeight = 14.sp,
             fontFamily = Montserrat
         )
     }

@@ -1,5 +1,11 @@
 package com.example.rhodoswidget
 
+internal data class KolymbiaConnection(
+    val place: String,
+    val outbound: LindosTimetableRoute,
+    val returnTrip: LindosTimetableRoute
+)
+
 internal object KolymbiaTimetable {
     const val VALIDITY = "06.07.2026–10.09.2026"
 
@@ -21,6 +27,35 @@ internal object KolymbiaTimetable {
         route("Prasonisi", "ΠΡΑΣΟΝΗΣΙ", "9,30 €", "13:00 16:00")
     )
 
+    val connections = fromKolymbia.mapNotNull { outbound ->
+        toKolymbia.firstOrNull { it.place == outbound.place }?.let { returnTrip ->
+            KolymbiaConnection(outbound.place, outbound, returnTrip)
+        }
+    }
+
+    val isValidForTrip: Boolean get() = isValidOn(
+        year = CountdownCalculator.DEPARTURE_YEAR,
+        monthOneBased = CountdownCalculator.DEPARTURE_MONTH + 1,
+        day = CountdownCalculator.DEPARTURE_DAY
+    )
+
+    fun isValidOn(year: Int, monthOneBased: Int, day: Int): Boolean {
+        val date = year * 10_000 + monthOneBased * 100 + day
+        return date in VALID_FROM..VALID_UNTIL
+    }
+
+    fun searchConnections(query: String): List<KolymbiaConnection> {
+        val term = query.trim()
+        if (term.isEmpty()) return connections
+        return connections.filter { connection ->
+            connection.place.contains(term, ignoreCase = true) ||
+                connection.outbound.greekName?.contains(term, ignoreCase = true) == true
+        }
+    }
+
     private fun route(place: String, greekName: String, price: String, times: String) =
         LindosTimetableRoute(place, greekName, price, times.split(' '))
+
+    private const val VALID_FROM = 20260706
+    private const val VALID_UNTIL = 20260910
 }

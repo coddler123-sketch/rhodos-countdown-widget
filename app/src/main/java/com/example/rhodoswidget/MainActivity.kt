@@ -103,6 +103,7 @@ private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
     val showNews = remember { mutableStateOf(false) }
     val showCompass = remember { mutableStateOf(false) }
     val showTravel = remember { mutableStateOf(startInTravel) }
+    val initialTravelScheduleId = remember { mutableStateOf<String?>(null) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
 
     val article = selectedArticle.value
@@ -135,7 +136,14 @@ private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
             onOpenDetail = { selectedArticle.value = it }
         )
     } else if (showTravel.value) {
-        TravelScreen(padding = padding, onBack = { showTravel.value = false })
+        TravelScreen(
+            padding = padding,
+            onBack = {
+                initialTravelScheduleId.value = null
+                showTravel.value = false
+            },
+            initialScheduleId = initialTravelScheduleId.value
+        )
     } else if (showCompass.value) {
         CompassScreen(padding = padding, onBack = { showCompass.value = false })
     } else {
@@ -144,7 +152,14 @@ private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
             newsState = newsState,
             onOpenNews = { showNews.value = true },
             onOpenCompass = { showCompass.value = true },
-            onOpenTravel = { showTravel.value = true }
+            onOpenTravel = {
+                initialTravelScheduleId.value = null
+                showTravel.value = true
+            },
+            onOpenKolymbia = {
+                initialTravelScheduleId.value = "ktel_kolymbia"
+                showTravel.value = true
+            }
         )
     }
 }
@@ -156,7 +171,8 @@ private fun RhodosHome(
     newsState: NewsUiState,
     onOpenNews: () -> Unit,
     onOpenCompass: () -> Unit,
-    onOpenTravel: () -> Unit
+    onOpenTravel: () -> Unit,
+    onOpenKolymbia: () -> Unit
 ) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
@@ -264,16 +280,19 @@ private fun RhodosHome(
                 hasUpdateBadge = updateController.availableUpdate != null,
                 onSettings = { showSettings.value = true }
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(18.dp))
             CountdownSection(s)
-            Spacer(Modifier.height(20.dp))
-            NewsTicker(newsState, onOpenNews)
-            Spacer(Modifier.height(12.dp))
-            FactCard(s.factOfTheDay)
-            Spacer(Modifier.height(10.dp))
-            HighlightCard(rhodosHighlightOfTheDay())
-            Spacer(Modifier.height(12.dp))
-            TravelCard(onClick = onOpenTravel)
+            Spacer(Modifier.height(16.dp))
+            HomeQuickActions(
+                onOpenTravel = onOpenTravel,
+                onOpenKolymbia = onOpenKolymbia
+            )
+            Spacer(Modifier.height(16.dp))
+            when (Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % 3) {
+                0 -> NewsTicker(newsState, onOpenNews)
+                1 -> FactCard(s.factOfTheDay)
+                else -> HighlightCard(rhodosHighlightOfTheDay())
+            }
             Spacer(Modifier.height(12.dp))
             CompassCard(onClick = onOpenCompass)
             Spacer(Modifier.height(12.dp))
