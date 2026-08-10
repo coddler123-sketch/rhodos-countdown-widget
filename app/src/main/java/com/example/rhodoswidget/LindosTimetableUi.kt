@@ -65,6 +65,52 @@ internal fun LindosGermanTimetable(modifier: Modifier = Modifier) {
 }
 
 @Composable
+internal fun KolymbiaGermanTimetable(modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0x1AFFFFFF), RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    stringResource(R.string.travel_german_timetable_title),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Montserrat
+                )
+                Text(
+                    stringResource(R.string.travel_german_timetable_validity, KolymbiaTimetable.VALIDITY),
+                    color = HomeAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Montserrat
+                )
+                Text(
+                    stringResource(R.string.travel_german_timetable_note),
+                    color = Color(0xB3FFFFFF),
+                    fontSize = 10.sp,
+                    fontFamily = Montserrat
+                )
+            }
+        }
+        item { TimetableSectionTitle(R.string.travel_german_timetable_from_kolymbia) }
+        items(KolymbiaTimetable.fromKolymbia, key = { "from_kolymbia_${it.place}" }) { route ->
+            TimetableRouteCard(route, R.string.travel_german_timetable_to)
+        }
+        item { TimetableSectionTitle(R.string.travel_german_timetable_to_kolymbia) }
+        items(KolymbiaTimetable.toKolymbia, key = { "to_kolymbia_${it.place}" }) { route ->
+            TimetableRouteCard(route, R.string.travel_german_timetable_from)
+        }
+    }
+}
+
+@Composable
 private fun TimetableSectionTitle(textRes: Int) {
     Text(
         text = stringResource(textRes),

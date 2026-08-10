@@ -136,7 +136,8 @@ object LiveTravelRepository {
     private const val RODA_API =
         "https://www.rhodes.gr/wp-json/wp/v2/pages/2827?_fields=content,modified"
 
-    private val ktelSources = listOf(
+    internal val ktelSources = listOf(
+        KtelSource("ktel_kolymbia", "Busse ab Kolymbia Beach", "kolymbia-beach2-qr"),
         KtelSource("ktel_lindos", "Rhodos ↔ Lindos", "lindos-qr"),
         KtelSource("ktel_tsambika", "Rhodos ↔ Tsambika", "tsambika-qr"),
         KtelSource("ktel_seven_springs", "Rhodos ↔ Sieben Quellen", "seven-springs-qr")
@@ -267,7 +268,7 @@ object LiveTravelRepository {
         }
     }.getOrDefault(false)
 
-    private data class KtelSource(val id: String, val title: String, val slug: String) {
+    internal data class KtelSource(val id: String, val title: String, val slug: String) {
         val pageUrl: String get() = "https://www.ktelrodou.gr/$slug/"
     }
 }

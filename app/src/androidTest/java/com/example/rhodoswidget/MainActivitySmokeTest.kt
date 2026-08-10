@@ -38,7 +38,7 @@ class MainActivitySmokeTest {
     @Test
     fun mainScreenShowsCoreCountdownContent() {
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
-        composeRule.onNodeWithText("Unser Urlaubs-Countdown").assertIsDisplayed()
+        composeRule.onNodeWithText("Bis zu unserem Rhodos-Urlaub").assertIsDisplayed()
         composeRule.onNodeWithText("TAGE").assertIsDisplayed()
         composeRule.onNodeWithText("STD.").assertIsDisplayed()
         composeRule.onNodeWithText("MIN.").assertIsDisplayed()
@@ -65,7 +65,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("gallery-apply").performClick()
 
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
-        composeRule.onNodeWithText("Unser Urlaubs-Countdown").assertIsDisplayed()
+        composeRule.onNodeWithText("Bis zu unserem Rhodos-Urlaub").assertIsDisplayed()
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         assertEquals("prasonisi_rhodes_023", Images.getPinnedImage(context))

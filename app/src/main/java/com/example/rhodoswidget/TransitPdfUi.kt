@@ -64,7 +64,7 @@ internal fun TransitPdfScreen(
     var pageIndex by remember(document.id) { mutableIntStateOf(0) }
     var isLoading by remember(document.id) { mutableStateOf(true) }
     var failed by remember(document.id) { mutableStateOf(false) }
-    val hasGermanTimetable = document.id == "ktel_lindos"
+    val hasGermanTimetable = document.id in setOf("ktel_kolymbia", "ktel_lindos")
     var showGermanTimetable by remember(document.id) { mutableStateOf(hasGermanTimetable) }
 
     val load: () -> Unit = {
@@ -150,6 +150,12 @@ internal fun TransitPdfScreen(
             }
         }
         when {
+            document.id == "ktel_kolymbia" && showGermanTimetable -> KolymbiaGermanTimetable(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(top = 10.dp)
+            )
             hasGermanTimetable && showGermanTimetable -> LindosGermanTimetable(
                 modifier = Modifier
                     .fillMaxWidth()

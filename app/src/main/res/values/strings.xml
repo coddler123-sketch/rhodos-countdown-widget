@@ -45,6 +45,8 @@
     <string name="travel_german_timetable_note">Deutsche Leseübersicht nach dem offiziellen KTEL-Dokument. Kurzfristige Änderungen sind möglich; maßgeblich bleibt die Original-PDF.</string>
     <string name="travel_german_timetable_from_lindos">ABFAHRT VON LINDOS</string>
     <string name="travel_german_timetable_to_lindos">NACH LINDOS</string>
+    <string name="travel_german_timetable_from_kolymbia">ABFAHRT VON KOLYMBIA BEACH</string>
+    <string name="travel_german_timetable_to_kolymbia">NACH KOLYMBIA BEACH</string>
     <string name="travel_german_timetable_to">Nach %1$s</string>
     <string name="travel_german_timetable_from">Von %1$s</string>
     <string name="travel_german_timetable_departures">ABFAHRTSZEITEN</string>

@@ -34,9 +34,8 @@
 
             <TextView
                 android:id="@+id/widget_large_title"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:autoSizeMaxTextSize="21sp"
                 android:autoSizeMinTextSize="14sp"
                 android:autoSizeStepGranularity="1sp"
@@ -60,6 +59,12 @@
                 android:layout_marginLeft="8dp"
                 android:contentDescription="@string/widget_favorite_description"
                 android:src="@drawable/ic_heart_outline" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
 
             <LinearLayout
                 android:id="@+id/widget_weather_pill"

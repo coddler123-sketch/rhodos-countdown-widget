@@ -25,6 +25,14 @@ class LiveTravelDataTest {
     }
 
     @Test
+    fun `ktel sources include buses from Kolymbia`() {
+        val kolymbia = LiveTravelRepository.ktelSources.first { it.id == "ktel_kolymbia" }
+
+        assertEquals("Busse ab Kolymbia Beach", kolymbia.title)
+        assertEquals("https://www.ktelrodou.gr/kolymbia-beach2-qr/", kolymbia.pageUrl)
+    }
+
+    @Test
     fun `roda parser keeps latest document per service day`() {
         val old = encoded("https://www.rhodes.gr/wp-content/uploads/2026/06/ΔΥΤΙΚΗΣ-ΔΕΥΤΕΡΑ-01.06.2026.pdf")
         val current = encoded("https://www.rhodes.gr/wp-content/uploads/2026/08/ΔΥΤΙΚΗΣ-ΔΕΥΤΕΡΑ-03.08.2026.pdf")
