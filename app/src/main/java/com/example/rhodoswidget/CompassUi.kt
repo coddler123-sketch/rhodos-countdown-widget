@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +59,10 @@ internal val compassTips = listOf(
 )
 
 @Composable
-fun CompassScreen(padding: PaddingValues, onBack: () -> Unit) {
+fun CompassScreen(
+    padding: PaddingValues,
+    onOpenCommunity: () -> Unit
+) {
     val categories = remember { listOf("Alle") + compassTips.map { it.category }.distinct() }
     var selected by rememberSaveable { mutableStateOf("Alle") }
     val visible = remember(selected) {
@@ -80,11 +82,10 @@ fun CompassScreen(padding: PaddingValues, onBack: () -> Unit) {
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = onBack) { Text("‹ Zurück", color = HomeAccent) }
                     Spacer(Modifier.weight(1f))
                     Text("13 TIPPS AUS DER GRUPPE", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
-                Text("Rhodos Kompass", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
+                Text("Rhodos Tipps", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
                 Text(
                     "Fester Stand aus sichtbaren Gruppenbeiträgen. Angaben bitte vor Ort prüfen.",
                     color = Color(0xBFFFFFFF), fontSize = 12.sp, lineHeight = 18.sp, fontFamily = Montserrat
@@ -108,6 +109,7 @@ fun CompassScreen(padding: PaddingValues, onBack: () -> Unit) {
                     }
                 }
             }
+            item { CommunityCard(onClick = onOpenCommunity) }
             items(visible, key = { it.title }) { tip -> CompassTipCard(tip) }
             item {
                 Text(

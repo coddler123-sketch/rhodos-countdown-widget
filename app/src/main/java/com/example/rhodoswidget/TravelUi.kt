@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +55,9 @@ import java.util.Calendar
 fun TravelScreen(
     padding: PaddingValues,
     onBack: () -> Unit,
-    initialScheduleId: String? = null
+    initialScheduleId: String? = null,
+    openChecklistDirectly: Boolean = false,
+    onDetailVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -83,13 +87,31 @@ fun TravelScreen(
     }
     var isTranslationLoading by remember { mutableStateOf(false) }
     var isTranslationPending by remember { mutableStateOf(false) }
-    var selectedSchedule by remember { mutableStateOf<TransitDocument?>(null) }
-    var pendingScheduleId by remember(initialScheduleId) { mutableStateOf(initialScheduleId) }
+    var selectedSchedule by remember(initialScheduleId) {
+        mutableStateOf(initialScheduleId?.let(LiveTravelRepository::placeholderTransitDocument))
+    }
+    var pendingScheduleId by remember(initialScheduleId) {
+        mutableStateOf(initialScheduleId.takeIf { selectedSchedule == null })
+    }
     var isLiveLoading by remember { mutableStateOf(false) }
     var liveRefreshFailed by remember { mutableStateOf(false) }
     var showingCachedLiveData by remember { mutableStateOf(transitDocuments.isNotEmpty() || events.isNotEmpty()) }
     var alertsEnabled by remember(context) {
         mutableStateOf(TravelAlertSettings.isEnabled(context))
+    }
+
+    LaunchedEffect(selectedSchedule, openChecklistDirectly) {
+        onDetailVisibilityChanged(selectedSchedule != null || openChecklistDirectly)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onDetailVisibilityChanged(false) }
+    }
+    BackHandler(enabled = selectedSchedule != null || openChecklistDirectly) {
+        if (initialScheduleId != null || openChecklistDirectly) {
+            onBack()
+        } else {
+            selectedSchedule = null
+        }
     }
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -182,6 +204,13 @@ fun TravelScreen(
             }
         }
     }
+    LaunchedEffect(transitDocuments, initialScheduleId) {
+        initialScheduleId?.let { scheduleId ->
+            transitDocuments.firstOrNull { it.id == scheduleId }?.let { document ->
+                selectedSchedule = document
+            }
+        }
+    }
 
     selectedSchedule?.let { document ->
         TransitPdfScreen(
@@ -195,6 +224,23 @@ fun TravelScreen(
         return
     }
 
+    if (openChecklistDirectly) {
+        TravelChecklistScreen(
+            padding = padding,
+            completedItems = completedItems,
+            notes = notes,
+            onBack = onBack,
+            onToggle = { id ->
+                completedItems = TravelPreferences.toggleChecklistItem(context, id)
+            },
+            onNotesChange = { updated ->
+                notes = updated
+                TravelPreferences.saveNotes(context, updated)
+            }
+        )
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -204,7 +250,7 @@ fun TravelScreen(
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item { TravelHeader(onBack) }
+        item { TravelHeader() }
         item { SectionLabel(R.string.travel_marine_section) }
         item {
             MarineWeatherCard(
@@ -349,12 +395,62 @@ fun TravelScreen(
 }
 
 @Composable
-private fun TravelHeader(onBack: () -> Unit) {
+private fun TravelChecklistScreen(
+    padding: PaddingValues,
+    completedItems: Set<String>,
+    notes: String,
+    onBack: () -> Unit,
+    onToggle: (String) -> Unit,
+    onNotesChange: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(Color(0xFF142E34), Color(0xFF0D1113))))
+            .padding(padding)
+            .testTag("travel-checklist-screen"),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item {
+            Column {
+                TextButton(onClick = onBack) {
+                    Text(stringResource(R.string.travel_back), color = HomeAccent)
+                }
+                Text(
+                    text = stringResource(R.string.travel_checklist_screen_title),
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Montserrat
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.travel_checklist_screen_intro),
+                    color = Color(0xCCFFFFFF),
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp,
+                    fontFamily = Montserrat
+                )
+            }
+        }
+        item { SectionLabel(R.string.travel_list_section) }
+        item {
+            TravelChecklistCard(
+                items = travelChecklist,
+                completedIds = completedItems,
+                notes = notes,
+                onToggle = onToggle,
+                onNotesChange = onNotesChange
+            )
+        }
+    }
+}
+
+@Composable
+private fun TravelHeader() {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) {
-                Text(stringResource(R.string.travel_back), color = HomeAccent)
-            }
             Spacer(Modifier.weight(1f))
             Text(
                 text = stringResource(R.string.travel_screen_label),

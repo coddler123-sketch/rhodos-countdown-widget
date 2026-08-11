@@ -62,7 +62,7 @@ internal fun TransitPdfScreen(
     var file by remember(document.id) { mutableStateOf<File?>(null) }
     var pageCount by remember(document.id) { mutableIntStateOf(0) }
     var pageIndex by remember(document.id) { mutableIntStateOf(0) }
-    var isLoading by remember(document.id) { mutableStateOf(true) }
+    var isLoading by remember(document.id) { mutableStateOf(false) }
     var failed by remember(document.id) { mutableStateOf(false) }
     val hasGermanTimetable = document.id in setOf("ktel_kolymbia", "ktel_lindos")
     var showGermanTimetable by remember(document.id) { mutableStateOf(hasGermanTimetable) }
@@ -84,8 +84,7 @@ internal fun TransitPdfScreen(
     }
     BackHandler(onBack = onBack)
     LaunchedEffect(document.id) {
-        isLoading = false
-        load()
+        if (!hasGermanTimetable) load()
     }
 
     Column(
@@ -138,7 +137,10 @@ internal fun TransitPdfScreen(
                     Text(stringResource(R.string.travel_german_timetable_tab), fontSize = 10.sp)
                 }
                 Button(
-                    onClick = { showGermanTimetable = false },
+                    onClick = {
+                        showGermanTimetable = false
+                        if (file == null && !isLoading) load()
+                    },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (!showGermanTimetable) HomeAccent else Color(0x1FFFFFFF),

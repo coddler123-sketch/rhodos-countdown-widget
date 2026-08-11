@@ -92,7 +92,7 @@ fun TravelCard(onClick: () -> Unit) {
 
 @Composable
 fun HomeQuickActions(
-    onOpenTravel: () -> Unit,
+    onOpenChecklist: () -> Unit,
     onOpenKolymbia: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -110,10 +110,10 @@ fun HomeQuickActions(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             HomeQuickActionCard(
-                title = stringResource(R.string.home_quick_travel_title),
-                description = stringResource(R.string.home_quick_travel_description),
-                testTag = "travel-link",
-                onClick = onOpenTravel,
+                title = stringResource(R.string.home_quick_checklist_title),
+                description = stringResource(R.string.home_quick_checklist_description),
+                testTag = "checklist-link",
+                onClick = onOpenChecklist,
                 modifier = Modifier.weight(1f)
             )
             HomeQuickActionCard(

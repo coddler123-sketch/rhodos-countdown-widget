@@ -21,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +83,7 @@ internal fun KolymbiaGermanTimetable(modifier: Modifier = Modifier) {
     val selectedConnection = KolymbiaTimetable.connections.firstOrNull { it.place == selectedPlace }
 
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.testTag("kolymbia-timetable"),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -77,10 +78,12 @@ class MainActivitySmokeTest {
     }
 
     @Test
-    fun compassOpensFromHomeAndReturns() {
-        composeRule.onNodeWithTag("compass-link").performScrollTo().performClick()
-        composeRule.onNodeWithText("Rhodos Kompass").assertIsDisplayed()
+    fun compassOpensFromMainNavigationAndReturns() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        assertEquals(0, composeRule.onAllNodesWithText("‹ Zurück").fetchSemanticsNodes().size)
+        composeRule.onNodeWithTag("community-link").performScrollTo().assertIsDisplayed()
 
         pressBack()
 
@@ -88,9 +91,38 @@ class MainActivitySmokeTest {
     }
 
     @Test
-    fun newsRotationCanBePaused() {
-        composeRule.onNodeWithContentDescription("News-Rotation pausieren").performClick()
-        composeRule.onNodeWithContentDescription("News-Rotation fortsetzen").assertIsDisplayed()
+    fun bottomNavigationSwitchesBetweenMainDestinations() {
+        composeRule.onNodeWithTag("main-nav-home").assertIsSelected()
+
+        composeRule.onNodeWithTag("main-nav-travel").performClick().assertIsSelected()
+        composeRule.onNodeWithTag("main-nav-news").performClick().assertIsSelected()
+        composeRule.onNodeWithTag("main-nav-compass").performClick().assertIsSelected()
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("main-nav-home").performClick().assertIsSelected()
+        composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
+    }
+
+    @Test
+    fun busShortcutOpensKolymbiaTimetableDirectly() {
+        composeRule.onNodeWithTag("kolymbia-bus-link").performClick()
+
+        composeRule.onNodeWithTag("kolymbia-timetable").assertIsDisplayed()
+        composeRule.onNodeWithText("Busse ab Kolymbia Beach").assertIsDisplayed()
+
+        pressBack()
+        composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
+    }
+
+    @Test
+    fun checklistShortcutOpensChecklistDirectly() {
+        composeRule.onNodeWithTag("checklist-link").performClick()
+
+        composeRule.onNodeWithTag("travel-checklist-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("Checkliste").assertIsDisplayed()
+
+        pressBack()
+        composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
     }
 
     @Test
@@ -104,7 +136,7 @@ class MainActivitySmokeTest {
             .commit()
         composeRule.activityRule.scenario.recreate()
 
-        composeRule.onNodeWithTag("news-ticker").performClick()
+        composeRule.onNodeWithTag("main-nav-news").performClick()
         composeRule.onNodeWithText("Aktuelles von Rhodos").assertIsDisplayed()
         composeRule.onAllNodesWithTag("news-open-detail")[0].performClick()
         composeRule.onNodeWithText("Auf Deutsch").assertIsDisplayed()

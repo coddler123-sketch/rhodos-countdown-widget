@@ -30,7 +30,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -40,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +57,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
@@ -66,6 +74,8 @@ import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 private const val COMMUNITY_URL = "https://www.facebook.com/groups/urlaubrhodos"
+private const val NAVIGATION_PREFS = "rhodos_navigation"
+private const val LAST_SEEN_NEWS_ID = "last_seen_news_id"
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -84,83 +94,180 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             RhodosWidgetTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    RhodosApp(padding, startInTravel = intent.getBooleanExtra(EXTRA_OPEN_TRAVEL, false))
-                }
+                RhodosApp(startInTravel = intent.getBooleanExtra(EXTRA_OPEN_TRAVEL, false))
             }
         }
     }
 }
 
+private enum class MainDestination {
+    HOME,
+    TRAVEL,
+    NEWS,
+    COMPASS
+}
+
 @Composable
-private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
+private fun RhodosApp(startInTravel: Boolean = false) {
     val context = LocalContext.current
     val newsRepository = remember(context) {
         DefaultNewsRepository(context.applicationContext, BuildConfig.NEWS_API_URL)
     }
     val newsViewModel: NewsViewModel = viewModel(factory = NewsViewModel.factory(newsRepository))
     val newsState by newsViewModel.uiState.collectAsStateWithLifecycle()
-    val showNews = remember { mutableStateOf(false) }
-    val showCompass = remember { mutableStateOf(false) }
-    val showTravel = remember { mutableStateOf(startInTravel) }
+    val destinationName = rememberSaveable {
+        mutableStateOf(if (startInTravel) MainDestination.TRAVEL.name else MainDestination.HOME.name)
+    }
     val initialTravelScheduleId = remember { mutableStateOf<String?>(null) }
+    val openTravelChecklist = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
+    val travelDetailVisible = remember { mutableStateOf(false) }
 
+    val destination = MainDestination.valueOf(destinationName.value)
     val article = selectedArticle.value
+    val latestNewsId = (newsState as? NewsUiState.Content)?.articles?.firstOrNull()?.id
+    val lastSeenNewsId = rememberSaveable {
+        mutableStateOf(
+            context.getSharedPreferences(NAVIGATION_PREFS, android.content.Context.MODE_PRIVATE)
+                .getString(LAST_SEEN_NEWS_ID, null)
+        )
+    }
+    LaunchedEffect(destination, latestNewsId) {
+        if (destination == MainDestination.NEWS && latestNewsId != null) {
+            lastSeenNewsId.value = latestNewsId
+            context.getSharedPreferences(NAVIGATION_PREFS, android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putString(LAST_SEEN_NEWS_ID, latestNewsId)
+                .apply()
+        }
+    }
     BackHandler(enabled = article != null) {
         selectedArticle.value = null
     }
-    BackHandler(enabled = article == null && showNews.value) {
-        showNews.value = false
-    }
-    BackHandler(enabled = article == null && !showNews.value && showCompass.value) {
-        showCompass.value = false
-    }
-    BackHandler(enabled = article == null && !showNews.value && !showCompass.value && showTravel.value) {
-        showTravel.value = false
+    BackHandler(
+        enabled = article == null && !travelDetailVisible.value && destination != MainDestination.HOME
+    ) {
+        initialTravelScheduleId.value = null
+        openTravelChecklist.value = false
+        destinationName.value = MainDestination.HOME.name
     }
 
-    if (article != null) {
-        NewsDetailScreen(
-            article = article,
-            padding = padding,
-            repository = newsRepository,
-            onBack = { selectedArticle.value = null }
-        )
-    } else if (showNews.value) {
-        NewsScreen(
-            state = newsState,
-            padding = padding,
-            onBack = { showNews.value = false },
-            onRefresh = newsViewModel::refresh,
-            onOpenDetail = { selectedArticle.value = it }
-        )
-    } else if (showTravel.value) {
-        TravelScreen(
-            padding = padding,
-            onBack = {
-                initialTravelScheduleId.value = null
-                showTravel.value = false
-            },
-            initialScheduleId = initialTravelScheduleId.value
-        )
-    } else if (showCompass.value) {
-        CompassScreen(padding = padding, onBack = { showCompass.value = false })
-    } else {
-        RhodosHome(
-            padding = padding,
-            newsState = newsState,
-            onOpenNews = { showNews.value = true },
-            onOpenCompass = { showCompass.value = true },
-            onOpenTravel = {
-                initialTravelScheduleId.value = null
-                showTravel.value = true
-            },
-            onOpenKolymbia = {
-                initialTravelScheduleId.value = "ktel_kolymbia"
-                showTravel.value = true
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color(0xFF0C252B),
+        bottomBar = {
+            if (article == null && !travelDetailVisible.value) {
+                MainNavigationBar(
+                    selected = destination,
+                    showNewsBadge = latestNewsId != null && latestNewsId != lastSeenNewsId.value,
+                    onSelect = { selected ->
+                        selectedArticle.value = null
+                        initialTravelScheduleId.value = null
+                        openTravelChecklist.value = false
+                        destinationName.value = selected.name
+                    }
+                )
             }
-        )
+        }
+    ) { padding ->
+        if (article != null) {
+            NewsDetailScreen(
+                article = article,
+                padding = padding,
+                repository = newsRepository,
+                onBack = { selectedArticle.value = null }
+            )
+        } else {
+            when (destination) {
+                MainDestination.HOME -> RhodosHome(
+                    padding = padding,
+                    onOpenChecklist = {
+                        initialTravelScheduleId.value = null
+                        openTravelChecklist.value = true
+                        destinationName.value = MainDestination.TRAVEL.name
+                    },
+                    onOpenKolymbia = {
+                        openTravelChecklist.value = false
+                        initialTravelScheduleId.value = "ktel_kolymbia"
+                        destinationName.value = MainDestination.TRAVEL.name
+                    }
+                )
+                MainDestination.TRAVEL -> TravelScreen(
+                    padding = padding,
+                    onBack = {
+                        initialTravelScheduleId.value = null
+                        openTravelChecklist.value = false
+                        destinationName.value = MainDestination.HOME.name
+                    },
+                    initialScheduleId = initialTravelScheduleId.value,
+                    openChecklistDirectly = openTravelChecklist.value,
+                    onDetailVisibilityChanged = { travelDetailVisible.value = it }
+                )
+                MainDestination.NEWS -> NewsScreen(
+                    state = newsState,
+                    padding = padding,
+                    onRefresh = newsViewModel::refresh,
+                    onOpenDetail = { selectedArticle.value = it }
+                )
+                MainDestination.COMPASS -> CompassScreen(
+                    padding = padding,
+                    onOpenCommunity = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(COMMUNITY_URL)))
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainNavigationBar(
+    selected: MainDestination,
+    showNewsBadge: Boolean,
+    onSelect: (MainDestination) -> Unit
+) {
+    NavigationBar(containerColor = Color(0xFF102A2F)) {
+        MainDestination.entries.forEach { destination ->
+            val labelRes = when (destination) {
+                MainDestination.HOME -> R.string.main_nav_home
+                MainDestination.TRAVEL -> R.string.main_nav_travel
+                MainDestination.NEWS -> R.string.main_nav_news
+                MainDestination.COMPASS -> R.string.main_nav_compass
+            }
+            val iconRes = when (destination) {
+                MainDestination.HOME -> R.drawable.ic_nav_home
+                MainDestination.TRAVEL -> R.drawable.ic_nav_travel
+                MainDestination.NEWS -> R.drawable.ic_nav_news
+                MainDestination.COMPASS -> R.drawable.ic_nav_compass
+            }
+            NavigationBarItem(
+                selected = destination == selected,
+                onClick = { onSelect(destination) },
+                icon = {
+                    BadgedBox(
+                        badge = {
+                            if (destination == MainDestination.NEWS && showNewsBadge) {
+                                Badge(modifier = Modifier.testTag("main-nav-news-badge"))
+                            }
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = null
+                        )
+                    }
+                },
+                label = { Text(stringResource(labelRes)) },
+                modifier = Modifier.testTag("main-nav-${destination.name.lowercase()}"),
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color(0xFF102A2F),
+                    selectedTextColor = HomeAccent,
+                    indicatorColor = HomeAccent,
+                    unselectedIconColor = Color(0xB3FFFFFF),
+                    unselectedTextColor = Color(0xB3FFFFFF)
+                )
+            )
+        }
     }
 }
 
@@ -168,10 +275,7 @@ private fun RhodosApp(padding: PaddingValues, startInTravel: Boolean = false) {
 @Composable
 private fun RhodosHome(
     padding: PaddingValues,
-    newsState: NewsUiState,
-    onOpenNews: () -> Unit,
-    onOpenCompass: () -> Unit,
-    onOpenTravel: () -> Unit,
+    onOpenChecklist: () -> Unit,
     onOpenKolymbia: () -> Unit
 ) {
     val context = LocalContext.current
@@ -284,23 +388,14 @@ private fun RhodosHome(
             CountdownSection(s)
             Spacer(Modifier.height(16.dp))
             HomeQuickActions(
-                onOpenTravel = onOpenTravel,
+                onOpenChecklist = onOpenChecklist,
                 onOpenKolymbia = onOpenKolymbia
             )
             Spacer(Modifier.height(16.dp))
-            when (Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % 3) {
-                0 -> NewsTicker(newsState, onOpenNews)
-                1 -> FactCard(s.factOfTheDay)
+            when (Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % 2) {
+                0 -> FactCard(s.factOfTheDay)
                 else -> HighlightCard(rhodosHighlightOfTheDay())
             }
-            Spacer(Modifier.height(12.dp))
-            CompassCard(onClick = onOpenCompass)
-            Spacer(Modifier.height(12.dp))
-            CommunityCard(
-                onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(COMMUNITY_URL)))
-                }
-            )
             Spacer(Modifier.height(12.dp))
             BottomSection(
                 s = s,
@@ -451,13 +546,12 @@ private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () 
             )
             CountdownProgress(s.progress)
         }
-        // Dezentes Gear-Icon oben rechts
+        // Kleine Darstellung bei weiterhin gut erreichbarer 48-dp-Touchfläche.
         Box(
             modifier = Modifier
-                .padding(top = 4.dp, start = 8.dp)
+                .padding(start = 8.dp)
+                .offset(x = 12.dp, y = (-12).dp)
                 .size(48.dp)
-                .clip(CircleShape)
-                .background(HomeCardColor)
                 .testTag("settings-button")
                 .clickable(onClick = onSettings)
                 .clearAndSetSemantics {
@@ -468,17 +562,25 @@ private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () 
                     }
                 }
         ) {
-            Text(
-                text = "⚙",
-                fontSize = 19.sp,
-                color = Color.White,
+            Box(
                 modifier = Modifier
                     .align(Alignment.Center)
-            )
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(HomeCardColor.copy(alpha = 0.38f))
+            ) {
+                Text(
+                    text = "⚙",
+                    fontSize = 17.sp,
+                    color = HomeAccent.copy(alpha = 0.78f),
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
             if (hasUpdateBadge) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
+                        .padding(top = 6.dp, end = 6.dp)
                         .size(9.dp)
                         .background(Color(0xFFFF5A5F), CircleShape)
                 )

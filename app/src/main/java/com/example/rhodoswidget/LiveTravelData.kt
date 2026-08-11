@@ -143,6 +143,18 @@ object LiveTravelRepository {
         KtelSource("ktel_seven_springs", "Rhodos ↔ Sieben Quellen", "seven-springs-qr")
     )
 
+    internal fun placeholderTransitDocument(id: String): TransitDocument? =
+        ktelSources.firstOrNull { it.id == id }?.let { source ->
+            TransitDocument(
+                id = source.id,
+                title = source.title,
+                operator = "KTEL",
+                pdfUrl = "",
+                sourceUrl = source.pageUrl,
+                fetchedAtMillis = 0L
+            )
+        }
+
     fun fetchTransit(nowMillis: Long = System.currentTimeMillis()): List<TransitDocument>? {
         val ktel = ktelSources.mapNotNull { source ->
             val api = "https://www.ktelrodou.gr/wp-json/wp/v2/pages?slug=${source.slug}&_fields=content"

@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -66,9 +65,7 @@ import java.util.Locale
 import java.util.TimeZone
 import kotlin.math.max
 
-private val Sea = Color(0xFF1F8796)
 private val Sun = Color(0xFFF4B942)
-private val Sand = Color(0xFFFFF3D8)
 
 @Composable
 fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
@@ -160,7 +157,6 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
 fun NewsScreen(
     state: NewsUiState,
     padding: PaddingValues,
-    onBack: () -> Unit,
     onRefresh: () -> Unit,
     onOpenDetail: (NewsArticle) -> Unit
 ) {
@@ -171,7 +167,7 @@ fun NewsScreen(
 
     Box(
         modifier = Modifier.fillMaxSize().background(
-            Brush.verticalGradient(listOf(Color(0xFFFFF8E8), Color(0xFFE8F7F7), Color.White))
+            Brush.verticalGradient(listOf(Color(0xFF142E34), Color(0xFF0D1113)))
         )
     ) {
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -179,15 +175,20 @@ fun NewsScreen(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("‹", modifier = Modifier.clickable(onClick = onBack).padding(8.dp), color = Sea, fontSize = 34.sp)
                 Column(Modifier.weight(1f)) {
-                    Text("Aktuelles von Rhodos", color = Color(0xFF174954), fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Inselinfos für unterwegs", color = Sea, fontSize = 13.sp)
+                    Text(
+                        "Aktuelles von Rhodos",
+                        color = Color.White,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = Montserrat
+                    )
+                    Text("Inselinfos für unterwegs", color = Color(0xBFFFFFFF), fontSize = 12.sp)
                 }
                 TextButton(
                     onClick = onRefresh,
                     enabled = (state as? NewsUiState.Content)?.isRefreshing != true
-                ) { Text("Aktualisieren", color = Sea, fontWeight = FontWeight.Bold) }
+                ) { Text("Aktualisieren", color = HomeAccent, fontWeight = FontWeight.Bold) }
             }
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
@@ -199,22 +200,22 @@ fun NewsScreen(
                         onClick = { selected = category },
                         label = { Text(category.label) },
                         colors = FilterChipDefaults.filterChipColors(
-                            containerColor = Color.White.copy(alpha = 0.45f),
-                            labelColor = Sea,
-                            selectedContainerColor = Sand,
-                            selectedLabelColor = Color(0xFF174954)
+                            containerColor = Color.Transparent,
+                            labelColor = Color.White,
+                            selectedContainerColor = HomeAccent,
+                            selectedLabelColor = Color(0xFF102126)
                         ),
                         border = BorderStroke(
                             1.dp,
-                            if (selected == category) Sea.copy(alpha = 0.24f)
-                            else Sea.copy(alpha = 0.55f)
+                            if (selected == category) HomeAccent
+                            else HomeCardBorder
                         )
                     )
                 }
             }
             Text(
                 "Weitere Filter ›",
-                color = Sea.copy(alpha = 0.72f),
+                color = Color(0x99FFFFFF),
                 fontSize = 11.sp,
                 modifier = Modifier.align(Alignment.End).padding(end = 20.dp, top = 2.dp)
             )
@@ -229,10 +230,10 @@ fun NewsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val content = state as NewsUiState.Content
-                    content.warning?.let { item { Text(it, color = Color(0xFF8A5B00), fontSize = 13.sp) } }
-                    if (content.isCached) item { Text("Ohne Internet verfügbar · zuletzt geladener Stand", color = Sea, fontSize = 12.sp) }
+                    content.warning?.let { item { Text(it, color = Sun, fontSize = 13.sp) } }
+                    if (content.isCached) item { Text("Ohne Internet verfügbar · zuletzt geladener Stand", color = HomeAccent, fontSize = 12.sp) }
                     items(articles, key = NewsArticle::id) { NewsCard(it, onOpenDetail) }
-                    item { Text("Automatisch aus dem Griechischen übersetzt", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
+                    item { Text("Automatisch aus dem Griechischen übersetzt", color = Color(0x80FFFFFF), fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
                 }
             }
         }
@@ -242,13 +243,17 @@ fun NewsScreen(
 @Composable
 private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) {
     val context = LocalContext.current
-    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
+    Card(
+        modifier = Modifier.fillMaxWidth().border(1.dp, HomeCardBorder, HomeCardShape),
+        colors = CardDefaults.cardColors(containerColor = HomeCardColor),
+        shape = HomeCardShape
+    ) {
         Column(Modifier.padding(18.dp)) {
-            Text(article.category.label.uppercase(), color = Sea, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(article.category.label.uppercase(), color = HomeAccent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(7.dp))
             Text(
                 article.germanTitle,
-                color = Color(0xFF173D46),
+                color = Color.White,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 3,
@@ -257,7 +262,7 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
             Spacer(Modifier.height(8.dp))
             Text(
                 article.germanSummary,
-                color = Color(0xFF496268),
+                color = Color(0xD9FFFFFF),
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 maxLines = 3,
@@ -267,7 +272,7 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
             val relativeAge = relativeNewsAge(article.publishedAt)
             Text(
                 "${article.source} · ${formatNewsDate(article.publishedAt)}${relativeAge?.let { " · $it" } ?: ""}",
-                color = Color.Gray,
+                color = Color(0x99FFFFFF),
                 fontSize = 12.sp
             )
             Spacer(Modifier.height(8.dp))
@@ -278,12 +283,12 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
             ) {
                 TextButton(
                     onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
-                ) { Text("Auf Griechisch", color = Sea, fontWeight = FontWeight.SemiBold) }
+                ) { Text("Auf Griechisch", color = HomeAccent, fontWeight = FontWeight.SemiBold) }
                 Spacer(Modifier.width(6.dp))
                 Button(
                     onClick = { onOpenDetail(article) },
                     modifier = Modifier.testTag("news-open-detail"),
-                    colors = ButtonDefaults.buttonColors(containerColor = Sun, contentColor = Color(0xFF3D2B00))
+                    colors = ButtonDefaults.buttonColors(containerColor = HomeAccent, contentColor = Color(0xFF102126))
                 ) { Text("Deutsch lesen", fontWeight = FontWeight.Bold) }
             }
         }
@@ -295,10 +300,13 @@ private fun NewsMessage(message: String, onRetry: (() -> Unit)? = null) {
     Column(Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("☀", fontSize = 38.sp)
         Spacer(Modifier.height(10.dp))
-        Text(message, color = Color(0xFF496268))
+        Text(message, color = Color(0xD9FFFFFF))
         if (onRetry != null) {
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = Sea)) { Text("Erneut versuchen") }
+            Button(
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(containerColor = HomeAccent, contentColor = Color(0xFF102126))
+            ) { Text("Erneut versuchen") }
         }
     }
 }

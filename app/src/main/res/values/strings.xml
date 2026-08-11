@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Rhodos Widget</string>
+    <string name="main_nav_home">Heute</string>
+    <string name="main_nav_travel">Unterwegs</string>
+    <string name="main_nav_news">Aktuelles</string>
+    <string name="main_nav_compass">Tipps</string>
     <string name="community_title">Rhodos-Urlaubsgruppe</string>
     <string name="community_label">FACEBOOK-GRUPPE</string>
     <string name="community_description">Reisetipps und Erfahrungen austauschen</string>
@@ -10,8 +14,8 @@
     <string name="travel_card_title">Unterwegs auf Rhodos</string>
     <string name="travel_card_description">Busse, Ausflüge und Hilfe vor Ort</string>
     <string name="home_quick_actions_label">SCHNELLZUGRIFF</string>
-    <string name="home_quick_travel_title">Unterwegs</string>
-    <string name="home_quick_travel_description">Wetter, Ausflüge und Hilfe</string>
+    <string name="home_quick_checklist_title">Checkliste</string>
+    <string name="home_quick_checklist_description">Packliste &amp; Notizen</string>
     <string name="home_quick_bus_title">Busse</string>
     <string name="home_quick_bus_description">Ab Kolymbia Beach</string>
     <string name="travel_back">‹ Zurück</string>
@@ -177,6 +181,8 @@
     <string name="travel_pharmacy_title">Apotheke in der Nähe</string>
     <string name="travel_pharmacy_description">Geöffnete Apotheken mit der Karten-App suchen</string>
     <string name="travel_list_section">MEINE URLAUBSLISTE</string>
+    <string name="travel_checklist_screen_title">Checkliste</string>
+    <string name="travel_checklist_screen_intro">Packliste abhaken und persönliche Notizen festhalten.</string>
     <string name="travel_list_progress">%1$d von %2$d erledigt</string>
     <string name="travel_check_documents">Ausweise und Reiseunterlagen</string>
     <string name="travel_check_insurance">Versicherung und Gesundheitskarte</string>
