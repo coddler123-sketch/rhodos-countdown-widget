@@ -1,8 +1,9 @@
 package com.example.rhodoswidget
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,15 +13,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,35 +41,63 @@ data class CompassTip(
     val category: String,
     val title: String,
     val description: String,
-    val signal: String
+    val note: String,
+    val kind: CompassTipKind = CompassTipKind.RECOMMENDATION
 )
 
+enum class CompassTipKind(val label: String) {
+    RECOMMENDATION("EMPFOHLEN"),
+    NOTE("HINWEIS"),
+    CAUTION("BEACHTEN")
+}
+
 internal val compassTips = listOf(
-    CompassTip("Essen", "Taverne Akti", "Als sehr lecker, günstig und besonders freundlich empfohlen.", "35 Reaktionen · aktueller Beitrag"),
-    CompassTip("Essen", "Stama", "Kleine Speisekarte und besonders herzlicher Service wurden positiv hervorgehoben.", "Ergänzende Empfehlung aus der Gruppe"),
-    CompassTip("Strände", "Tsambika / Tsampika", "Mehrfach positiv genannt, aktuell aber gut besucht. Links am Strand wurden Restaurant und Liegen erwähnt.", "Besucherandrang beachten"),
-    CompassTip("Strände", "Stegna", "Strand und Essen vor Ort wurden positiv bewertet; auch hier kann es voller werden.", "Aktueller Erfahrungsbericht"),
-    CompassTip("Strände", "Pefkoi Plakia Beach", "Die Blue Waves Cantine wurde als besonderer Ort für eine Pause am Meer genannt.", "Konkreter Fund aus den Beiträgen"),
-    CompassTip("Unterkünfte", "Elysium bei Faliraki", "Hotel, Strand, Service und Lage wurden in einem aktuellen Gastbericht sehr positiv bewertet.", "Einzelne positive Erfahrung"),
-    CompassTip("Strände", "Elli Beach", "Ein aktueller Beitrag berichtet von mehr Müll als in den Vorjahren.", "Einzelne aktuelle Beobachtung"),
-    CompassTip("Stadt", "Mandraki vor Sonnenaufgang", "Früh am Morgen sorgen ruhiges Licht, Altstadtkulisse und einlaufende Schiffe für eine besondere Stimmung.", "Konkreter Zeitpunkt"),
-    CompassTip("Unterkünfte", "Kresten Palace", "Mehrere positive Rückmeldungen; zum Strand führt ein steiler Weg bergab und wieder hinauf.", "Mehrere Erfahrungen"),
-    CompassTip("Unterkünfte", "Lydia Maris Resort", "Ein wiederkehrender Gast beschreibt den Aufenthalt erneut als sehr angenehm.", "Bericht eines Stammgasts"),
-    CompassTip("Unterkünfte", "Esperides Beach Family", "Mehrfach als Familienhotel mit Pool, direkter Meerlage und gutem Essen unterstützt.", "Gruppentipp für Familien"),
-    CompassTip("Unterkünfte", "Blue Sea Beach", "Positiver erster Eindruck, aber für einen Abendbummel deutlich außerhalb von Faliraki.", "Lage und Transfer prüfen"),
-    CompassTip("Mobilität", "Mietwagenbedingungen prüfen", "Selbstbeteiligung, Kaution, Shuttle und Versicherung vor der Buchung schriftlich bestätigen lassen.", "Praktischer Warnhinweis")
+    CompassTip("Essen", "Taverne Akti", "Leckeres Essen, faire Preise und freundlicher Service.", "Besonders häufig empfohlen"),
+    CompassTip("Essen", "Stama", "Kleine Speisekarte und sehr herzlicher Service.", "Persönliche Empfehlung aus der Gruppe"),
+    CompassTip("Strände", "Tsambika / Tsampika", "Weitläufiger Strand mit Restaurant und Liegen auf der linken Seite.", "Kann tagsüber sehr voll werden", CompassTipKind.CAUTION),
+    CompassTip("Strände", "Stegna", "Schöner Strand mit guten Möglichkeiten zum Essen.", "In der Hauptzeit mehr Andrang", CompassTipKind.NOTE),
+    CompassTip("Strände", "Pefkoi Plakia Beach", "Ruhige Pause am Meer bei der Blue Waves Cantine.", "Tipp für einen entspannten Strandtag"),
+    CompassTip("Strände", "Elli Beach", "Zentraler Stadtstrand mit derzeit gemischten Erfahrungen.", "Sauberkeit vor Ort prüfen", CompassTipKind.CAUTION),
+    CompassTip("Ausflüge", "Mandraki vor Sonnenaufgang", "Ruhiges Licht, Altstadtkulisse und einlaufende Schiffe.", "Am besten sehr früh besuchen"),
+    CompassTip("Mobilität", "Mietwagenbedingungen prüfen", "Selbstbeteiligung, Kaution, Shuttle und Versicherung schriftlich bestätigen lassen.", "Vor der Buchung klären", CompassTipKind.CAUTION),
+    CompassTip("Unterkünfte", "Elysium bei Faliraki", "Strand, Service und Lage wurden positiv hervorgehoben.", "Einzelne sehr positive Erfahrung", CompassTipKind.NOTE),
+    CompassTip("Unterkünfte", "Kresten Palace", "Mehrere positive Rückmeldungen zu Hotel und Aufenthalt.", "Steiler Weg zum Strand", CompassTipKind.CAUTION),
+    CompassTip("Unterkünfte", "Lydia Maris Resort", "Von einem wiederkehrenden Gast erneut positiv bewertet.", "Erfahrung eines Stammgasts", CompassTipKind.NOTE),
+    CompassTip("Unterkünfte", "Esperides Beach Family", "Familienhotel mit Pool, direkter Meerlage und gutem Essen.", "Gut für Familien"),
+    CompassTip("Unterkünfte", "Blue Sea Beach", "Positiver erster Eindruck in direkter Strandlage.", "Für Abendbummel außerhalb von Faliraki", CompassTipKind.CAUTION)
 )
 
 @Composable
 fun CompassScreen(
     padding: PaddingValues,
-    onOpenCommunity: () -> Unit
+    scrollToTopRequest: Int = 0,
+    onOpenCommunity: () -> Unit,
+    onDetailVisibilityChanged: (Boolean) -> Unit = {}
 ) {
-    val categories = remember { listOf("Alle") + compassTips.map { it.category }.distinct() }
-    var selected by rememberSaveable { mutableStateOf("Alle") }
-    val visible = remember(selected) {
-        if (selected == "Alle") compassTips else compassTips.filter { it.category == selected }
+    val listState = rememberLazyListState()
+    LaunchedEffect(scrollToTopRequest) {
+        if (scrollToTopRequest > 0) listState.animateScrollToItem(0)
     }
+    val categories = remember {
+        listOf(
+            CompassCategory("Essen", "Tavernen und persönliche Empfehlungen"),
+            CompassCategory("Strände", "Strände für lebhafte und ruhige Tage"),
+            CompassCategory("Ausflüge", "Besondere Orte und passende Besuchszeiten"),
+            CompassCategory("Mobilität", "Wichtige Hinweise für Mietwagen und Wege"),
+            CompassCategory("Unterkünfte", "Erfahrungen mit Hotels auf Rhodos")
+        )
+    }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
+    val visible = remember(selectedCategory) {
+        compassTips.filter { it.category == selectedCategory }
+    }
+    LaunchedEffect(selectedCategory) {
+        onDetailVisibilityChanged(selectedCategory != null)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onDetailVisibilityChanged(false) }
+    }
+    BackHandler(enabled = selectedCategory != null) { selectedCategory = null }
 
     Box(
         modifier = Modifier
@@ -76,54 +106,152 @@ fun CompassScreen(
             .padding(padding)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().testTag("compass-screen"),
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(if (selectedCategory == null) "compass-screen" else "compass-category-screen"),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(Modifier.weight(1f))
-                    Text("13 TIPPS AUS DER GRUPPE", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-                Text("Rhodos Tipps", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
-                Text(
-                    "Fester Stand aus sichtbaren Gruppenbeiträgen. Angaben bitte vor Ort prüfen.",
-                    color = Color(0xBFFFFFFF), fontSize = 12.sp, lineHeight = 18.sp, fontFamily = Montserrat
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    categories.forEach { category ->
-                        FilterChip(
-                            selected = selected == category,
-                            onClick = { selected = category },
-                            label = { Text(category) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = HomeAccent,
-                                selectedLabelColor = Color(0xFF102126),
-                                labelColor = Color.White
+            if (selectedCategory == null) {
+                item { CompassOverviewHeader() }
+                items(categories.chunked(2), key = { row -> row.first().title }) { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        row.forEach { category ->
+                            CompassCategoryCard(
+                                category = category,
+                                count = compassTips.count { it.category == category.title },
+                                modifier = Modifier.weight(1f),
+                                onClick = { selectedCategory = category.title }
                             )
-                        )
+                        }
+                        if (row.size == 1) {
+                            CompassCommunityCard(
+                                modifier = Modifier.weight(1f),
+                                onClick = onOpenCommunity
+                            )
+                        }
                     }
                 }
-            }
-            item { CommunityCard(onClick = onOpenCommunity) }
-            items(visible, key = { it.title }) { tip -> CompassTipCard(tip) }
-            item {
-                Text(
-                    "Die Hinweise sind persönliche Erfahrungen und werden nicht automatisch aktualisiert.",
-                    color = Color(0x80FFFFFF), fontSize = 10.sp, lineHeight = 15.sp,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+            } else {
+                item {
+                    CompassCategoryHeader(
+                        title = selectedCategory.orEmpty(),
+                        count = visible.size,
+                        onBack = { selectedCategory = null }
+                    )
+                }
+                items(visible, key = { it.title }) { tip -> CompassTipCard(tip) }
+                item {
+                    Text(
+                        "Persönliche Erfahrungen können sich ändern. Preise, Öffnungszeiten und Bedingungen bitte vor Ort prüfen.",
+                        color = Color(0x80FFFFFF), fontSize = 10.sp, lineHeight = 15.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
             }
         }
     }
 }
 
+private data class CompassCategory(
+    val title: String,
+    val description: String
+)
+
+@Composable
+private fun CompassOverviewHeader() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(Modifier.weight(1f))
+        Text("13 AUSGEWÄHLTE TIPPS", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+    }
+    Text("Rhodos Tipps", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
+    Text(
+        "Wähle ein Thema für Empfehlungen und persönliche Erfahrungen.",
+        color = Color(0xBFFFFFFF), fontSize = 12.sp, lineHeight = 18.sp, fontFamily = Montserrat
+    )
+}
+
+@Composable
+private fun CompassCategoryCard(
+    category: CompassCategory,
+    count: Int,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 132.dp)
+            .background(HomeCardColor, HomeCardShape)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .clickable(onClick = onClick)
+            .testTag("compass-category-${category.title}")
+            .padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(category.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
+            Spacer(Modifier.height(6.dp))
+            Text(category.description, color = Color(0xBFFFFFFF), fontSize = 11.sp, lineHeight = 16.sp, fontFamily = Montserrat)
+        }
+        Text("$count TIPPS  ›", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun CompassCommunityCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 132.dp)
+            .background(HomeCardColor, HomeCardShape)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .clickable(onClick = onClick)
+            .testTag("community-link")
+            .padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text("Facebook", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
+            Spacer(Modifier.height(6.dp))
+            Text("Weitere Erfahrungen aus der Rhodos-Community", color = Color(0xBFFFFFFF), fontSize = 11.sp, lineHeight = 16.sp, fontFamily = Montserrat)
+        }
+        Text("COMMUNITY  ↗", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun CompassCategoryHeader(
+    title: String,
+    count: Int,
+    onBack: () -> Unit
+) {
+    Text(
+        "‹ Alle Tipps",
+        color = HomeAccent,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .clickable(onClick = onBack)
+            .testTag("compass-category-back")
+            .padding(vertical = 12.dp)
+    )
+    Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
+    Text("$count persönliche Tipps", color = Color(0xBFFFFFFF), fontSize = 12.sp, fontFamily = Montserrat)
+}
+
 @Composable
 private fun CompassTipCard(tip: CompassTip) {
+    val statusColor = when (tip.kind) {
+        CompassTipKind.RECOMMENDATION -> HomeAccent
+        CompassTipKind.NOTE -> Color(0xFF8DD7E3)
+        CompassTipKind.CAUTION -> Color(0xFFFFB86B)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,12 +259,27 @@ private fun CompassTipCard(tip: CompassTip) {
             .border(1.dp, HomeCardBorder, HomeCardShape)
             .padding(16.dp)
     ) {
-        Text(tip.category.uppercase(), color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(tip.category.uppercase(), color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+            Text(
+                text = tip.kind.label,
+                color = statusColor,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(50))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
         Spacer(Modifier.height(5.dp))
         Text(tip.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = Montserrat)
         Spacer(Modifier.height(5.dp))
         Text(tip.description, color = Color(0xE6FFFFFF), fontSize = 12.sp, lineHeight = 18.sp, fontFamily = Montserrat)
         Spacer(Modifier.height(8.dp))
-        Text(tip.signal, color = Color(0xA6FFFFFF), fontSize = 10.sp, fontFamily = Montserrat)
+        Text(tip.note, color = statusColor, fontSize = 10.sp, fontFamily = Montserrat)
     }
 }

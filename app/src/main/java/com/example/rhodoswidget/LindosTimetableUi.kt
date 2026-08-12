@@ -24,9 +24,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.DateFormat
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 internal fun LindosGermanTimetable(modifier: Modifier = Modifier) {
@@ -75,12 +83,19 @@ internal fun LindosGermanTimetable(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun KolymbiaGermanTimetable(modifier: Modifier = Modifier) {
+internal fun KolymbiaGermanTimetable(
+    document: TransitDocument,
+    modifier: Modifier = Modifier
+) {
     var query by rememberSaveable { mutableStateOf("") }
     var selectedPlace by rememberSaveable { mutableStateOf<String?>(null) }
     var showReferenceSchedule by rememberSaveable { mutableStateOf(false) }
     val connections = KolymbiaTimetable.searchConnections(query)
     val selectedConnection = KolymbiaTimetable.connections.firstOrNull { it.place == selectedPlace }
+    val hasUnreviewedUpdate = KolymbiaTimetable.hasUnreviewedUpdate(document.pdfUrl)
+    val checkedAt = document.fetchedAtMillis.takeIf { it > 0L }?.let {
+        DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(it))
+    }
 
     LazyColumn(
         modifier = modifier.testTag("kolymbia-timetable"),
@@ -94,7 +109,10 @@ internal fun KolymbiaGermanTimetable(modifier: Modifier = Modifier) {
                     .padding(12.dp)
             ) {
                 Text(
-                    stringResource(R.string.travel_timetable_trip_status_title),
+                    stringResource(
+                        if (hasUnreviewedUpdate) R.string.travel_timetable_update_detected_title
+                        else R.string.travel_timetable_trip_status_title
+                    ),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -113,6 +131,24 @@ internal fun KolymbiaGermanTimetable(modifier: Modifier = Modifier) {
                     fontSize = 10.sp,
                     fontFamily = Montserrat
                 )
+                Text(
+                    text = checkedAt?.let {
+                        stringResource(R.string.travel_timetable_checked_at, it)
+                    } ?: stringResource(R.string.travel_timetable_check_pending),
+                    color = Color(0x99FFFFFF),
+                    fontSize = 10.sp,
+                    fontFamily = Montserrat
+                )
+                if (hasUnreviewedUpdate) {
+                    Text(
+                        text = stringResource(R.string.travel_timetable_update_detected_note),
+                        color = HomeAccent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Montserrat,
+                        modifier = Modifier.padding(top = 6.dp).testTag("timetable-update-detected")
+                    )
+                }
             }
         }
         item {
@@ -230,7 +266,7 @@ private fun QuickDestinationRow(
                     contentColor = Color.White
                 )
             ) {
-                Text(place, fontSize = 10.sp, maxLines = 1)
+                Text(place, fontSize = 10.sp, maxLines = 2)
             }
         }
     }
@@ -284,6 +320,12 @@ private fun KolymbiaConnectionDetail(
     onHideReference: () -> Unit,
     onChooseAnother: () -> Unit
 ) {
+    val now = Calendar.getInstance()
+    val highlightNextDeparture = KolymbiaTimetable.isValidOn(
+        now.get(Calendar.YEAR),
+        now.get(Calendar.MONTH) + 1,
+        now.get(Calendar.DAY_OF_MONTH)
+    )
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -338,11 +380,13 @@ private fun KolymbiaConnectionDetail(
             }
             ConnectionTimes(
                 titleRes = R.string.travel_timetable_outbound,
-                route = connection.outbound
+                route = connection.outbound,
+                highlightNextDeparture = highlightNextDeparture
             )
             ConnectionTimes(
                 titleRes = R.string.travel_timetable_return,
-                route = connection.returnTrip
+                route = connection.returnTrip,
+                highlightNextDeparture = highlightNextDeparture
             )
             if (isReferenceSchedule) {
                 TextButton(onClick = onHideReference) {
@@ -354,7 +398,11 @@ private fun KolymbiaConnectionDetail(
 }
 
 @Composable
-private fun ConnectionTimes(titleRes: Int, route: LindosTimetableRoute) {
+private fun ConnectionTimes(
+    titleRes: Int,
+    route: LindosTimetableRoute,
+    highlightNextDeparture: Boolean
+) {
     Text(
         text = stringResource(titleRes),
         color = Color.White,
@@ -362,12 +410,43 @@ private fun ConnectionTimes(titleRes: Int, route: LindosTimetableRoute) {
         fontWeight = FontWeight.Bold,
         fontFamily = Montserrat
     )
+    val now = Calendar.getInstance()
+    val nextDeparture = if (highlightNextDeparture) {
+        KolymbiaTimetable.nextDeparture(
+            route.departureTimes,
+            now.get(Calendar.HOUR_OF_DAY),
+            now.get(Calendar.MINUTE)
+        )
+    } else null
+    val times = buildAnnotatedString {
+        route.departureTimes.forEachIndexed { index, time ->
+            if (index > 0) append("  ·  ")
+            if (time == nextDeparture) {
+                withStyle(
+                    SpanStyle(
+                        color = Color(0xFF102126),
+                        background = HomeAccent,
+                        fontWeight = FontWeight.Bold
+                    )
+                ) { append(" $time ") }
+            } else {
+                append(time)
+            }
+        }
+    }
+    val spokenTimes = route.departureTimes.joinToString(", ")
+    val nextDescription = nextDeparture?.let {
+        stringResource(R.string.travel_timetable_next_departure_accessibility, it)
+    }
     Text(
-        text = route.departureTimes.joinToString("  ·  "),
+        text = times,
         color = Color(0xE6FFFFFF),
         fontSize = 12.sp,
         lineHeight = 19.sp,
-        fontFamily = Montserrat
+        fontFamily = Montserrat,
+        modifier = Modifier.semantics {
+            contentDescription = listOfNotNull(spokenTimes, nextDescription).joinToString(". ")
+        }
     )
 }
 

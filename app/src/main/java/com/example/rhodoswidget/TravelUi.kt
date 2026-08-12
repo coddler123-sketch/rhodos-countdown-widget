@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,9 +20,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -33,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,11 +54,18 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
+
+private enum class TravelArea {
+    TODAY,
+    MOBILITY,
+    EXPLORE,
+    HELP
+}
 
 @Composable
 fun TravelScreen(
     padding: PaddingValues,
+    scrollToTopRequest: Int = 0,
     onBack: () -> Unit,
     initialScheduleId: String? = null,
     openChecklistDirectly: Boolean = false,
@@ -62,6 +74,10 @@ fun TravelScreen(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    LaunchedEffect(scrollToTopRequest) {
+        if (scrollToTopRequest > 0) listState.animateScrollToItem(0)
+    }
     var marineWeather by remember(context) {
         mutableStateOf(MarineWeatherRepository.cached(context))
     }
@@ -99,18 +115,24 @@ fun TravelScreen(
     var alertsEnabled by remember(context) {
         mutableStateOf(TravelAlertSettings.isEnabled(context))
     }
+    var showMobilitySources by rememberSaveable { mutableStateOf(false) }
+    var showFerrySources by rememberSaveable { mutableStateOf(false) }
+    var showMoreHelp by rememberSaveable { mutableStateOf(false) }
+    var selectedArea by rememberSaveable { mutableStateOf<TravelArea?>(null) }
 
-    LaunchedEffect(selectedSchedule, openChecklistDirectly) {
-        onDetailVisibilityChanged(selectedSchedule != null || openChecklistDirectly)
+    LaunchedEffect(selectedSchedule, openChecklistDirectly, selectedArea) {
+        onDetailVisibilityChanged(
+            selectedSchedule != null || openChecklistDirectly || selectedArea != null
+        )
     }
     DisposableEffect(Unit) {
         onDispose { onDetailVisibilityChanged(false) }
     }
-    BackHandler(enabled = selectedSchedule != null || openChecklistDirectly) {
-        if (initialScheduleId != null || openChecklistDirectly) {
-            onBack()
-        } else {
-            selectedSchedule = null
+    BackHandler(enabled = selectedSchedule != null || openChecklistDirectly || selectedArea != null) {
+        when {
+            initialScheduleId != null || openChecklistDirectly -> onBack()
+            selectedSchedule != null -> selectedSchedule = null
+            else -> selectedArea = null
         }
     }
     val notificationPermission = rememberLauncherForActivityResult(
@@ -241,156 +263,302 @@ fun TravelScreen(
         return
     }
 
+    if (selectedArea == null) {
+        TravelOverviewScreen(
+            padding = padding,
+            listState = listState,
+            onOpenArea = { selectedArea = it }
+        )
+        return
+    }
+
     LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(Color(0xFF142E34), Color(0xFF0D1113))))
+            .padding(padding)
+            .testTag("travel-area-screen"),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            TravelAreaDetailHeader(
+                area = selectedArea ?: return@item,
+                onBack = { selectedArea = null }
+            )
+        }
+        when (selectedArea) {
+            TravelArea.TODAY -> {
+                item {
+                    MarineWeatherCard(
+                        marineWeather = marineWeather,
+                        weather = weather,
+                        isLoading = isMarineLoading,
+                        refreshFailed = marineRefreshFailed,
+                        onRefresh = refreshMarine
+                    )
+                }
+                item {
+                    TravelAlertsCard(
+                        enabled = alertsEnabled,
+                        onEnabledChange = { enabled ->
+                            if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                                PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                TravelAlertSettings.setEnabled(context.applicationContext, enabled)
+                                alertsEnabled = enabled
+                            }
+                        }
+                    )
+                }
+            }
+            TravelArea.MOBILITY -> {
+                item { BusOverviewCard() }
+                item {
+                    LiveTimetablesCard(
+                        documents = transitDocuments,
+                        isLoading = isLiveLoading,
+                        refreshFailed = liveRefreshFailed,
+                        isCached = showingCachedLiveData,
+                        onRefresh = refreshLiveData,
+                        onOpen = { selectedSchedule = it }
+                    )
+                }
+                item {
+                    ExpandableTravelGroup(
+                        titleRes = R.string.travel_more_mobility_sources,
+                        testTag = "travel-more-mobility",
+                        expanded = showMobilitySources,
+                        onToggle = { showMobilitySources = !showMobilitySources }
+                    )
+                }
+                if (showMobilitySources) {
+                    items(travelSources, key = { "mobility_${it.url}" }) { source ->
+                        TravelSourceCard(source = source, onOpen = { openSource(source.url) })
+                    }
+                    item { SupportingTravelText(R.string.travel_sources_hint) }
+                }
+            }
+            TravelArea.EXPLORE -> {
+                item {
+                    LiveEventsCard(
+                        events = events,
+                        translations = eventTranslations,
+                        isTranslationLoading = isTranslationLoading,
+                        isTranslationPending = isTranslationPending,
+                        isLoading = isLiveLoading,
+                        refreshFailed = liveRefreshFailed,
+                        isCached = showingCachedLiveData,
+                        onRefresh = refreshLiveData,
+                        onOpen = { openSource(it.url) },
+                        onTranslationInfo = {
+                            runCatching { uriHandler.openUri("https://translate.google.com/") }
+                        }
+                    )
+                }
+                items(excursionIdeas, key = { it.id }) { idea ->
+                    ExcursionCard(
+                        idea = idea,
+                        isFavorite = idea.id in favorites,
+                        onToggleFavorite = {
+                            favorites = TravelPreferences.toggleFavorite(context, idea.id)
+                        },
+                        onMap = { openMap(idea.mapQuery) },
+                        onOpen = { openSource(idea.url) }
+                    )
+                }
+                item {
+                    ExpandableTravelGroup(
+                        titleRes = R.string.travel_more_ferry_sources,
+                        testTag = "travel-more-explore",
+                        expanded = showFerrySources,
+                        onToggle = { showFerrySources = !showFerrySources }
+                    )
+                }
+                if (showFerrySources) {
+                    items(ferryAndEventSources, key = { "explore_${it.url}" }) { source ->
+                        TravelSourceCard(source = source, onOpen = { openSource(source.url) })
+                    }
+                    item { SupportingTravelText(R.string.travel_offline_hint) }
+                }
+            }
+            TravelArea.HELP -> {
+                item { EmergencyCard(onCall = { callNumber("112") }) }
+                item {
+                    ExpandableTravelGroup(
+                        titleRes = R.string.travel_more_help,
+                        testTag = "travel-more-help",
+                        expanded = showMoreHelp,
+                        onToggle = { showMoreHelp = !showMoreHelp }
+                    )
+                }
+                if (showMoreHelp) {
+                    item { EmergencyContactsCard(emergencyContacts, callNumber) }
+                    item {
+                        TravelMapHelpCard(
+                            onHospital = { openMap("General Hospital of Rhodes") },
+                            onPharmacy = { openMap("pharmacy near me") }
+                        )
+                    }
+                    item { SupportingTravelText(R.string.travel_emergency_disclaimer) }
+                }
+                item {
+                    TravelChecklistCard(
+                        items = travelChecklist,
+                        completedIds = completedItems,
+                        notes = notes,
+                        onToggle = { id ->
+                            completedItems = TravelPreferences.toggleChecklistItem(context, id)
+                        },
+                        onNotesChange = { updated ->
+                            notes = updated
+                            TravelPreferences.saveNotes(context, updated)
+                        }
+                    )
+                }
+            }
+            null -> Unit
+        }
+    }
+}
+
+@Composable
+private fun TravelOverviewScreen(
+    padding: PaddingValues,
+    listState: LazyListState,
+    onOpenArea: (TravelArea) -> Unit
+) {
+    LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Color(0xFF142E34), Color(0xFF0D1113))))
             .padding(padding)
             .testTag("travel-screen"),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item { TravelHeader() }
-        item { SectionLabel(R.string.travel_marine_section) }
         item {
-            MarineWeatherCard(
-                marineWeather = marineWeather,
-                weather = weather,
-                isLoading = isMarineLoading,
-                refreshFailed = marineRefreshFailed,
-                onRefresh = refreshMarine
-            )
-        }
-        item { SectionLabel(R.string.travel_plan_section) }
-        item {
-            DayPlanCard(
-                recommendDayPlan(
-                    weather = weather,
-                    marineWeather = marineWeather,
-                    hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-                )
-            )
-        }
-        item { SectionLabel(R.string.travel_alerts_section) }
-        item {
-            TravelAlertsCard(
-                enabled = alertsEnabled,
-                onEnabledChange = { enabled ->
-                    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-                        PackageManager.PERMISSION_GRANTED
-                    ) {
-                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        TravelAlertSettings.setEnabled(context.applicationContext, enabled)
-                        alertsEnabled = enabled
-                    }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    TravelOverviewCard(
+                        titleRes = R.string.travel_area_today,
+                        descriptionRes = R.string.travel_area_today_description,
+                        testTag = "travel-area-today",
+                        onClick = { onOpenArea(TravelArea.TODAY) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    TravelOverviewCard(
+                        titleRes = R.string.travel_area_mobility,
+                        descriptionRes = R.string.travel_area_mobility_description,
+                        testTag = "travel-area-mobility",
+                        onClick = { onOpenArea(TravelArea.MOBILITY) },
+                        modifier = Modifier.weight(1f),
+                        emphasized = true
+                    )
                 }
-            )
-        }
-        item { SectionLabel(R.string.travel_bus_section) }
-        item { BusOverviewCard() }
-        item {
-            LiveTimetablesCard(
-                documents = transitDocuments,
-                isLoading = isLiveLoading,
-                refreshFailed = liveRefreshFailed,
-                isCached = showingCachedLiveData,
-                onRefresh = refreshLiveData,
-                onOpen = { selectedSchedule = it }
-            )
-        }
-        items(travelSources, key = { it.url }) { source ->
-            TravelSourceCard(source = source, onOpen = { openSource(source.url) })
-        }
-        item {
-            Text(
-                text = stringResource(R.string.travel_sources_hint),
-                color = Color(0x99FFFFFF),
-                fontSize = 10.sp,
-                lineHeight = 15.sp,
-                fontFamily = Montserrat,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-            )
-        }
-        item { SectionLabel(R.string.travel_transport_section) }
-        item {
-            LiveEventsCard(
-                events = events,
-                translations = eventTranslations,
-                isTranslationLoading = isTranslationLoading,
-                isTranslationPending = isTranslationPending,
-                isLoading = isLiveLoading,
-                refreshFailed = liveRefreshFailed,
-                isCached = showingCachedLiveData,
-                onRefresh = refreshLiveData,
-                onOpen = { openSource(it.url) },
-                onTranslationInfo = {
-                    runCatching { uriHandler.openUri("https://translate.google.com/") }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    TravelOverviewCard(
+                        titleRes = R.string.travel_area_explore,
+                        descriptionRes = R.string.travel_area_explore_description,
+                        testTag = "travel-area-explore",
+                        onClick = { onOpenArea(TravelArea.EXPLORE) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    TravelOverviewCard(
+                        titleRes = R.string.travel_area_help,
+                        descriptionRes = R.string.travel_area_help_description,
+                        testTag = "travel-area-help",
+                        onClick = { onOpenArea(TravelArea.HELP) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TravelOverviewCard(
+    titleRes: Int,
+    descriptionRes: Int,
+    testTag: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    emphasized: Boolean = false
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 132.dp)
+            .background(
+                if (emphasized) HomeAccent.copy(alpha = 0.22f) else HomeCardColor,
+                HomeCardShape
             )
-        }
-        items(ferryAndEventSources, key = { it.url }) { source ->
-            TravelSourceCard(source = source, onOpen = { openSource(source.url) })
-        }
-        item { SectionLabel(R.string.travel_excursions_section) }
-        items(excursionIdeas, key = { it.id }) { idea ->
-            ExcursionCard(
-                idea = idea,
-                isFavorite = idea.id in favorites,
-                onToggleFavorite = {
-                    favorites = TravelPreferences.toggleFavorite(context, idea.id)
-                },
-                onMap = { openMap(idea.mapQuery) },
-                onOpen = { openSource(idea.url) }
+            .border(
+                1.dp,
+                if (emphasized) HomeAccent.copy(alpha = 0.85f) else HomeCardBorder,
+                HomeCardShape
             )
+            .testTag(testTag)
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(titleRes),
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = stringResource(descriptionRes),
+            color = Color(0xC7FFFFFF),
+            fontSize = 10.sp,
+            lineHeight = 15.sp,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.travel_area_open),
+            color = HomeAccent,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = Montserrat
+        )
+    }
+}
+
+@Composable
+private fun TravelAreaDetailHeader(area: TravelArea, onBack: () -> Unit) {
+    val titleRes = when (area) {
+        TravelArea.TODAY -> R.string.travel_area_today
+        TravelArea.MOBILITY -> R.string.travel_area_mobility
+        TravelArea.EXPLORE -> R.string.travel_area_explore
+        TravelArea.HELP -> R.string.travel_area_help
+    }
+    Column {
+        TextButton(onClick = onBack, modifier = Modifier.testTag("travel-area-back")) {
+            Text(stringResource(R.string.travel_back), color = HomeAccent)
         }
-        item {
-            Text(
-                text = stringResource(R.string.travel_offline_hint),
-                color = Color(0x99FFFFFF),
-                fontSize = 10.sp,
-                lineHeight = 15.sp,
-                fontFamily = Montserrat,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-            )
-        }
-        item { SectionLabel(R.string.travel_emergency_section) }
-        item {
-            EmergencyCard(onCall = { callNumber("112") })
-        }
-        item { EmergencyContactsCard(emergencyContacts, callNumber) }
-        item {
-            TravelMapHelpCard(
-                onHospital = { openMap("General Hospital of Rhodes") },
-                onPharmacy = { openMap("pharmacy near me") }
-            )
-        }
-        item {
-            Text(
-                text = stringResource(R.string.travel_emergency_disclaimer),
-                color = Color(0x99FFFFFF),
-                fontSize = 10.sp,
-                lineHeight = 15.sp,
-                fontFamily = Montserrat,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-            )
-        }
-        item { SectionLabel(R.string.travel_list_section) }
-        item {
-            TravelChecklistCard(
-                items = travelChecklist,
-                completedIds = completedItems,
-                notes = notes,
-                onToggle = { id ->
-                    completedItems = TravelPreferences.toggleChecklistItem(context, id)
-                },
-                onNotesChange = { updated ->
-                    notes = updated
-                    TravelPreferences.saveNotes(context, updated)
-                }
-            )
-        }
+        Text(
+            text = stringResource(titleRes),
+            color = Color.White,
+            fontSize = 27.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
     }
 }
 
@@ -464,7 +632,8 @@ private fun TravelHeader() {
             color = Color.White,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = Montserrat
+            fontFamily = Montserrat,
+            modifier = Modifier.testTag("travel-header-title")
         )
         Text(
             text = stringResource(R.string.travel_screen_intro),
@@ -485,6 +654,43 @@ private fun SectionLabel(textRes: Int) {
         fontWeight = FontWeight.Bold,
         letterSpacing = 0.8.sp,
         modifier = Modifier.padding(top = 8.dp, start = 4.dp)
+    )
+}
+
+@Composable
+private fun ExpandableTravelGroup(
+    titleRes: Int,
+    testTag: String,
+    expanded: Boolean,
+    onToggle: () -> Unit
+) {
+    TextButton(
+        onClick = onToggle,
+        modifier = Modifier.fillMaxWidth().testTag(testTag)
+    ) {
+        Text(
+            text = stringResource(titleRes),
+            color = Color(0xCCFFFFFF),
+            fontFamily = Montserrat,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = if (expanded) "−" else "+",
+            color = HomeAccent,
+            fontSize = 20.sp
+        )
+    }
+}
+
+@Composable
+private fun SupportingTravelText(textRes: Int) {
+    Text(
+        text = stringResource(textRes),
+        color = Color(0x99FFFFFF),
+        fontSize = 10.sp,
+        lineHeight = 15.sp,
+        fontFamily = Montserrat,
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
     )
 }
 

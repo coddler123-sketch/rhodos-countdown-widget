@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -129,6 +130,26 @@ fun HomeQuickActions(
 }
 
 @Composable
+fun HomeDayPlanSection(
+    isOnVacation: Boolean,
+    kind: DayPlanKind
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("home-day-plan")
+    ) {
+        DayPlanCard(
+            kind = kind,
+            label = stringResource(
+                if (isOnVacation) R.string.home_tip_today_label
+                else R.string.home_tip_planning_label
+            )
+        )
+    }
+}
+
+@Composable
 private fun HomeQuickActionCard(
     title: String,
     description: String,
@@ -140,7 +161,7 @@ private fun HomeQuickActionCard(
     val haptics = LocalHapticFeedback.current
     Column(
         modifier = modifier
-            .height(104.dp)
+            .heightIn(min = 104.dp)
             .clip(HomeCardShape)
             .background(if (emphasized) HomeAccent.copy(alpha = 0.22f) else HomeCardColor)
             .border(1.dp, HomeAccent.copy(alpha = if (emphasized) 0.85f else 0.5f), HomeCardShape)

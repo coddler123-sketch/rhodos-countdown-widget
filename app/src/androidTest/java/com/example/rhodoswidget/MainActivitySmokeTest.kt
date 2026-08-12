@@ -3,6 +3,7 @@ package com.example.rhodoswidget
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -11,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
@@ -44,6 +46,8 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithText("STD.").assertIsDisplayed()
         composeRule.onNodeWithText("MIN.").assertIsDisplayed()
         composeRule.onNodeWithText("SEK.").assertIsDisplayed()
+        composeRule.onNodeWithTag("home-day-plan").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("TIPP FÜR EUREN URLAUB").assertIsDisplayed()
     }
 
     @Test
@@ -82,8 +86,17 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        assertEquals(0, composeRule.onAllNodesWithText("‹ Zurück").fetchSemanticsNodes().size)
-        composeRule.onNodeWithTag("community-link").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("13 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-category-Essen").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(3)
+        composeRule.onNodeWithTag("community-link").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("compass-category-Unterkünfte").performClick()
+        composeRule.onNodeWithTag("compass-category-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("5 persönliche Tipps").assertIsDisplayed()
+
+        pressBack()
+        composeRule.onNodeWithTag("compass-category-Unterkünfte").assertIsDisplayed()
 
         pressBack()
 
@@ -101,6 +114,35 @@ class MainActivitySmokeTest {
 
         composeRule.onNodeWithTag("main-nav-home").performClick().assertIsSelected()
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingActiveTabReturnsToTop() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(3)
+
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+
+        composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
+    }
+
+    @Test
+    fun travelOverviewOpensMobilityAreaAndReturns() {
+        composeRule.onNodeWithTag("main-nav-travel").performClick()
+        composeRule.onNodeWithTag("travel-area-today").assertIsDisplayed()
+        composeRule.onNodeWithTag("travel-area-mobility").assertIsDisplayed()
+        composeRule.onNodeWithTag("travel-area-explore").assertIsDisplayed()
+        composeRule.onNodeWithTag("travel-area-help").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("travel-area-mobility").performClick()
+        composeRule.onNodeWithTag("travel-area-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("Busse & Mobilität").assertIsDisplayed()
+        composeRule.onNodeWithTag("travel-area-screen").performScrollToIndex(3)
+        composeRule.onNodeWithTag("travel-more-mobility").performScrollTo().performClick()
+        composeRule.onNodeWithTag("travel-more-mobility").assertTextContains("−")
+
+        pressBack()
+        composeRule.onNodeWithTag("travel-area-mobility").assertIsDisplayed()
     }
 
     @Test
@@ -138,6 +180,9 @@ class MainActivitySmokeTest {
 
         composeRule.onNodeWithTag("main-nav-news").performClick()
         composeRule.onNodeWithText("Aktuelles von Rhodos").assertIsDisplayed()
+        composeRule.onNodeWithText("NEUESTE MELDUNG").assertIsDisplayed()
+        composeRule.onNodeWithTag("news-more-filters").performClick()
+        composeRule.onNodeWithText("Wetter/Unwetter").assertIsDisplayed()
         composeRule.onAllNodesWithTag("news-open-detail")[0].performClick()
         composeRule.onNodeWithText("Auf Deutsch").assertIsDisplayed()
 

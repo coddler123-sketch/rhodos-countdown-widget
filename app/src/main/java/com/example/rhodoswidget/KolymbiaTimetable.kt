@@ -7,6 +7,8 @@ internal data class KolymbiaConnection(
 )
 
 internal object KolymbiaTimetable {
+    const val REVIEWED_PDF_URL =
+        "https://www.ktelrodou.gr/wp-content/uploads/2026/08/KOLYMBIABEACH5.pdf"
     const val VALIDITY = "06.07.2026–10.09.2026"
 
     val fromKolymbia = listOf(
@@ -42,6 +44,17 @@ internal object KolymbiaTimetable {
     fun isValidOn(year: Int, monthOneBased: Int, day: Int): Boolean {
         val date = year * 10_000 + monthOneBased * 100 + day
         return date in VALID_FROM..VALID_UNTIL
+    }
+
+    fun hasUnreviewedUpdate(officialPdfUrl: String): Boolean =
+        officialPdfUrl.isNotBlank() && officialPdfUrl != REVIEWED_PDF_URL
+
+    fun nextDeparture(departureTimes: List<String>, hour: Int, minute: Int): String? {
+        val currentMinute = hour * 60 + minute
+        return departureTimes.firstOrNull { time ->
+            val (departureHour, departureMinute) = time.split(':').map(String::toInt)
+            departureHour * 60 + departureMinute >= currentMinute
+        }
     }
 
     fun searchConnections(query: String): List<KolymbiaConnection> {

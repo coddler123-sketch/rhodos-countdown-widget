@@ -1,8 +1,7 @@
 package com.example.rhodoswidget
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -24,9 +23,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,7 +48,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -93,7 +91,7 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "INSEL-NEWS",
+                    "AKTUELLES",
                     color = HomeAccent,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 10.sp,
@@ -157,10 +155,16 @@ fun NewsTicker(state: NewsUiState, onOpenNews: () -> Unit) {
 fun NewsScreen(
     state: NewsUiState,
     padding: PaddingValues,
+    scrollToTopRequest: Int = 0,
     onRefresh: () -> Unit,
     onOpenDetail: (NewsArticle) -> Unit
 ) {
-    var selected by remember { mutableStateOf(NewsCategory.ALL) }
+    var selected by rememberSaveable { mutableStateOf(NewsCategory.ALL) }
+    var showMoreFilters by rememberSaveable { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    LaunchedEffect(scrollToTopRequest) {
+        if (scrollToTopRequest > 0) listState.animateScrollToItem(0)
+    }
     val articles = (state as? NewsUiState.Content)?.articles.orEmpty().filter {
         selected == NewsCategory.ALL || it.category == selected
     }
@@ -190,49 +194,52 @@ fun NewsScreen(
                     enabled = (state as? NewsUiState.Content)?.isRefreshing != true
                 ) { Text("Aktualisieren", color = HomeAccent, fontWeight = FontWeight.Bold) }
             }
+            val primaryCategories = listOf(NewsCategory.ALL, NewsCategory.RHODOS, NewsCategory.TRAVEL)
+            val secondaryCategories = NewsCategory.entries.filterNot(primaryCategories::contains)
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                NewsCategory.entries.forEach { category ->
-                    FilterChip(
-                        selected = selected == category,
-                        onClick = { selected = category },
-                        label = { Text(category.label) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = Color.Transparent,
-                            labelColor = Color.White,
-                            selectedContainerColor = HomeAccent,
-                            selectedLabelColor = Color(0xFF102126)
-                        ),
-                        border = BorderStroke(
-                            1.dp,
-                            if (selected == category) HomeAccent
-                            else HomeCardBorder
-                        )
-                    )
-                }
+                primaryCategories.forEach { category -> NewsFilterChip(category, selected) { selected = category } }
             }
             Text(
-                "Weitere Filter ›",
-                color = Color(0x99FFFFFF),
+                if (showMoreFilters) "Weniger Filter ︿" else "Weitere Filter ›",
+                color = HomeAccent,
                 fontSize = 11.sp,
-                modifier = Modifier.align(Alignment.End).padding(end = 20.dp, top = 2.dp)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .testTag("news-more-filters")
+                    .clickable { showMoreFilters = !showMoreFilters }
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
             )
-            Spacer(Modifier.height(10.dp))
+            AnimatedVisibility(showMoreFilters || selected in secondaryCategories) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    secondaryCategories.forEach { category -> NewsFilterChip(category, selected) { selected = category } }
+                }
+            }
+            Spacer(Modifier.height(6.dp))
             when {
                 state is NewsUiState.Loading -> NewsMessage("Die neuesten Inselmeldungen werden geladen …")
                 state is NewsUiState.Error -> NewsMessage(state.message, onRefresh)
                 state is NewsUiState.Empty -> NewsMessage(state.message, onRefresh)
                 articles.isEmpty() -> NewsMessage("Für diesen Filter gibt es gerade keine Meldungen.")
                 else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.testTag("news-list"),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val content = state as NewsUiState.Content
                     content.warning?.let { item { Text(it, color = Sun, fontSize = 13.sp) } }
                     if (content.isCached) item { Text("Ohne Internet verfügbar · zuletzt geladener Stand", color = HomeAccent, fontSize = 12.sp) }
-                    items(articles, key = NewsArticle::id) { NewsCard(it, onOpenDetail) }
+                    item(key = "featured-${articles.first().id}") {
+                        FeaturedNewsCard(articles.first(), onOpenDetail)
+                    }
+                    items(articles.drop(1), key = NewsArticle::id) { CompactNewsCard(it, onOpenDetail) }
                     item { Text("Automatisch aus dem Griechischen übersetzt", color = Color(0x80FFFFFF), fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
                 }
             }
@@ -241,15 +248,42 @@ fun NewsScreen(
 }
 
 @Composable
-private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) {
-    val context = LocalContext.current
+private fun NewsFilterChip(
+    category: NewsCategory,
+    selected: NewsCategory,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = selected == category,
+        onClick = onClick,
+        label = { Text(category.label) },
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = Color.Transparent,
+            labelColor = Color.White,
+            selectedContainerColor = HomeAccent,
+            selectedLabelColor = Color(0xFF102126)
+        ),
+        border = BorderStroke(1.dp, if (selected == category) HomeAccent else HomeCardBorder)
+    )
+}
+
+@Composable
+private fun FeaturedNewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().border(1.dp, HomeCardBorder, HomeCardShape),
-        colors = CardDefaults.cardColors(containerColor = HomeCardColor),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, HomeAccent.copy(alpha = 0.7f), HomeCardShape)
+            .clickable { onOpenDetail(article) }
+            .testTag("news-open-detail"),
+        colors = CardDefaults.cardColors(containerColor = HomeAccent.copy(alpha = 0.16f)),
         shape = HomeCardShape
     ) {
         Column(Modifier.padding(18.dp)) {
-            Text(article.category.label.uppercase(), color = HomeAccent, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("NEUESTE MELDUNG", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 0.8.sp)
+                Spacer(Modifier.weight(1f))
+                Text(article.category.label.uppercase(), color = Color(0xBFFFFFFF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
             Spacer(Modifier.height(7.dp))
             Text(
                 article.germanTitle,
@@ -271,29 +305,53 @@ private fun NewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) 
             Spacer(Modifier.height(12.dp))
             val relativeAge = relativeNewsAge(article.publishedAt)
             Text(
-                "${article.source} · ${formatNewsDate(article.publishedAt)}${relativeAge?.let { " · $it" } ?: ""}",
+                newsMeta(article, relativeAge),
                 color = Color(0x99FFFFFF),
                 fontSize = 12.sp
             )
-            Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(article.originalUrl))) }
-                ) { Text("Auf Griechisch", color = HomeAccent, fontWeight = FontWeight.SemiBold) }
-                Spacer(Modifier.width(6.dp))
-                Button(
-                    onClick = { onOpenDetail(article) },
-                    modifier = Modifier.testTag("news-open-detail"),
-                    colors = ButtonDefaults.buttonColors(containerColor = HomeAccent, contentColor = Color(0xFF102126))
-                ) { Text("Deutsch lesen", fontWeight = FontWeight.Bold) }
-            }
+            Spacer(Modifier.height(10.dp))
+            Text("Deutsch lesen  ›", color = HomeAccent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
+
+@Composable
+private fun CompactNewsCard(article: NewsArticle, onOpenDetail: (NewsArticle) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .clickable { onOpenDetail(article) }
+            .testTag("news-open-detail"),
+        colors = CardDefaults.cardColors(containerColor = HomeCardColor),
+        shape = HomeCardShape
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Text(article.category.label.uppercase(), color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(5.dp))
+            Text(
+                article.germanTitle,
+                color = Color.White,
+                fontSize = 16.sp,
+                lineHeight = 21.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(7.dp))
+            Text(
+                newsMeta(article, relativeNewsAge(article.publishedAt)),
+                color = Color(0x99FFFFFF),
+                fontSize = 11.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+private fun newsMeta(article: NewsArticle, relativeAge: String?): String =
+    "${article.source} · ${formatNewsDate(article.publishedAt)}${relativeAge?.let { " · $it" } ?: ""}"
 
 @Composable
 private fun NewsMessage(message: String, onRetry: (() -> Unit)? = null) {

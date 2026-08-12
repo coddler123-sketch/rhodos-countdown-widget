@@ -43,4 +43,21 @@ class KolymbiaTimetableTest {
         assertTrue(!KolymbiaTimetable.isValidOn(2026, 9, 11))
         assertTrue(!KolymbiaTimetable.isValidForTrip)
     }
+
+    @Test
+    fun `detects only an unreviewed official pdf`() {
+        assertTrue(!KolymbiaTimetable.hasUnreviewedUpdate(KolymbiaTimetable.REVIEWED_PDF_URL))
+        assertTrue(KolymbiaTimetable.hasUnreviewedUpdate("https://www.ktelrodou.gr/wp-content/uploads/new.pdf"))
+        assertTrue(!KolymbiaTimetable.hasUnreviewedUpdate(""))
+    }
+
+    @Test
+    fun `next departure keeps the complete timetable intact`() {
+        val departures = listOf("8:50", "9:20", "12:50")
+
+        assertEquals("9:20", KolymbiaTimetable.nextDeparture(departures, 9, 5))
+        assertEquals("9:20", KolymbiaTimetable.nextDeparture(departures, 9, 20))
+        assertEquals(null, KolymbiaTimetable.nextDeparture(departures, 13, 0))
+        assertEquals(3, departures.size)
+    }
 }

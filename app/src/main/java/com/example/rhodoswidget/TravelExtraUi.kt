@@ -160,9 +160,18 @@ private fun MarineStatusText(@StringRes textRes: Int) {
 }
 
 @Composable
-internal fun DayPlanCard(kind: DayPlanKind) {
+internal fun DayPlanCard(kind: DayPlanKind, label: String) {
     val (titleRes, reasonRes) = dayPlanText(kind)
     TravelCardContainer {
+        Text(
+            text = label,
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(5.dp))
         Text(
             text = stringResource(titleRes),
             color = Color.White,

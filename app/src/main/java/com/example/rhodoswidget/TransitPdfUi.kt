@@ -153,6 +153,7 @@ internal fun TransitPdfScreen(
         }
         when {
             document.id == "ktel_kolymbia" && showGermanTimetable -> KolymbiaGermanTimetable(
+                document = document,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)

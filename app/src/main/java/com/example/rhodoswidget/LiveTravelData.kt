@@ -167,6 +167,17 @@ object LiveTravelRepository {
         return (ktel + roda).takeIf { it.isNotEmpty() }
     }
 
+    internal fun fetchKolymbiaDocument(
+        nowMillis: Long = System.currentTimeMillis()
+    ): TransitDocument? {
+        val source = ktelSources.first { it.id == "ktel_kolymbia" }
+        val api = "https://www.ktelrodou.gr/wp-json/wp/v2/pages?slug=${source.slug}&_fields=content"
+        return httpText(api)?.let { body ->
+            val page = JSONArray(body).optJSONObject(0)?.toString() ?: return@let null
+            LiveTravelParser.ktelDocument(page, source.id, source.title, source.pageUrl, nowMillis)
+        }
+    }
+
     fun fetchEvents(nowMillis: Long = System.currentTimeMillis()): List<RhodesEvent>? {
         return httpText(eventEndpoint(nowMillis))?.let { LiveTravelParser.events(it, nowMillis) }
     }

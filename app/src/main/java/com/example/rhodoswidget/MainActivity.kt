@@ -44,6 +44,7 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -84,6 +85,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        BusTimetableCheckWorker.schedule(applicationContext)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
@@ -121,7 +123,8 @@ private fun RhodosApp(startInTravel: Boolean = false) {
     val initialTravelScheduleId = remember { mutableStateOf<String?>(null) }
     val openTravelChecklist = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
-    val travelDetailVisible = remember { mutableStateOf(false) }
+    val nestedDetailVisible = remember { mutableStateOf(false) }
+    val scrollToTopRequest = remember { mutableIntStateOf(0) }
 
     val destination = MainDestination.valueOf(destinationName.value)
     val article = selectedArticle.value
@@ -145,7 +148,7 @@ private fun RhodosApp(startInTravel: Boolean = false) {
         selectedArticle.value = null
     }
     BackHandler(
-        enabled = article == null && !travelDetailVisible.value && destination != MainDestination.HOME
+        enabled = article == null && !nestedDetailVisible.value && destination != MainDestination.HOME
     ) {
         initialTravelScheduleId.value = null
         openTravelChecklist.value = false
@@ -156,11 +159,12 @@ private fun RhodosApp(startInTravel: Boolean = false) {
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFF0C252B),
         bottomBar = {
-            if (article == null && !travelDetailVisible.value) {
+            if (article == null && !nestedDetailVisible.value) {
                 MainNavigationBar(
                     selected = destination,
                     showNewsBadge = latestNewsId != null && latestNewsId != lastSeenNewsId.value,
                     onSelect = { selected ->
+                        if (selected == destination) scrollToTopRequest.intValue++
                         selectedArticle.value = null
                         initialTravelScheduleId.value = null
                         openTravelChecklist.value = false
@@ -181,6 +185,7 @@ private fun RhodosApp(startInTravel: Boolean = false) {
             when (destination) {
                 MainDestination.HOME -> RhodosHome(
                     padding = padding,
+                    scrollToTopRequest = scrollToTopRequest.intValue,
                     onOpenChecklist = {
                         initialTravelScheduleId.value = null
                         openTravelChecklist.value = true
@@ -194,6 +199,7 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                 )
                 MainDestination.TRAVEL -> TravelScreen(
                     padding = padding,
+                    scrollToTopRequest = scrollToTopRequest.intValue,
                     onBack = {
                         initialTravelScheduleId.value = null
                         openTravelChecklist.value = false
@@ -201,19 +207,22 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                     },
                     initialScheduleId = initialTravelScheduleId.value,
                     openChecklistDirectly = openTravelChecklist.value,
-                    onDetailVisibilityChanged = { travelDetailVisible.value = it }
+                    onDetailVisibilityChanged = { nestedDetailVisible.value = it }
                 )
                 MainDestination.NEWS -> NewsScreen(
                     state = newsState,
                     padding = padding,
+                    scrollToTopRequest = scrollToTopRequest.intValue,
                     onRefresh = newsViewModel::refresh,
                     onOpenDetail = { selectedArticle.value = it }
                 )
                 MainDestination.COMPASS -> CompassScreen(
                     padding = padding,
+                    scrollToTopRequest = scrollToTopRequest.intValue,
                     onOpenCommunity = {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(COMMUNITY_URL)))
-                    }
+                    },
+                    onDetailVisibilityChanged = { nestedDetailVisible.value = it }
                 )
             }
         }
@@ -275,6 +284,7 @@ private fun MainNavigationBar(
 @Composable
 private fun RhodosHome(
     padding: PaddingValues,
+    scrollToTopRequest: Int,
     onOpenChecklist: () -> Unit,
     onOpenKolymbia: () -> Unit
 ) {
@@ -290,6 +300,11 @@ private fun RhodosHome(
     val backgroundDim = remember { mutableStateOf(Images.getBackgroundDim(context)) }
     val animatedDim by animateFloatAsState(backgroundDim.value, label = "backgroundDim")
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(scrollToTopRequest) {
+        if (scrollToTopRequest > 0) scrollState.animateScrollTo(0)
+    }
 
     LaunchedEffect(reloadDone.value) {
         if (reloadDone.value) { delay(1_500); reloadDone.value = false }
@@ -357,7 +372,7 @@ private fun RhodosHome(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
             updateController.availableUpdate?.let { update ->
@@ -390,6 +405,19 @@ private fun RhodosHome(
             HomeQuickActions(
                 onOpenChecklist = onOpenChecklist,
                 onOpenKolymbia = onOpenKolymbia
+            )
+            Spacer(Modifier.height(16.dp))
+            HomeDayPlanSection(
+                isOnVacation = s.isOnVacation,
+                kind = if (s.isOnVacation) {
+                    recommendDayPlan(
+                        weather = WeatherRepository.cached(context),
+                        marineWeather = MarineWeatherRepository.cached(context),
+                        hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                    )
+                } else {
+                    DayPlanKind.LINDOS_EARLY
+                }
             )
             Spacer(Modifier.height(16.dp))
             when (Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % 2) {
