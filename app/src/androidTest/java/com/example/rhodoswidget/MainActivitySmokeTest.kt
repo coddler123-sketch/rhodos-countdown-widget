@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
@@ -31,11 +32,13 @@ class MainActivitySmokeTest {
     @Before
     fun clearPinnedImageBeforeTest() {
         clearPinnedImage()
+        clearCompassPreferences()
     }
 
     @After
     fun clearPinnedImageAfterTest() {
         clearPinnedImage()
+        clearCompassPreferences()
     }
 
     @Test
@@ -86,21 +89,109 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("13 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
-        composeRule.onNodeWithTag("compass-category-Essen").assertIsDisplayed()
-        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(3)
+        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(9)
         composeRule.onNodeWithTag("community-link").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-Unterkünfte").performClick()
-        composeRule.onNodeWithTag("compass-category-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("5 persönliche Tipps").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("5 Treffer").assertIsDisplayed()
 
-        pressBack()
-        composeRule.onNodeWithTag("compass-category-Unterkünfte").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-category-filter-all").performClick()
+        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
 
         pressBack()
 
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
+    }
+
+    @Test
+    fun compassSearchAndSavedTipPersistAfterRecreation() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-search").performTextInput("Melekouni")
+        composeRule.onNodeWithTag("compass-tip-food-melekouni").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-save-food-melekouni").performClick()
+
+        composeRule.activityRule.scenario.recreate()
+
+        composeRule.onNodeWithTag("compass-tip-food-melekouni").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-save-food-melekouni").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("♥ GEMERKT").assertIsDisplayed()
+    }
+
+    @Test
+    fun kolymbiaFoodTipOpensWithDirectMapLink() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-search").performTextInput("Carrusel")
+        composeRule.onNodeWithTag("compass-tip-food-kolymbia-carrusel").performClick()
+
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-map-food-kolymbia-carrusel")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-note-food-kolymbia-carrusel")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun shoppingTipShowsReviewSummaryAndMapLink() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-search").performTextInput("Sklavenitis")
+        composeRule.onNodeWithTag("compass-tip-shopping-supermarket-sklavenitis-kolymbia").performClick()
+
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+        composeRule.onNodeWithText("REZENSIONEN ZUSAMMENGEFASST")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-map-shopping-supermarket-sklavenitis-kolymbia")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun excursionTipCloseReturnsToTipsOverview() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(7)
+        composeRule.onNodeWithTag("compass-category-Ausflüge").performClick()
+        composeRule.onNodeWithTag("compass-tip-trip-seven-springs").performClick()
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-map-trip-seven-springs").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-close-trip-seven-springs").assertIsDisplayed().performClick()
+
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-tip-trip-seven-springs").assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+
+        pressBack()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithTag("compass-tip-overlay").fetchSemanticsNodes().isEmpty()
+        }
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-tip-trip-seven-springs").assertIsDisplayed()
+    }
+
+    @Test
+    fun mobilityBackReturnsThroughTipsNavigation() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(8)
+        composeRule.onNodeWithTag("compass-category-Mobilität").performClick()
+
+        composeRule.onNodeWithTag("compass-tip-mobility-september-schedule")
+            .performScrollTo()
+            .performClick()
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+
+        pressBack()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithTag("compass-tip-overlay").fetchSemanticsNodes().isEmpty()
+        }
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-tip-mobility-september-schedule").assertIsDisplayed()
+
+        pressBack()
+        composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
     }
 
     @Test
@@ -203,6 +294,14 @@ class MainActivitySmokeTest {
         context.getSharedPreferences("rhodos_settings", Context.MODE_PRIVATE)
             .edit()
             .remove("pinned_image_name")
+            .commit()
+    }
+
+    private fun clearCompassPreferences() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        context.getSharedPreferences("rhodos_compass", Context.MODE_PRIVATE)
+            .edit()
+            .clear()
             .commit()
     }
 }

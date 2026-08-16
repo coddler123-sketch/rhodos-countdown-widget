@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Required by the documented GitHub Releases self-update flow. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
@@ -40,6 +42,19 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/rhodos_countdown_large_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".RhodosWidgetAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".RhodosWidgetScheduleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
         </receiver>
 
         <provider

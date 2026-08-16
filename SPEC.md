@@ -94,9 +94,12 @@ Lokal gespeichert werden:
 
 - ausgewaehltes Hintergrundbild
 - letzter erfolgreicher Wetterbericht und Abrufzeitpunkt
+- gemerkte und erledigte Reisetipps
+- persoenliche Notizen zu Reisetipps
 
 Es gibt keine Anmeldung, keine Cloud-Synchronisation, keine Analytics und keine
-personenbezogene Serverdatenbank. Android-Backup ist fuer die App aktiviert.
+personenbezogene Serverdatenbank. Android-Backup ist fuer lokale Einstellungen,
+gemerkte Tipps und persoenliche Notizen aktiviert.
 
 ## Architektur
 

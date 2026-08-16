@@ -1,5 +1,6 @@
 package com.example.rhodoswidget
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import java.net.URI
 
@@ -11,6 +12,9 @@ internal data class TravelSource(
 
 internal data class ExcursionIdea(
     val id: String,
+    @param:DrawableRes val imageRes: Int,
+    val imageCredit: String,
+    val imageUrl: String,
     @param:StringRes val titleRes: Int,
     @param:StringRes val metaRes: Int,
     @param:StringRes val descriptionRes: Int,
@@ -44,6 +48,9 @@ internal val travelSources = listOf(
 internal val excursionIdeas = listOf(
     ExcursionIdea(
         id = "lindos",
+        imageRes = R.drawable.excursion_lindos,
+        imageCredit = "Foto: Ввласенко · CC BY-SA 3.0",
+        imageUrl = "https://commons.wikimedia.org/wiki/File:Lindos_View_of_the_Acropolis_and_town_from_the_north-east._Rhodes,_Greece.jpg",
         titleRes = R.string.travel_lindos_title,
         metaRes = R.string.travel_lindos_meta,
         descriptionRes = R.string.travel_lindos_description,
@@ -52,6 +59,9 @@ internal val excursionIdeas = listOf(
     ),
     ExcursionIdea(
         id = "old_town",
+        imageRes = R.drawable.excursion_old_town,
+        imageCredit = "Foto: LunaLinda · CC BY-SA 4.0",
+        imageUrl = "https://commons.wikimedia.org/wiki/File:Rhodes%27_old_town.jpg",
         titleRes = R.string.travel_old_town_title,
         metaRes = R.string.travel_old_town_meta,
         descriptionRes = R.string.travel_old_town_description,
@@ -60,6 +70,9 @@ internal val excursionIdeas = listOf(
     ),
     ExcursionIdea(
         id = "seven_springs",
+        imageRes = R.drawable.excursion_seven_springs,
+        imageCredit = "Foto: dronepicr · CC BY 2.0",
+        imageUrl = "https://commons.wikimedia.org/wiki/File:Second_spring_in_Epta_Piges,_Rhodes,_Greece_(51698550031).jpg",
         titleRes = R.string.travel_seven_springs_title,
         metaRes = R.string.travel_seven_springs_meta,
         descriptionRes = R.string.travel_seven_springs_description,
@@ -68,6 +81,9 @@ internal val excursionIdeas = listOf(
     ),
     ExcursionIdea(
         id = "tsambika",
+        imageRes = R.drawable.excursion_tsambika,
+        imageCredit = "Foto: dronepicr · CC BY 2.0",
+        imageUrl = "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Tsambika_Beach,_Rhodes,_Greece_(51698551526).jpg",
         titleRes = R.string.travel_tsambika_title,
         metaRes = R.string.travel_tsambika_meta,
         descriptionRes = R.string.travel_tsambika_description,

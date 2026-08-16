@@ -86,6 +86,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         BusTimetableCheckWorker.schedule(applicationContext)
+        RhodosWidgetWorker.ensureScheduled(applicationContext)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
@@ -416,7 +417,7 @@ private fun RhodosHome(
                         hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
                     )
                 } else {
-                    DayPlanKind.LINDOS_EARLY
+                    planningDayPlan(Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
                 }
             )
             Spacer(Modifier.height(16.dp))

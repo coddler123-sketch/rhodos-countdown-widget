@@ -1,5 +1,7 @@
 package com.example.rhodoswidget
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -33,6 +35,9 @@ class RhodosWidgetWorker(
             WeatherRepository.fetch()?.let { WeatherRepository.save(applicationContext, it) }
         }
         RhodosCountdownLargeWidgetProvider.updateAllLargeWidgets(applicationContext)
+        // Der Alarm ist ein One-Shot; nach Reboot oder Force-Stop ist er weg. Der Worker
+        // bewaffnet ihn deshalb bei jedem Lauf neu.
+        RhodosWidgetAlarm.schedule(applicationContext)
         Result.success()
     }
 
@@ -62,6 +67,7 @@ class RhodosWidgetWorker(
 
         internal const val PERIODIC_WORK = "rhodos_widget_periodic"
         internal const val ONE_TIME_WORK = "rhodos_widget_now"
+        internal const val ALARM_WORK = "rhodos_widget_alarm"
 
         /** Regelmaessiger 15-Minuten-Refresh (Anzeige + ggf. Wetter). */
         fun schedulePeriodic(context: Context) {
@@ -70,9 +76,39 @@ class RhodosWidgetWorker(
             ).build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 PERIODIC_WORK,
-                ExistingPeriodicWorkPolicy.KEEP,
+                ExistingPeriodicWorkPolicy.UPDATE,
                 request
             )
+        }
+
+        /** Repariert die Widget-Zeitplanung nach App-Update, Neustart oder App-Start. */
+        fun ensureScheduled(context: Context, requestRefresh: Boolean = false) {
+            val widgetIds = AppWidgetManager.getInstance(context).getAppWidgetIds(
+                ComponentName(context, RhodosCountdownLargeWidgetProvider::class.java)
+            )
+            ensureScheduled(context, widgetIds.isNotEmpty(), requestRefresh)
+        }
+
+        internal fun ensureScheduled(
+            context: Context,
+            hasWidgets: Boolean,
+            requestRefresh: Boolean = false
+        ) {
+            if (!hasWidgets) {
+                RhodosWidgetAlarm.cancel(context)
+                cancelAll(context)
+                return
+            }
+            schedulePeriodic(context)
+            RhodosWidgetAlarm.schedule(context)
+            if (requestRefresh) refreshNow(context)
+        }
+
+        /** Einmaliger Lauf ohne Zwang: rendert neu, holt Wetter nur nach den ueblichen Regeln. */
+        fun runOnce(context: Context) {
+            val request = OneTimeWorkRequestBuilder<RhodosWidgetWorker>().build()
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(ALARM_WORK, ExistingWorkPolicy.REPLACE, request)
         }
 
         /** Sofortiger, erzwungener Abruf (manueller Refresh / Widget hinzugefuegt). */
@@ -89,6 +125,7 @@ class RhodosWidgetWorker(
             WorkManager.getInstance(context).apply {
                 cancelUniqueWork(PERIODIC_WORK)
                 cancelUniqueWork(ONE_TIME_WORK)
+                cancelUniqueWork(ALARM_WORK)
             }
         }
     }

@@ -14,6 +14,19 @@ import java.util.concurrent.TimeUnit
 class RhodosWidgetLifecycleTest {
 
     @Test
+    fun activeWidgetRepairsPeriodicWork() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(RhodosWidgetWorker.PERIODIC_WORK).result.get(5, TimeUnit.SECONDS)
+        workManager.pruneWork().result.get(5, TimeUnit.SECONDS)
+
+        RhodosWidgetWorker.ensureScheduled(context, hasWidgets = true)
+
+        waitForPeriodicWork(workManager) { it.state == WorkInfo.State.ENQUEUED }
+        RhodosWidgetWorker.cancelAll(context)
+    }
+
+    @Test
     fun disablingLastWidgetCancelsPeriodicWork() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val workManager = WorkManager.getInstance(context)
@@ -24,6 +37,21 @@ class RhodosWidgetLifecycleTest {
         waitForPeriodicWork(workManager) { it.state == WorkInfo.State.ENQUEUED }
 
         RhodosCountdownLargeWidgetProvider().onDisabled(context)
+
+        waitForPeriodicWork(workManager) { it.state == WorkInfo.State.CANCELLED }
+    }
+
+    @Test
+    fun missingWidgetCancelsRetainedPeriodicWork() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(RhodosWidgetWorker.PERIODIC_WORK).result.get(5, TimeUnit.SECONDS)
+        workManager.pruneWork().result.get(5, TimeUnit.SECONDS)
+
+        RhodosWidgetWorker.schedulePeriodic(context)
+        waitForPeriodicWork(workManager) { it.state == WorkInfo.State.ENQUEUED }
+
+        RhodosWidgetWorker.ensureScheduled(context, hasWidgets = false)
 
         waitForPeriodicWork(workManager) { it.state == WorkInfo.State.CANCELLED }
     }

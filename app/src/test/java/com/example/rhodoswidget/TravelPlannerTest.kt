@@ -7,6 +7,15 @@ import org.junit.Test
 
 class TravelPlannerTest {
     @Test
+    fun `planning tip rotates daily and repeats after all six tips`() {
+        val firstCycle = (1..6).map(::planningDayPlan)
+
+        assertEquals(DayPlanKind.entries.toSet(), firstCycle.toSet())
+        assertEquals(planningDayPlan(1), planningDayPlan(7))
+        assertEquals(planningDayPlan(365), planningDayPlan(371))
+    }
+
+    @Test
     fun `rain recommends protected culture program`() {
         assertEquals(
             DayPlanKind.OLD_TOWN,

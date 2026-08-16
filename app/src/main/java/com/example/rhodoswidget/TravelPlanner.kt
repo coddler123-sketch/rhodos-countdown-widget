@@ -9,6 +9,18 @@ enum class DayPlanKind {
     EVENING
 }
 
+private val planningDayPlans = listOf(
+    DayPlanKind.LINDOS_EARLY,
+    DayPlanKind.SHADE,
+    DayPlanKind.INLAND,
+    DayPlanKind.OLD_TOWN,
+    DayPlanKind.BEACH,
+    DayPlanKind.EVENING
+)
+
+fun planningDayPlan(dayOfYear: Int): DayPlanKind =
+    planningDayPlans[Math.floorMod(dayOfYear - 1, planningDayPlans.size)]
+
 fun recommendDayPlan(
     weather: RhodosWeather?,
     marineWeather: MarineWeather?,

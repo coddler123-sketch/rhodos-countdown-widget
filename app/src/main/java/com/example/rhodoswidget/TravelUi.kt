@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,10 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -367,6 +371,9 @@ fun TravelScreen(
                             favorites = TravelPreferences.toggleFavorite(context, idea.id)
                         },
                         onMap = { openMap(idea.mapQuery) },
+                        onOpenImageSource = {
+                            runCatching { uriHandler.openUri(idea.imageUrl) }
+                        },
                         onOpen = { openSource(idea.url) }
                     )
                 }
@@ -758,9 +765,30 @@ private fun ExcursionCard(
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onMap: () -> Unit,
+    onOpenImageSource: () -> Unit,
     onOpen: () -> Unit
 ) {
     TravelCardContainer {
+        Image(
+            painter = painterResource(idea.imageRes),
+            contentDescription = stringResource(idea.titleRes),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(132.dp)
+                .clip(HomeCardShape)
+        )
+        Text(
+            text = idea.imageCredit,
+            color = Color(0x99FFFFFF),
+            fontSize = 9.sp,
+            fontFamily = Montserrat,
+            modifier = Modifier
+                .align(Alignment.End)
+                .clickable(onClick = onOpenImageSource)
+                .padding(horizontal = 4.dp, vertical = 5.dp)
+        )
+        Spacer(Modifier.height(4.dp))
         Text(
             text = stringResource(idea.titleRes),
             color = Color.White,

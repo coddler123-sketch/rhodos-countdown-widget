@@ -22,9 +22,12 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         appWidgetIds.forEach { id -> updateLargeWidget(context, appWidgetManager, id) }
-        // 15-Minuten-Refresh sicherstellen und einmal sofort frisch holen.
-        RhodosWidgetWorker.schedulePeriodic(context)
-        RhodosWidgetWorker.refreshNow(context)
+        // 15-Minuten-Refresh sicherstellen (WorkManager plus Doze-toleranter Alarm als Rueckfall)
+        // und einmal sofort frisch holen.
+        RhodosWidgetWorker.ensureScheduled(
+            context = context,
+            requestRefresh = true
+        )
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -35,6 +38,7 @@ class RhodosCountdownLargeWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onDisabled(context: Context) {
+        RhodosWidgetAlarm.cancel(context)
         RhodosWidgetWorker.cancelAll(context)
         super.onDisabled(context)
     }
