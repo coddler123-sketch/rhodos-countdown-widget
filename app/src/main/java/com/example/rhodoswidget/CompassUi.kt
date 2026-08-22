@@ -59,6 +59,7 @@ fun CompassScreen(
             CompassCategory("Mobilität", "Bus, Mietwagen und sichere Rückfahrten", R.drawable.category_rhodes_bus),
             CompassCategory("Unterkünfte", "Persönliche Hotelerfahrungen", R.drawable.relax_hotel_kolymbia),
             CompassCategory("Supermärkte", "Lebensmittel, Getränke und Reisebedarf", R.drawable.rhodes_old_town_009),
+            CompassCategory("Mode & Accessoires", "Sommermode, Sandalen und Taschen", R.drawable.tip_shop_hashtag),
             CompassCategory("Souvenirs", "Handgemachte und besondere Erinnerungen", R.drawable.lindos_white_houses_bougainvillea_002),
             CompassCategory("Regionale Produkte", "Öl, Honig, Keramik und Spezialitäten", R.drawable.rhodos_1906335)
         )
@@ -80,7 +81,6 @@ fun CompassScreen(
         }
     }
     val featuredTip = remember { featuredCompassTip(compassTips, Calendar.getInstance().get(Calendar.DAY_OF_YEAR)) }
-    val nearbyTips = remember { filterCompassTips(compassTips, "Kolymbia").take(6) }
     val dayPlan = remember(savedTips) { buildCompassDayPlan(compassTips, savedTips) }
     val selectedTip = remember(selectedTipId) { compassTips.firstOrNull { it.id == selectedTipId } }
     val isOverview = selectedCategory == null && searchQuery.isBlank() && selectedFilter == null
@@ -180,14 +180,6 @@ fun CompassScreen(
                 item { CompassDayPlanCard(dayPlan) }
             }
             if (isOverview) {
-                item {
-                    CompassNearbySection(
-                        tips = nearbyTips,
-                        savedTips = savedTips,
-                        onToggleSaved = ::toggleSaved,
-                        onOpen = ::openTip
-                    )
-                }
                 items(categories.chunked(2), key = { row -> row.first().title }) { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),

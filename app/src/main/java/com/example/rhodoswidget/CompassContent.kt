@@ -290,6 +290,54 @@ internal val compassTips = listOf(
         sourceUrl = "https://citymaps.gr/souper-market/rodos/zeus-supermarket-tourist-shop/"
     ),
     CompassTip(
+        category = "Supermärkte",
+        title = "Edem: Markt an der Eukalyptusstraße",
+        description = "Ein zentral gelegener Ferienmarkt für Lebensmittel, Getränke, Snacks und Dinge des täglichen Bedarfs.",
+        note = "Gut für den Einkauf zu Fuß; für einen großen Warenkorb weiterhin mit Sklavenitis vergleichen",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Supermarkt", "Lebensmittel", "zu Fuß"),
+        reviewSummary = "Die öffentlich ausgewiesenen Google-Daten lagen zuletzt bei 4,3 von 5 Punkten aus rund 292 Rezensionen; die große Mehrheit vergab vier oder fünf Sterne. Es gibt aber auch einzelne sehr niedrige Bewertungen, deshalb Preise und Frische wie bei jedem Ferienmarkt vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://businessguide.gr/listing/hellenic-market-edem-rhodes-supermarket/"
+    ),
+    CompassTip(
+        category = "Supermärkte",
+        title = "Michalis Kiosk: schnell versorgt",
+        description = "Ein kleiner Kiosk an der Hauptstraße für kalte Getränke, Snacks und spontane Besorgungen unterwegs.",
+        note = "Für Kleinigkeiten praktisch; kein Ersatz für einen vollständigen Supermarkteinkauf",
+        location = "EO95 bei Kolymbia",
+        journey = "zu Fuß nur je nach Unterkunft, sonst kurzer Stopp mit Auto oder Taxi",
+        tags = listOf("Kolymbia", "Kiosk", "Getränke", "schneller Stopp"),
+        reviewSummary = "Das öffentlich sichtbare Bewertungsaggregat nennt 5,0 von 5 Punkten aus 29 Rezensionen und damit eine auffallend starke, wenn auch noch überschaubare Basis. Aus den zugänglichen Daten lassen sich einzelne Stärken jedoch nicht verlässlich herauslesen; Sortiment und Öffnung deshalb vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.cybo.com/GR-postal-code/851-03_afantou/grocery-stores-and-supermarkets/"
+    ),
+    CompassTip(
+        category = "Mode & Accessoires",
+        title = "Hashtag Shop: griechische Sommermode",
+        description = "Eine Boutique an der Eukalyptusstraße mit Kleidung, Sandalen, Strandmode, Taschen und Accessoires für Frauen und Männer.",
+        note = "Interessanter für tragbare Urlaubserinnerungen als für klassische Souvenirs",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Mode", "Sandalen", "Accessoires", "zu Fuß"),
+        reviewSummary = "Bei 4,9 von 5 Punkten aus 39 Google-Rezensionen werden besonders hilfsbereiter Service, faire Preise, gute Auswahl und Produkte griechischer Firmen gelobt. Einzelne Käufer berichten zugleich von kleinen Qualitätsproblemen bei günstigen Accessoires – Nähte, Verschlüsse und Schrauben kurz prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://wanderlog.com/place/details/7941601"
+    ),
+    CompassTip(
+        category = "Souvenirs",
+        title = "Tourist Shop Oslo Street: beliebter Fundort",
+        description = "Ein gut bewerteter Ferienladen in Kolymbia für Souvenirs und typische Urlaubsbesorgungen.",
+        note = "Vor dem Kauf Material, Herkunft und Preise mit einem zweiten Laden vergleichen",
+        location = "Oslo Street, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Souvenirs", "Ferienbedarf", "zu Fuß"),
+        reviewSummary = "Das öffentlich sichtbare Bewertungsaggregat führt den Laden mit 4,9 von 5 Punkten aus 42 Rezensionen und damit als einen der stärksten allgemeinen Tourist Shops im Ort. Da kaum belastbare Einzeltexte zugänglich sind, bleibt offen, welche Waren besonders überzeugen – Qualität und Herkunft vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.cybo.com/GR-postal-code/851-03_afantou/grocery-stores-and-supermarkets/"
+    ),
+    CompassTip(
         category = "Souvenirs",
         title = "Secret Rhodes: handgemachte Andenken",
         description = "Ein kleiner Laden an der Eukalyptusstraße mit Keramik, Schmuck, Naturkosmetik, Olivenölseife und handgemachten Dekorationen.",

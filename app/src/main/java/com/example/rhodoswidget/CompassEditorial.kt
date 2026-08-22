@@ -61,6 +61,13 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             "Lebensmittel und Reisebedarf", "Für einzelne Getränke reicht oft ein näherer Minimarkt.",
             imageRes = R.drawable.rhodes_old_town_009
         )
+        "Mode & Accessoires" -> CompassEditorial(
+            "30–60 Minuten", "Später Nachmittag", "Rund um Kolymbia", "Meist zu Fuß",
+            "Saisonale Öffnungszeiten am Besuchstag prüfen.",
+            "Mit einem Bummel auf der Eukalyptusstraße verbinden.", "Keine feste Rückfahrt nötig.",
+            "Kleidung, Schuhe und Accessoires", "Qualität und Rückgabemöglichkeiten vor dem Kauf ansehen.",
+            imageRes = R.drawable.tip_shop_hashtag
+        )
         "Souvenirs" -> CompassEditorial(
             "30–60 Minuten", "Später Nachmittag", "Rund um Kolymbia", "Zu Fuß, Taxi oder Auto",
             "Saisonale Öffnungszeiten am Besuchstag prüfen.",
@@ -396,6 +403,44 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             counterRecommendation = "Bei einem großen Warenkorb mit einem Vollsortimenter vergleichen.",
             checkedAt = "16.08.2026",
             imageRes = R.drawable.rhodes_greece_landscape_025
+        )
+        "Edem: Markt an der Eukalyptusstraße" -> fallback.copy(
+            fromHotel = "Eukalyptusstraße, Kolymbia",
+            transport = "Je nach Hotel zu Fuß",
+            combination = "Mit Eukalyptusallee, Strand oder Abendessen.",
+            facilities = "Lebensmittel, Getränke, Snacks und Reisebedarf",
+            counterRecommendation = "Für einen großen Einkauf Auswahl und Preise mit Sklavenitis vergleichen.",
+            checkedAt = "22.08.2026",
+            imageRes = R.drawable.tip_shop_edem
+        )
+        "Michalis Kiosk: schnell versorgt" -> fallback.copy(
+            duration = "10–20 Minuten",
+            bestTime = "Unterwegs",
+            fromHotel = "An der EO95 bei Kolymbia",
+            transport = "Zu Fuß je nach Lage, sonst Auto oder Taxi",
+            combination = "Als kurzer Stopp auf dem Weg zu einem Ausflug.",
+            facilities = "Kalte Getränke, Snacks und kleine Alltagsbesorgungen",
+            counterRecommendation = "Für Frischeprodukte oder einen Wocheneinkauf einen Supermarkt wählen.",
+            checkedAt = "22.08.2026",
+            imageRes = R.drawable.tip_shop_michalis_kiosk
+        )
+        "Hashtag Shop: griechische Sommermode" -> fallback.copy(
+            fromHotel = "Eukalyptusstraße, Kolymbia",
+            transport = "Je nach Hotel zu Fuß",
+            combination = "Mit einem Abendbummel und Essen im Ortszentrum.",
+            facilities = "Sommermode, Sandalen, Taschen und Accessoires",
+            counterRecommendation = "Günstige Accessoires vor dem Kauf auf Verarbeitung prüfen.",
+            checkedAt = "22.08.2026",
+            imageRes = R.drawable.tip_shop_hashtag
+        )
+        "Tourist Shop Oslo Street: beliebter Fundort" -> fallback.copy(
+            fromHotel = "Oslo Street, Kolymbia",
+            transport = "Je nach Hotel zu Fuß",
+            combination = "Mit einem Ortsbummel oder Strandweg verbinden.",
+            facilities = "Souvenirs und typischer Ferienbedarf",
+            counterRecommendation = "Bewertung ist stark, aber konkrete Rezensionstexte sind kaum zugänglich; Preise und Herkunft vergleichen.",
+            checkedAt = "22.08.2026",
+            imageRes = R.drawable.tip_shop_oslo
         )
         "Secret Rhodes: handgemachte Andenken" -> fallback.copy(
             fromHotel = "Eukalyptusstraße, Kolymbia",

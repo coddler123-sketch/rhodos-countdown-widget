@@ -232,55 +232,6 @@ private fun CompassCategoryFilterChip(
 }
 
 @Composable
-internal fun CompassNearbySection(
-    tips: List<CompassTip>,
-    savedTips: Set<String>,
-    onToggleSaved: (String) -> Unit,
-    onOpen: (String) -> Unit
-) {
-    Column {
-        Text("NAH BEI EUCH", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        Spacer(Modifier.height(8.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(tips, key = { "near_${it.title}" }) { tip ->
-                val editorial = editorialFor(tip)
-                Column(
-                    modifier = Modifier
-                        .width(236.dp)
-                        .background(HomeCardColor, HomeCardShape)
-                        .border(1.dp, categoryColor(tip.category).copy(alpha = 0.55f), HomeCardShape)
-                        .clickable { onOpen(tip.id) }
-                        .padding(12.dp)
-                ) {
-                    Image(
-                        painter = painterResource(editorial.imageRes),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(82.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                    )
-                    Spacer(Modifier.height(9.dp))
-                    Text(tip.title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(editorial.fromHotel, color = Color(0xBFFFFFFF), fontSize = 9.sp, maxLines = 1)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(editorial.duration, color = categoryColor(tip.category), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        TextButton(onClick = { onToggleSaved(tip.id) }) {
-                            Text(if (tip.id in savedTips) "♥" else "♡", color = HomeAccent, fontSize = 18.sp)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 internal fun CompassDayPlanCard(tips: List<CompassTip>) {
     Column(
         modifier = Modifier
@@ -479,6 +430,17 @@ internal fun CompassTipCard(
                 }
                 .testTag("compass-tip-${tip.id}")
         ) {
+            Image(
+                painter = painterResource(editorial.imageRes),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (expanded) 184.dp else 136.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .testTag("compass-tip-image-${tip.id}-${if (expanded) "detail" else "card"}")
+            )
+            Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -700,6 +662,7 @@ internal fun categoryColor(category: String): Color = when (category) {
     "Mobilität" -> Color(0xFF8DD7E3)
     "Unterkünfte" -> Color(0xFF93C98B)
     "Supermärkte" -> Color(0xFF79C98D)
+    "Mode & Accessoires" -> Color(0xFFE0A36C)
     "Souvenirs" -> Color(0xFFD6A4E8)
     "Regionale Produkte" -> Color(0xFFD9A86C)
     else -> HomeAccent

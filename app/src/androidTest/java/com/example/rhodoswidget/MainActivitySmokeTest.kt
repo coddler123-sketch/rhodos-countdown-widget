@@ -89,16 +89,15 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
-        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(9)
-        composeRule.onNodeWithTag("community-link").assertIsDisplayed()
+        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithTag("community-link").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-Unterkünfte").performClick()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
         composeRule.onNodeWithText("5 Treffer").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-filter-all").performClick()
-        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
 
         pressBack()
 
@@ -110,6 +109,9 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithTag("compass-search").performTextInput("Melekouni")
         composeRule.onNodeWithTag("compass-tip-food-melekouni").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-tip-image-food-melekouni-card", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
         composeRule.onNodeWithTag("compass-save-food-melekouni").performClick()
 
         composeRule.activityRule.scenario.recreate()
@@ -141,6 +143,12 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("compass-tip-shopping-supermarket-sklavenitis-kolymbia").performClick()
 
         composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+        composeRule.onNodeWithTag(
+            "compass-tip-image-shopping-supermarket-sklavenitis-kolymbia-detail",
+            useUnmergedTree = true
+        )
+            .performScrollTo()
+            .assertIsDisplayed()
         composeRule.onNodeWithText("REZENSIONEN ZUSAMMENGEFASST")
             .performScrollTo()
             .assertIsDisplayed()
@@ -191,7 +199,7 @@ class MainActivitySmokeTest {
 
         pressBack()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("42 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
     }
 
     @Test
