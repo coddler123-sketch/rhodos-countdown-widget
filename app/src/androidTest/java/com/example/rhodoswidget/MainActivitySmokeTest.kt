@@ -164,6 +164,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithTag("compass-screen").performScrollToKey("Strände")
         composeRule.onNodeWithTag("compass-category-Ausflüge").performClick()
+        composeRule.onNodeWithTag("compass-screen").performScrollToKey("trip-seven-springs")
         composeRule.onNodeWithTag("compass-tip-trip-seven-springs").performClick()
         composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-map-trip-seven-springs").performScrollTo().assertIsDisplayed()
@@ -187,9 +188,8 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("compass-screen").performScrollToKey("Mobilität")
         composeRule.onNodeWithTag("compass-category-Mobilität").performClick()
 
-        composeRule.onNodeWithTag("compass-tip-mobility-september-schedule")
-            .performScrollTo()
-            .performClick()
+        composeRule.onNodeWithTag("compass-screen").performScrollToKey("mobility-september-schedule")
+        composeRule.onNodeWithTag("compass-tip-mobility-september-schedule").performClick()
         composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
 
         pressBack()
