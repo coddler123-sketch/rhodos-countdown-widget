@@ -196,7 +196,7 @@ fun CompassScreen(
                         if (row.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
-                item {
+                item(key = "community") {
                     CompassCommunityCard(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onOpenCommunity

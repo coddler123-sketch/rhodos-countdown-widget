@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -90,7 +91,8 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
         composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
-        composeRule.onNodeWithTag("community-link").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-screen").performScrollToKey("community")
+        composeRule.onNodeWithTag("community-link").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-Unterkünfte").performClick()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
@@ -160,7 +162,7 @@ class MainActivitySmokeTest {
     @Test
     fun excursionTipCloseReturnsToTipsOverview() {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
-        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(7)
+        composeRule.onNodeWithTag("compass-screen").performScrollToKey("Strände")
         composeRule.onNodeWithTag("compass-category-Ausflüge").performClick()
         composeRule.onNodeWithTag("compass-tip-trip-seven-springs").performClick()
         composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
@@ -182,7 +184,7 @@ class MainActivitySmokeTest {
     @Test
     fun mobilityBackReturnsThroughTipsNavigation() {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
-        composeRule.onNodeWithTag("compass-screen").performScrollToIndex(8)
+        composeRule.onNodeWithTag("compass-screen").performScrollToKey("Mobilität")
         composeRule.onNodeWithTag("compass-category-Mobilität").performClick()
 
         composeRule.onNodeWithTag("compass-tip-mobility-september-schedule")
