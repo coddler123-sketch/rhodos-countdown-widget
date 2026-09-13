@@ -90,16 +90,16 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").performScrollToKey("community")
         composeRule.onNodeWithTag("community-link").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-Unterkünfte").performClick()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("5 Treffer").assertIsDisplayed()
+        composeRule.onNodeWithText("6 Treffer").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-filter-all").performClick()
-        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
 
         pressBack()
 
@@ -160,6 +160,23 @@ class MainActivitySmokeTest {
     }
 
     @Test
+    fun relaxHotelTipShowsPracticalDetailsAndMapLink() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-search").performTextInput("Relax Hotel")
+        composeRule.onNodeWithTag("compass-tip-hotel-relax-kolymbia").performClick()
+
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-hotel-details-hotel-relax-kolymbia")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("HOTEL AUF EINEN BLICK").assertIsDisplayed()
+        composeRule.onNodeWithText("EUER ZIMMER · SHARED POOL").assertIsDisplayed()
+        composeRule.onNodeWithTag("compass-map-hotel-relax-kolymbia")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun excursionTipCloseReturnsToTipsOverview() {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithTag("compass-screen").performScrollToKey("Strände")
@@ -201,7 +218,7 @@ class MainActivitySmokeTest {
 
         pressBack()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("46 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
     }
 
     @Test

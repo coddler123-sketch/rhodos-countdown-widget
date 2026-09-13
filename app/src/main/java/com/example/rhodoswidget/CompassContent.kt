@@ -15,6 +15,51 @@ internal val compassTips = listOf(
     CompassTip("Unterkünfte", "Esperides Beach Family", "Familienhotel mit Pool, direkter Meerlage und gutem Essen.", "Gut für Familien"),
     CompassTip("Unterkünfte", "Blue Sea Beach", "Positiver erster Eindruck in direkter Strandlage.", "Für Abendbummel außerhalb von Faliraki", CompassTipKind.CAUTION),
     CompassTip(
+        category = "Unterkünfte",
+        title = "Relax Hotel – unser Hotel",
+        description = "Euer familiengeführtes 3-Sterne-Hotel liegt zentral in Kolymbia und laut Hotel rund 100 Meter vom Meer entfernt.",
+        note = "Leistungen, Essenszeiten und mögliche Gebühren können von Saison und gebuchtem Reiseangebot abhängen",
+        location = "Eukalyptus Alley 2, Kolymbia, Rhodos",
+        journey = "Vor Ort; Flughafen laut Hotel unter 40 Autominuten",
+        tags = listOf("Relax Hotel", "Kolymbia", "Pool", "Strandnähe", "24-h-Rezeption"),
+        hotelDetails = listOf(
+            CompassTipDetail(
+                "EUER ZIMMER · SHARED POOL",
+                "Gebucht ist ein Doppelzimmer Superior Sharing Pool im renovierten Teil. Schauinsland führt das Relax unter RHO071 und bietet diese exklusive Zimmerkategorie seit Sommer 2023 an. Dazu gehören Terrasse mit Sonnenliegen, Walk-in-Dusche, Föhn, Klimaanlage und direkter Zugang zum Shared Pool. Der Pool ist kein Privatpool, sondern wird mit den angrenzenden Zimmern geteilt."
+            ),
+            CompassTipDetail(
+                "ADRESSE & KONTAKT",
+                "Eukalyptus Alley 2, Kolymbia · 85100/85103 Rhodos · Rezeption +30 22410 56220 · relax.hotel@hotmail.com · relaxhotel.gr"
+            ),
+            CompassTipDetail(
+                "LAGE & UMGEBUNG",
+                "Zentral in Kolymbia, laut Hotel etwa 100 m vom Meer. Ein Supermarkt wird mit rund 200 m Entfernung angegeben; Geschäfte, Tavernen und die Eukalyptusstraße liegen in der näheren Umgebung."
+            ),
+            CompassTipDetail(
+                "ZIMMER",
+                "Das gesamte Hotel wurde laut eigener Website 2019 umfangreich renoviert. Die besonderen, bei Schauinsland exklusiven Superior-Shared-Pool-Zimmer kamen als erneuerter Bereich zur Sommersaison 2023 hinzu. Maßgeblich bleiben euer Voucher und die Rezeption."
+            ),
+            CompassTipDetail(
+                "ESSEN & TRINKEN",
+                "Restaurant mit griechischen und mediterranen Gerichten, Frühstücksbuffet, Bar/Lounge und Poolbar. All-inclusive-Umfang, Getränke und Essenszeiten bitte in den Reiseunterlagen oder an der Rezeption prüfen."
+            ),
+            CompassTipDetail(
+                "POOL & FAMILIE",
+                "Saisonaler Außenpool, Kinderbecken, Garten, Spielplatz und Spielebereich. Ob Liegen, Schirme oder einzelne Angebote verfügbar sind, kann saisonabhängig sein."
+            ),
+            CompassTipDetail(
+                "SERVICE & REGELN",
+                "24-h-Rezeption, Aufzug, WLAN, Safe, Autovermietung und Außenparkplätze werden genannt. Haustiere sind nicht erlaubt. Beim Check-in Pool-Nutzungszeiten, Tiefe/Temperatur, Handtücher sowie mögliche WLAN- oder Klimagebühren klären."
+            ),
+            CompassTipDetail(
+                "AN- & ABREISE",
+                "Die veröffentlichten Check-in-/Check-out-Zeiten widersprechen sich je nach Anbieter. Maßgeblich sind euer Voucher und die Rezeption. Am Vortag Transfer-Abholzeit, Gepäckaufbewahrung und mögliche Zimmerverlängerung erfragen."
+            )
+        ),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.relaxhotel.gr/"
+    ),
+    CompassTip(
         category = "Essen",
         title = "Melekouni probieren",
         description = "Der rhodische Sesam-Honig-Riegel ist eine typische Süßigkeit der Insel und ein gutes kleines Mitbringsel.",

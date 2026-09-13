@@ -160,13 +160,26 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             imageRes = R.drawable.rhodes_greece_landscape_003
         )
         "Lydia Maris Resort" -> fallback.copy(
-            imageRes = R.drawable.relax_hotel_kolymbia
+            imageRes = R.drawable.rhodos_1906319
         )
         "Esperides Beach Family" -> fallback.copy(
             imageRes = R.drawable.prasonisi_rhodes_006
         )
         "Blue Sea Beach" -> fallback.copy(
             imageRes = R.drawable.rhodos_02_tsambika_strand_sunset
+        )
+        "Relax Hotel – unser Hotel" -> fallback.copy(
+            duration = "",
+            bestTime = "",
+            fromHotel = "",
+            transport = "",
+            septemberNote = "",
+            combination = "",
+            returnTip = "",
+            facilities = "",
+            counterRecommendation = "Verbindlich sind euer Reisevoucher und die Angaben der Rezeption; einzelne Leistungen können saisonal oder je nach Veranstalter abweichen.",
+            checkedAt = "23.08.2026",
+            imageRes = R.drawable.relax_hotel_kolymbia
         )
         "Melekouni probieren" -> fallback.copy(
             duration = "Kurzer Genussstopp",

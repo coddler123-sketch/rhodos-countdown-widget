@@ -57,7 +57,7 @@ fun CompassScreen(
             CompassCategory("Strände", "Lebhafte Buchten und ruhige Badetage", R.drawable.anthony_quinn_bay_rhodes_001),
             CompassCategory("Ausflüge", "Orte, Besuchszeiten und Kombinationen", R.drawable.excursion_lindos),
             CompassCategory("Mobilität", "Bus, Mietwagen und sichere Rückfahrten", R.drawable.category_rhodes_bus),
-            CompassCategory("Unterkünfte", "Persönliche Hotelerfahrungen", R.drawable.relax_hotel_kolymbia),
+            CompassCategory("Unterkünfte", "Euer Relax Hotel und weitere Erfahrungen", R.drawable.relax_hotel_kolymbia),
             CompassCategory("Supermärkte", "Lebensmittel, Getränke und Reisebedarf", R.drawable.rhodes_old_town_009),
             CompassCategory("Mode & Accessoires", "Sommermode, Sandalen und Taschen", R.drawable.tip_shop_hashtag),
             CompassCategory("Souvenirs", "Handgemachte und besondere Erinnerungen", R.drawable.lindos_white_houses_bougainvillea_002),

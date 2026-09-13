@@ -7,7 +7,7 @@ import org.junit.Test
 class CompassTipsTest {
     @Test
     fun `tip collection balances community and researched guidance`() {
-        assertEquals(46, compassTips.size)
+        assertEquals(47, compassTips.size)
         assertEquals(compassTips.size, compassTips.map { it.id }.distinct().size)
         assertTrue(compassTips.all { it.id.isNotBlank() && it.id != it.title })
         assertTrue(compassTips.count { it.source == CompassTipSource.COMMUNITY } >= 10)
@@ -64,6 +64,25 @@ class CompassTipsTest {
         assertEquals(3, compassTips.count { it.category == "Souvenirs" })
         assertEquals(1, compassTips.count { it.category == "Mode & Accessoires" })
         assertEquals(3, compassTips.count { it.category == "Regionale Produkte" })
+    }
+
+    @Test
+    fun `Relax Hotel tip contains practical sourced details and map`() {
+        val hotel = compassTips.first { it.id == "hotel-relax-kolymbia" }
+
+        assertEquals("Unterkünfte", hotel.category)
+        assertEquals(8, hotel.hotelDetails.size)
+        assertTrue(hotel.hotelDetails.any {
+            it.title == "EUER ZIMMER · SHARED POOL" &&
+                "kein Privatpool" in it.text &&
+                "renovierten Teil" in it.text &&
+                "Sommer 2023" in it.text &&
+                "RHO071" in it.text
+        })
+        assertTrue(hotel.hotelDetails.any { it.title == "ADRESSE & KONTAKT" && "+30 22410 56220" in it.text })
+        assertTrue(hotel.hotelDetails.any { it.title == "AN- & ABREISE" && "Voucher" in it.text })
+        assertTrue(hotel.sourceUrl == "https://www.relaxhotel.gr/")
+        assertTrue(hotel.mapsUrl?.startsWith("https://www.google.com/maps/") == true)
     }
 
     @Test

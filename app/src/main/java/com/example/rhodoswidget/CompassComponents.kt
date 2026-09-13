@@ -549,26 +549,63 @@ internal fun CompassTipCard(
                     )
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            CompassFactRow("DAUER", editorial.duration)
-            CompassFactRow("BESTE ZEIT", editorial.bestTime)
-            CompassFactRow("AB RELAX HOTEL", editorial.fromHotel)
-            CompassFactRow("ANREISE", editorial.transport)
+            if (tip.hotelDetails.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(accent.copy(alpha = 0.10f), RoundedCornerShape(14.dp))
+                        .border(1.dp, accent.copy(alpha = 0.30f), RoundedCornerShape(14.dp))
+                        .padding(12.dp)
+                        .testTag("compass-hotel-details-${tip.id}")
+                ) {
+                    Text(
+                        "HOTEL AUF EINEN BLICK",
+                        color = accent,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.7.sp
+                    )
+                    tip.hotelDetails.forEachIndexed { index, detail ->
+                        Spacer(Modifier.height(if (index == 0) 10.dp else 12.dp))
+                        Text(
+                            detail.title,
+                            color = Color(0xBFFFFFFF),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            detail.text,
+                            color = Color(0xE6FFFFFF),
+                            fontSize = 11.sp,
+                            lineHeight = 17.sp,
+                            fontFamily = Montserrat
+                        )
+                    }
+                }
+            } else {
+                Spacer(Modifier.height(12.dp))
+                CompassFactRow("DAUER", editorial.duration)
+                CompassFactRow("BESTE ZEIT", editorial.bestTime)
+                CompassFactRow("AB RELAX HOTEL", editorial.fromHotel)
+                CompassFactRow("ANREISE", editorial.transport)
 
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "IM SEPTEMBER",
-                color = HomeAccent,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp
-            )
-            Text(editorial.septemberNote, color = Color(0xE6FFFFFF), fontSize = 11.sp, lineHeight = 17.sp, fontFamily = Montserrat)
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "IM SEPTEMBER",
+                    color = HomeAccent,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                Text(editorial.septemberNote, color = Color(0xE6FFFFFF), fontSize = 11.sp, lineHeight = 17.sp, fontFamily = Montserrat)
 
-            Spacer(Modifier.height(12.dp))
-            CompassFactRow("GUT KOMBINIERBAR", editorial.combination)
-            CompassFactRow("RÜCKFAHRT", editorial.returnTip)
-            CompassFactRow("VOR ORT", editorial.facilities)
+                Spacer(Modifier.height(12.dp))
+                CompassFactRow("GUT KOMBINIERBAR", editorial.combination)
+                CompassFactRow("RÜCKFAHRT", editorial.returnTip)
+                CompassFactRow("VOR ORT", editorial.facilities)
+            }
 
             Spacer(Modifier.height(10.dp))
             Text("EHRLICH EINGESCHÄTZT", color = Color(0xFFFFB86B), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
