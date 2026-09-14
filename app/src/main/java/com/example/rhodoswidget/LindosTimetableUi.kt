@@ -110,8 +110,11 @@ internal fun KolymbiaGermanTimetable(
             ) {
                 Text(
                     stringResource(
-                        if (hasUnreviewedUpdate) R.string.travel_timetable_update_detected_title
-                        else R.string.travel_timetable_trip_status_title
+                        when {
+                            hasUnreviewedUpdate -> R.string.travel_timetable_update_detected_title
+                            KolymbiaTimetable.isValidForTrip -> R.string.travel_timetable_trip_status_title_valid
+                            else -> R.string.travel_timetable_trip_status_title
+                        }
                     ),
                     color = Color.White,
                     fontSize = 16.sp,
@@ -126,7 +129,11 @@ internal fun KolymbiaGermanTimetable(
                     fontFamily = Montserrat
                 )
                 Text(
-                    stringResource(R.string.travel_timetable_trip_status_note, KolymbiaTimetable.VALIDITY),
+                    stringResource(
+                        if (KolymbiaTimetable.isValidForTrip) R.string.travel_timetable_trip_status_note_valid
+                        else R.string.travel_timetable_trip_status_note,
+                        KolymbiaTimetable.VALIDITY
+                    ),
                     color = Color(0xB3FFFFFF),
                     fontSize = 10.sp,
                     fontFamily = Montserrat

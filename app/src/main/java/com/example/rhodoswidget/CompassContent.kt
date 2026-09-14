@@ -152,8 +152,8 @@ internal val compassTips = listOf(
     CompassTip(
         category = "Mobilität",
         title = "September-Fahrplan neu prüfen",
-        description = "KTEL veröffentlicht saisonale Fahrpläne. Die heute sichtbaren Zeiten sind nicht automatisch für den 20.09.2026 gültig.",
-        note = "Kurz vor Abreise und nochmals vor Ort aktualisieren",
+        description = "Der KTEL-Sommerfahrplan wurde inzwischen bis 30.09.2026 verlängert und deckt damit euren Reisezeitraum ab.",
+        note = "Trotzdem kurz vor Abreise und nochmals vor Ort aktualisieren, falls sich der Plan erneut ändert",
         kind = CompassTipKind.CAUTION,
         location = "Kolymbia Beach",
         journey = "KTEL Ostküste",
