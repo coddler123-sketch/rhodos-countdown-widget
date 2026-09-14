@@ -8,7 +8,7 @@ internal data class LindosTimetableRoute(
 )
 
 internal object LindosTimetable {
-    const val VALIDITY = "06.07.2026–10.09.2026"
+    const val VALIDITY = "06.07.2026–30.09.2026"
 
     val fromLindos = listOf(
         route("Rhodos-Stadt", "ΡΟΔΟΣ", "6,00 €", "6:45 7:30 8:40 9:40 10:30 11:30 12:15 13:00 14:00 14:30 15:00 15:30 16:30 17:15 18:00 18:45 19:15 20:00 20:45 21:45"),

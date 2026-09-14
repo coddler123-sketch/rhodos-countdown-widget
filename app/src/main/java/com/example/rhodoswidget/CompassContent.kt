@@ -41,7 +41,7 @@ internal val compassTips = listOf(
             ),
             CompassTipDetail(
                 "ESSEN & TRINKEN",
-                "Restaurant mit griechischen und mediterranen Gerichten, Frühstücksbuffet, Bar/Lounge und Poolbar. All-inclusive-Umfang, Getränke und Essenszeiten bitte in den Reiseunterlagen oder an der Rezeption prüfen."
+                "Laut Schauinsland-Reisen (Veranstalterbeschreibung) alle Mahlzeiten als Buffet: Frühstück 7:00–10:30 Uhr, Mittagessen 12:30–14:30 Uhr, Abendessen 18:30–21:00 Uhr. Lokale alkoholische und alkoholfreie Getränke 11:00–23:00 Uhr, Kaffee 6:30–20:00 Uhr. Genaue Zeiten vor Ort an der Rezeption bestätigen lassen."
             ),
             CompassTipDetail(
                 "POOL & FAMILIE",

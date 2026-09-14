@@ -38,10 +38,10 @@ class KolymbiaTimetableTest {
     }
 
     @Test
-    fun `published timetable does not cover the trip start`() {
-        assertTrue(KolymbiaTimetable.isValidOn(2026, 9, 10))
-        assertTrue(!KolymbiaTimetable.isValidOn(2026, 9, 11))
-        assertTrue(!KolymbiaTimetable.isValidForTrip)
+    fun `published timetable now covers the trip start`() {
+        assertTrue(KolymbiaTimetable.isValidOn(2026, 9, 30))
+        assertTrue(!KolymbiaTimetable.isValidOn(2026, 10, 1))
+        assertTrue(KolymbiaTimetable.isValidForTrip)
     }
 
     @Test

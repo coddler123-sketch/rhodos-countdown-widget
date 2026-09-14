@@ -9,10 +9,10 @@ internal data class KolymbiaConnection(
 internal object KolymbiaTimetable {
     const val REVIEWED_PDF_URL =
         "https://www.ktelrodou.gr/wp-content/uploads/2026/08/KOLYMBIABEACH5.pdf"
-    const val VALIDITY = "06.07.2026–10.09.2026"
+    const val VALIDITY = "06.07.2026–30.09.2026"
 
     val fromKolymbia = listOf(
-        route("Rhodos-Stadt", "ΡΟΔΟΣ", "4,00 €", "7:50 8:50 9:50 10:35 11:35 12:30 13:35 14:10 15:05 16:05 16:35 17:45 18:15 20:20"),
+        route("Rhodos-Stadt", "ΡΟΔΟΣ", "4,00 €", "7:45 8:45 9:45 10:30 11:30 12:25 13:30 14:05 15:00 16:00 16:30 17:40 18:10 20:15"),
         route("Lindos", "ΛΙΝΔΟΣ", "4,30 €", "8:50 9:20 9:50 10:50 12:50 14:50"),
         route("Tsambika-Strand", "ΤΣΑΜΠΙΚΑ ΠΑΡΑΛΙΑ", "2,30 €", "9:50 12:50 15:50"),
         route("Sieben Quellen", "ΕΠΤΑ ΠΗΓΕΣ", "2,30 €", "11:30"),
@@ -70,5 +70,5 @@ internal object KolymbiaTimetable {
         LindosTimetableRoute(place, greekName, price, times.split(' '))
 
     private const val VALID_FROM = 20260706
-    private const val VALID_UNTIL = 20260910
+    private const val VALID_UNTIL = 20260930
 }
