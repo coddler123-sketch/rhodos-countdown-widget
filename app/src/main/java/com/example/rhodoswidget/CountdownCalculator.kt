@@ -88,6 +88,12 @@ object CountdownCalculator {
         set(Calendar.MILLISECOND, 0)
     }
 
+    fun isFlightDay(now: Calendar = Calendar.getInstance()): Boolean {
+        return now.get(Calendar.YEAR) == DEPARTURE_YEAR &&
+            now.get(Calendar.MONTH) == DEPARTURE_MONTH &&
+            now.get(Calendar.DAY_OF_MONTH) == DEPARTURE_DAY
+    }
+
     private fun departureCalendar(now: Calendar) = (now.clone() as Calendar).apply {
         set(Calendar.YEAR, DEPARTURE_YEAR)
         set(Calendar.MONTH, DEPARTURE_MONTH)

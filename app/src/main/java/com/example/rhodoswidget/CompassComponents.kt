@@ -156,7 +156,7 @@ internal fun CompassQuickFilters(
     onSelected: (String) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(listOf("Ohne Auto", "Halber Tag", "Ruhig", "Essen")) { filter ->
+        items(listOf("Rund ums Relax Hotel", "Zu Fuß", "Ohne Auto", "Halber Tag", "Ruhig", "Essen")) { filter ->
             FilterChip(
                 selected = selected == filter,
                 onClick = { onSelected(filter) },

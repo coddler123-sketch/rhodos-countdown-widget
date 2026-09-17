@@ -403,6 +403,10 @@ private fun RhodosHome(
             Spacer(Modifier.height(18.dp))
             CountdownSection(s)
             Spacer(Modifier.height(16.dp))
+            if (CountdownCalculator.isFlightDay(Calendar.getInstance())) {
+                FlightDayTimelineCard()
+                Spacer(Modifier.height(16.dp))
+            }
             HomeQuickActions(
                 onOpenChecklist = onOpenChecklist,
                 onOpenKolymbia = onOpenKolymbia

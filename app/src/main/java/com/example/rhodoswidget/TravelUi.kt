@@ -363,6 +363,7 @@ fun TravelScreen(
                         }
                     )
                 }
+                item { GreekPhrasebookCard() }
                 items(excursionIdeas, key = { it.id }) { idea ->
                     ExcursionCard(
                         idea = idea,
@@ -892,4 +893,87 @@ internal fun TravelCardContainer(content: @Composable ColumnScope.() -> Unit) {
             .padding(16.dp),
         content = content
     )
+}
+
+@Composable
+private fun GreekPhrasebookCard() {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
+            .padding(16.dp)
+            .testTag("greek-phrasebook-card")
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "GRIECHISCH FÜR DIE TAVERNE 🇬🇷",
+                    color = HomeAccent,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Montserrat,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Sprachführer & wichtige Redewendungen",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Montserrat
+                )
+            }
+            Text(
+                text = if (expanded) "▲" else "▼",
+                color = HomeAccent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        if (expanded) {
+            Spacer(Modifier.height(12.dp))
+            greekPhrases.forEach { phrase ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = phrase.greek,
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = Montserrat
+                        )
+                        Text(
+                            text = phrase.german,
+                            color = HomeAccent,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Montserrat
+                        )
+                    }
+                    Text(
+                        text = "Aussprache: ${phrase.phonetic}",
+                        color = Color(0x99FFFFFF),
+                        fontSize = 11.sp,
+                        fontFamily = Montserrat
+                    )
+                }
+            }
+        }
+    }
 }

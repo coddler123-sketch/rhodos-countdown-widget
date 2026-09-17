@@ -142,3 +142,26 @@ private val TRUSTED_TRAVEL_HOSTS = setOf(
     "www.sebeco.gr",
     "seadreams.gr"
 )
+
+internal data class GreekPhrase(
+    val category: String,
+    val greek: String,
+    val phonetic: String,
+    val german: String
+)
+
+internal val greekPhrases = listOf(
+    GreekPhrase("Taverne & Bestellung", "Ton logariasmó, parakaló", "Ton lo-ga-rjas-mó, pa-ra-ka-ló", "Die Rechnung bitte"),
+    GreekPhrase("Taverne & Bestellung", "Stin ygía mas! / Yamas!", "Stin i-jí-a mas / Ja-mas", "Zum Wohl / Prost!"),
+    GreekPhrase("Taverne & Bestellung", "Éna neró, parakaló", "É-na ne-ró, pa-ra-ka-ló", "Ein Wasser bitte"),
+    GreekPhrase("Taverne & Bestellung", "Polý nóstimo!", "Po-lí nós-ti-mo", "Sehr lecker!"),
+    GreekPhrase("Taverne & Bestellung", "Dyo biras, parakaló", "Di-o bí-ras, pa-ra-ka-ló", "Zwei Bier bitte"),
+    GreekPhrase("Begrüßung & Danke", "Kaliméra", "Ka-li-mé-ra", "Guten Morgen / Guten Tag"),
+    GreekPhrase("Begrüßung & Danke", "Kalispera", "Ka-lis-pé-ra", "Guten Abend"),
+    GreekPhrase("Begrüßung & Danke", "Efcharistó polý", "Ef-cha-ris-tó po-lí", "Vielen Dank"),
+    GreekPhrase("Begrüßung & Danke", "Parakaló", "Pa-ra-ka-ló", "Bitte / Gern geschehen"),
+    GreekPhrase("Begrüßung & Danke", "Yássas / Yássou", "Já-sas / Já-su", "Hallo / Tschüss (Formell / Informell)"),
+    GreekPhrase("Unterwegs & Fragen", "Poú eínai i paralía?", "Pu í-ne i pa-ra-lí-a?", "Wo ist der Strand?"),
+    GreekPhrase("Unterwegs & Fragen", "Nai / Óchi", "Nä / Ó-chi", "Ja / Nein (Vorsicht: 'Nai' heißt Ja!)"),
+    GreekPhrase("Unterwegs & Fragen", "Gatáki", "Ga-tá-ki", "Kätzchen (für die süßen Tavernenkatzen)")
+)

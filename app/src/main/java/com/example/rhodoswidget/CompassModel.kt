@@ -119,6 +119,11 @@ internal fun filterCompassTips(
 }
 
 internal fun matchesCompassQuickFilter(tip: CompassTip, filter: String): Boolean = when (filter) {
+    "Rund ums Relax Hotel" -> tip.location.contains("Kolymbia", ignoreCase = true) ||
+        tip.tags.any { it.contains("Kolymbia", ignoreCase = true) } ||
+        tip.journey.contains("zu Fuß", ignoreCase = true)
+    "Zu Fuß" -> tip.journey.contains("zu Fuß", ignoreCase = true) ||
+        tip.tags.any { it.contains("zu Fuß", ignoreCase = true) }
     "Ohne Auto" -> tip.tags.any { it.contains("ohne Auto", ignoreCase = true) } ||
         tip.journey.contains("zu Fuß", ignoreCase = true) ||
         tip.journey.contains("Bus", ignoreCase = true)

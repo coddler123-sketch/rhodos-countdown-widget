@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -301,6 +302,75 @@ fun CommunityCard(onClick: () -> Unit) {
                 )
             }
             Text(text = "↗", color = HomeAccent, fontSize = 20.sp)
+        }
+    }
+}
+
+@Composable
+fun FlightDayTimelineCard() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(Color(0xFF1B3B42))
+            .border(1.dp, HomeAccent.copy(alpha = 0.8f), HomeCardShape)
+            .padding(16.dp)
+            .testTag("flight-day-timeline")
+    ) {
+        Text(
+            text = "HEUTE IST ABFLUGTAG! ✈️",
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Reise-Timeline & Etappen",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(10.dp))
+        TimelineItem("14:00 Uhr", "Boarding & Abflugbereich", "Gepäck aufgegeben & Sicherheitskontrolle")
+        TimelineItem("14:30 Uhr", "Abflug nach Rhodos 🛫", "Direktflug 20.09.2026")
+        TimelineItem("19:00 Uhr", "Ankunft Flughafen Rhodos (RHO) 🛬", "Ortszeit Rhodos")
+        TimelineItem("~20:00 Uhr", "Check-in Relax Hotel Kolymbia 🏨", "Doppelzimmer Superior Shared Pool (RHO071)")
+    }
+}
+
+@Composable
+private fun TimelineItem(time: String, title: String, subtitle: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = time,
+            color = HomeAccent,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            modifier = Modifier.width(75.dp)
+        )
+        Column {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = Montserrat
+            )
+            Text(
+                text = subtitle,
+                color = Color(0xAAFFFFFF),
+                fontSize = 10.sp,
+                fontFamily = Montserrat
+            )
         }
     }
 }
