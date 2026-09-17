@@ -334,18 +334,28 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             checkedAt = "16.08.2026",
             imageRes = R.drawable.tip_food_rosso_di_sera
         )
-        "Anthoula: Taverne im Grünen" -> fallback.copy(
+        "Anthoula: Traumhafte rhodische Küche" -> fallback.copy(
             duration = "1½–2 Stunden",
             bestTime = "Mittags oder abends",
-            fromHotel = "Etwas außerhalb von Kolymbia",
-            transport = "Taxi oder Auto",
-            septemberNote = "Öffnungszeit und Rückfahrt am Ausflugstag bestätigen.",
+            fromHotel = "Eukalyptus-Allee durchlaufen & Ampel an der Rodou-Lindou überqueren",
+            transport = "Zu Fuß über die Allee oder kurze Fahrt",
+            septemberNote = "Qualität und Preis-Leistungs-Verhältnis unübertroffen.",
             combination = "Sehr gut vor oder nach den Sieben Quellen.",
-            returnTip = "Taxi-Rückfahrt vor dem Essen vereinbaren.",
-            facilities = "Lokale Gerichte, Meze und Holzkohlegrill",
-            counterRecommendation = "Ohne Auto weniger spontan als die Lokale im Ortszentrum.",
-            checkedAt = "16.08.2026",
+            returnTip = "Zu Fuß über die Eukalyptus-Allee zurück.",
+            facilities = "Traumhafte traditionelle Küche, Meze, Holzkohlegrill",
+            checkedAt = "17.09.2026",
             imageRes = R.drawable.tip_food_anthoula
+        )
+        "Taverne Manolis: Gute Gyros Pita" -> fallback.copy(
+            duration = "30–60 Minuten",
+            bestTime = "Mittags oder früher Abend",
+            fromHotel = "Unweit des Strandes in Kolymbia",
+            transport = "Zu Fuß vom Strand oder Hotel",
+            combination = "Ideal mit einem Strandtag oder Spaziergang am Hafen.",
+            facilities = "Gute Gyros Pita, kalte Getränke, Strandnähe",
+            counterRecommendation = "Eher für ein schnelles, leckeres Essen als für ein langes Abendmenü.",
+            checkedAt = "17.09.2026",
+            imageRes = R.drawable.category_kolymbia_harbour
         )
         "Taverna Michel: familiär und vom Grill" -> fallback.copy(
             fromHotel = "Zentral in Kolymbia",
@@ -398,13 +408,13 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             checkedAt = "16.08.2026",
             imageRes = R.drawable.rhodos_392463
         )
-        "Sklavenitis Kolymbia: großer Einkauf" -> fallback.copy(
-            fromHotel = "An der Rhodos–Lindos-Straße",
-            transport = "Auto oder Taxi",
-            combination = "Gut direkt nach Ankunft oder vor einem Ausflug mit Auto.",
-            facilities = "Frischetheken, Backwaren, Fertiggerichte und Parkplatz",
-            counterRecommendation = "Für einen kleinen Einkauf ist der Weg vom Hotel möglicherweise unnötig.",
-            checkedAt = "16.08.2026",
+        "Sklavenitis: Griechischer Supermarkt" -> fallback.copy(
+            fromHotel = "An der Rodou-Lindou kurz vor Einmündung Kolymbia (nahe ehem. Krankenhaus / Seniorenheim)",
+            transport = "Auto, Taxi oder kurzer Weg",
+            combination = "Ideal für den täglichen Bedarf und Vorratseinkauf wie bei Einheimischen.",
+            facilities = "Vollsortimenter, Frischetheken, heimische Produkte",
+            counterRecommendation = "Für einen kleinen Einkauf zu Fuß reicht oft ein näherer Minimarkt im Ort.",
+            checkedAt = "17.09.2026",
             validUntil = "Öffnungszeit vorab prüfen",
             imageRes = R.drawable.rhodes_old_town_009
         )

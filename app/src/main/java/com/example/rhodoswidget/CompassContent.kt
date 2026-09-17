@@ -3,7 +3,7 @@ package com.example.rhodoswidget
 internal val compassTips = listOf(
     CompassTip("Essen", "Taverne Akti", "Leckeres Essen, faire Preise und freundlicher Service.", "Besonders häufig empfohlen"),
     CompassTip("Essen", "Stama", "Kleine Speisekarte und sehr herzlicher Service.", "Persönliche Empfehlung aus der Gruppe"),
-    CompassTip("Strände", "Tsambika / Tsampika", "Weitläufiger Strand mit Restaurant und Liegen auf der linken Seite.", "Kann tagsüber sehr voll werden", CompassTipKind.CAUTION),
+    CompassTip("Strände", "Tsambika / Tsampika", "Goldgelber Sand über mindestens 1 km mit seichtem Wasserzugang und reinem Sandboden. Kein einzelnes Hotel direkt am Strand – pure Natur!", "Baden als absolutes Vergnügen; schöner seichter Sandboden", CompassTipKind.RECOMMENDATION),
     CompassTip("Strände", "Stegna", "Schöner Strand mit guten Möglichkeiten zum Essen.", "In der Hauptzeit mehr Andrang", CompassTipKind.NOTE),
     CompassTip("Strände", "Pefkoi Plakia Beach", "Ruhige Pause am Meer bei der Blue Waves Cantine.", "Tipp für einen entspannten Strandtag"),
     CompassTip("Strände", "Elli Beach", "Zentraler Stadtstrand mit derzeit gemischten Erfahrungen.", "Sauberkeit vor Ort prüfen", CompassTipKind.CAUTION),
@@ -152,14 +152,14 @@ internal val compassTips = listOf(
     CompassTip(
         category = "Mobilität",
         title = "September-Fahrplan neu prüfen",
-        description = "Der KTEL-Sommerfahrplan wurde inzwischen bis 30.09.2026 verlängert und deckt damit euren Reisezeitraum ab.",
-        note = "Trotzdem kurz vor Abreise und nochmals vor Ort aktualisieren, falls sich der Plan erneut ändert",
+        description = "Busse nach Rhodos-Stadt und Lindos dauern je nach Stopps ca. 1 Std. Sie sind meist unklimatisiert und im Sommer sehr voll ('Kuschelkurs').",
+        note = "Wer es flexibler und angenehmer mag, ist mit Mietauto oder Roller unterwegs",
         kind = CompassTipKind.CAUTION,
         location = "Kolymbia Beach",
         journey = "KTEL Ostküste",
-        tags = listOf("Bus", "September", "Fahrplan"),
+        tags = listOf("Bus", "September", "Fahrplan", "Mietwagen"),
         source = CompassTipSource.RESEARCHED,
-        sourceUrl = "https://www.ktelrodou.gr/schedule/"
+        sourceUrl = "https://www.rhodos-wiki.de/von-a-nach-b/linienbus-auf-rhodos/"
     ),
     CompassTip(
         category = "Mobilität",
@@ -187,11 +187,11 @@ internal val compassTips = listOf(
     CompassTip(
         category = "Kolymbia",
         title = "Entspannter Strandtag vor Ort",
-        description = "Kolymbia Beach gilt als eher ruhiger Ferienstrand mit klarem Wasser und weniger Partystimmung als größere Badeorte.",
-        note = "Für heiße Tage Schatten oder Sonnenschirm einplanen",
-        location = "Kolymbia Beach",
+        description = "Kolymbia verfügt über drei Strände. Besonders schön ist die kleine Sandbucht direkt am Hafenbereich mit Bar im Hintergrund, Kinderbereich, Wassersport und Bootstouren.",
+        note = "Kolymbia ist der ideale Ausgangsort in der Mitte aller Sehenswürdigkeiten",
+        location = "Kolymbia Beach & Hafen",
         journey = "zu Fuß je nach Hotel",
-        tags = listOf("Strand", "ruhig", "nah"),
+        tags = listOf("Strand", "Hafen", "Bootstouren", "Wassersport", "Kinderfreundlich"),
         source = CompassTipSource.RESEARCHED,
         sourceUrl = "https://www.visitrhodes.com/what-to-see/beaches/kolymbia-beach"
     ),
@@ -241,14 +241,27 @@ internal val compassTips = listOf(
     ),
     CompassTip(
         category = "Essen",
-        title = "Anthoula: Taverne im Grünen",
-        description = "Nahe der Abzweigung zu den Sieben Quellen gibt es lokale Gerichte, Meze und Fleisch vom Holzkohlegrill in familiärer Umgebung.",
-        note = "Etwas außerhalb – gut mit Epta Piges oder einer kurzen Taxifahrt verbinden",
-        location = "Abzweigung Kolymbia Richtung Archipoli",
-        journey = "kurze Taxi- oder Autofahrt",
-        tags = listOf("nahe Kolymbia", "Taverne", "Grill", "regional"),
+        title = "Anthoula: Traumhafte rhodische Küche",
+        description = "Traumhafte rhodische Küche nahe Kolymbia. Eukalyptus-Allee bis zur Hauptstraße Rodou-Lindou durchlaufen, an der Ampelkreuzung Richtung Sieben Quellen überqueren – ca. 50 m danach kommen zwei Tavernen. Antoula ist der Favorit für top Qualität & Preis-Leistungs-Verhältnis!",
+        note = "Qualität und Preis-Leistungs-Verhältnis fast nicht zu übertreffen",
+        location = "Rodou-Lindou / 50 m nach Ampelkreuzung Sieben Quellen (Kolymbia)",
+        journey = "Eukalyptus-Allee durchlaufen & Ampel überqueren",
+        tags = listOf("nahe Kolymbia", "Taverne", "Favorit", "rhodische Küche", "Preis-Leistung"),
+        reviewSummary = "Traumhafte rhodische Küche ganz in der Nähe von Kolymbia. Die Eukalyptus-Allee durchlaufen und die Ampelkreuzung überqueren. Qualität und Preis-Leistungs-Verhältnis gelten als unübertroffen.",
         source = CompassTipSource.RESEARCHED,
-        sourceUrl = "https://www.anthoulataverna.gr/"
+        sourceUrl = "https://www.rhodos-wiki.de/rhodos-restaurants/antoula/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Taverne Manolis: Gute Gyros Pita",
+        description = "Unweit des Strandes gelegene Taverne für eine richtig gute Gyros Pita und frische Snacks. Während Lokale im Zentrum meist touristisch orientiert sind, bietet Manolis echtes Essen nahe am Meer.",
+        note = "Leckere Gyros Pita unweit des Strandes; ideal für einen schnellen, guten Imbiss",
+        location = "Strandnähe, Kolymbia",
+        journey = "zu Fuß vom Strand",
+        tags = listOf("Kolymbia", "Gyros Pita", "Strandnähe", "Taverne", "günstig"),
+        reviewSummary = "Beliebter Anlaufpunkt nahe des Strandes für frische, gut gewürzte Gyros Pita und unkomplizierte griechische Spezialitäten zu fairen Preisen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.rhodos-wiki.de/rhodos-restaurants/manolis/"
     ),
     CompassTip(
         category = "Essen",
@@ -312,13 +325,13 @@ internal val compassTips = listOf(
     ),
     CompassTip(
         category = "Supermärkte",
-        title = "Sklavenitis Kolymbia: großer Einkauf",
-        description = "Der größere Vollsortimenter an der Straße Rhodos–Lindos bietet Frischetheken, Backwaren, Obst, Fertiggerichte und einen Parkplatz.",
-        note = "Für einen umfangreichen Einkauf sinnvoller als kleine touristische Minimärkte",
-        location = "Rhodos–Lindos-Straße bei Kolymbia",
-        journey = "am einfachsten mit Auto oder Taxi",
-        tags = listOf("Kolymbia", "Supermarkt", "Lebensmittel", "Parkplatz"),
-        reviewSummary = "Besucher beschreiben den Markt als gut sortiert, preislich vernünftig und praktisch für einen größeren Vorratseinkauf; auch Personal, Parkplatz und warme Speisen werden positiv erwähnt. Sonntags und an Feiertagen können andere Öffnungszeiten gelten oder der Markt geschlossen sein.",
+        title = "Sklavenitis: Griechischer Supermarkt",
+        description = "Griechischer Supermarkt an der Rodou-Lindou kurz vor der Einmündung nach Kolymbia (nahe dem ehemaligen Krankenhaus / heute Seniorenheim). Bietet alles für den täglichen Bedarf – hier kaufen in erster Linie Einheimische ein.",
+        note = "In Kolymbia wird alles angeboten, was man für einen erfüllten Urlaub braucht",
+        location = "Rodou-Lindou kurz vor Einmündung Kolymbia",
+        journey = "mit Auto, Taxi oder kurzem Weg je nach Hotellage",
+        tags = listOf("Kolymbia", "Supermarkt", "Lebensmittel", "Einheimische", "Vollsortimenter"),
+        reviewSummary = "Sehr gut sortierter griechischer Vollsortimenter mit Frischetheke und fairen Preisen. Vor allem von Einheimischen genutzt; liegt direkt an der Rodou-Lindou vor der Zufahrt nach Kolymbia.",
         source = CompassTipSource.RESEARCHED,
         sourceUrl = "https://www.sklavenitis.gr/anakoinoseis/"
     ),

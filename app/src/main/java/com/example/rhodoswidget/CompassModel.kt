@@ -65,6 +65,7 @@ internal val compassTipIds = listOf(
     "food-kolymbia-palio-nisaki",
     "food-kolymbia-rosso-di-sera",
     "food-kolymbia-anthoula",
+    "food-kolymbia-manolis",
     "food-kolymbia-michel",
     "food-kolymbia-tsambikos",
     "food-kolymbia-food-box",
