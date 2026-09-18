@@ -94,7 +94,6 @@ fun TravelCard(onClick: () -> Unit) {
 
 @Composable
 fun HomeQuickActions(
-    onOpenChecklist: () -> Unit,
     onOpenKolymbia: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -107,26 +106,14 @@ fun HomeQuickActions(
             letterSpacing = 0.8.sp
         )
         Spacer(Modifier.height(8.dp))
-        Row(
+        HomeQuickActionCard(
+            title = stringResource(R.string.home_quick_bus_title),
+            description = stringResource(R.string.home_quick_bus_description),
+            testTag = "kolymbia-bus-link",
+            onClick = onOpenKolymbia,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            HomeQuickActionCard(
-                title = stringResource(R.string.home_quick_checklist_title),
-                description = stringResource(R.string.home_quick_checklist_description),
-                testTag = "checklist-link",
-                onClick = onOpenChecklist,
-                modifier = Modifier.weight(1f)
-            )
-            HomeQuickActionCard(
-                title = stringResource(R.string.home_quick_bus_title),
-                description = stringResource(R.string.home_quick_bus_description),
-                testTag = "kolymbia-bus-link",
-                onClick = onOpenKolymbia,
-                modifier = Modifier.weight(1f),
-                emphasized = true
-            )
-        }
+            emphasized = true
+        )
     }
 }
 

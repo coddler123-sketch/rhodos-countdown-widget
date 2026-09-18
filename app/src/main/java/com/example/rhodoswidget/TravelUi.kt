@@ -76,7 +76,6 @@ fun TravelScreen(
     scrollToTopRequest: Int = 0,
     onBack: () -> Unit,
     initialScheduleId: String? = null,
-    openChecklistDirectly: Boolean = false,
     onDetailVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -93,12 +92,6 @@ fun TravelScreen(
     var marineRefreshFailed by remember { mutableStateOf(false) }
     var favorites by remember(context) {
         mutableStateOf(TravelPreferences.favorites(context))
-    }
-    var completedItems by remember(context) {
-        mutableStateOf(TravelPreferences.completedChecklistItems(context))
-    }
-    var notes by remember(context) {
-        mutableStateOf(TravelPreferences.notes(context))
     }
     var transitDocuments by remember(context) {
         mutableStateOf(LiveTravelRepository.cachedTransit(context))
@@ -128,17 +121,15 @@ fun TravelScreen(
     var showMoreHelp by rememberSaveable { mutableStateOf(false) }
     var selectedArea by rememberSaveable { mutableStateOf<TravelArea?>(null) }
 
-    LaunchedEffect(selectedSchedule, openChecklistDirectly, selectedArea) {
-        onDetailVisibilityChanged(
-            selectedSchedule != null || openChecklistDirectly || selectedArea != null
-        )
+    LaunchedEffect(selectedSchedule, selectedArea) {
+        onDetailVisibilityChanged(selectedSchedule != null || selectedArea != null)
     }
     DisposableEffect(Unit) {
         onDispose { onDetailVisibilityChanged(false) }
     }
-    BackHandler(enabled = selectedSchedule != null || openChecklistDirectly || selectedArea != null) {
+    BackHandler(enabled = selectedSchedule != null || selectedArea != null) {
         when {
-            initialScheduleId != null || openChecklistDirectly -> onBack()
+            initialScheduleId != null -> onBack()
             selectedSchedule != null -> selectedSchedule = null
             else -> selectedArea = null
         }
@@ -250,23 +241,6 @@ fun TravelScreen(
                 if (initialScheduleId != null) onBack() else selectedSchedule = null
             },
             onOpenSource = { openSource(document.sourceUrl) }
-        )
-        return
-    }
-
-    if (openChecklistDirectly) {
-        TravelChecklistScreen(
-            padding = padding,
-            completedItems = completedItems,
-            notes = notes,
-            onBack = onBack,
-            onToggle = { id ->
-                completedItems = TravelPreferences.toggleChecklistItem(context, id)
-            },
-            onNotesChange = { updated ->
-                notes = updated
-                TravelPreferences.saveNotes(context, updated)
-            }
         )
         return
     }
@@ -419,20 +393,6 @@ fun TravelScreen(
                     }
                     item { SupportingTravelText(R.string.travel_emergency_disclaimer) }
                 }
-                item {
-                    TravelChecklistCard(
-                        items = travelChecklist,
-                        completedIds = completedItems,
-                        notes = notes,
-                        onToggle = { id ->
-                            completedItems = TravelPreferences.toggleChecklistItem(context, id)
-                        },
-                        onNotesChange = { updated ->
-                            notes = updated
-                            TravelPreferences.saveNotes(context, updated)
-                        }
-                    )
-                }
             }
             null -> Unit
         }
@@ -573,59 +533,6 @@ private fun TravelAreaDetailHeader(area: TravelArea, onBack: () -> Unit) {
             fontWeight = FontWeight.Bold,
             fontFamily = Montserrat
         )
-    }
-}
-
-@Composable
-private fun TravelChecklistScreen(
-    padding: PaddingValues,
-    completedItems: Set<String>,
-    notes: String,
-    onBack: () -> Unit,
-    onToggle: (String) -> Unit,
-    onNotesChange: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFF142E34), Color(0xFF0D1113))))
-            .padding(padding)
-            .testTag("travel-checklist-screen"),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            Column {
-                TextButton(onClick = onBack) {
-                    Text(stringResource(R.string.travel_back), color = HomeAccent)
-                }
-                Text(
-                    text = stringResource(R.string.travel_checklist_screen_title),
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = Montserrat
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.travel_checklist_screen_intro),
-                    color = Color(0xCCFFFFFF),
-                    fontSize = 13.sp,
-                    lineHeight = 19.sp,
-                    fontFamily = Montserrat
-                )
-            }
-        }
-        item { SectionLabel(R.string.travel_list_section) }
-        item {
-            TravelChecklistCard(
-                items = travelChecklist,
-                completedIds = completedItems,
-                notes = notes,
-                onToggle = onToggle,
-                onNotesChange = onNotesChange
-            )
-        }
     }
 }
 

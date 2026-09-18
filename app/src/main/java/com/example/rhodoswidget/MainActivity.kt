@@ -122,7 +122,6 @@ private fun RhodosApp(startInTravel: Boolean = false) {
         mutableStateOf(if (startInTravel) MainDestination.TRAVEL.name else MainDestination.HOME.name)
     }
     val initialTravelScheduleId = remember { mutableStateOf<String?>(null) }
-    val openTravelChecklist = remember { mutableStateOf(false) }
     val selectedArticle = remember { mutableStateOf<NewsArticle?>(null) }
     val nestedDetailVisible = remember { mutableStateOf(false) }
     val scrollToTopRequest = remember { mutableIntStateOf(0) }
@@ -152,7 +151,6 @@ private fun RhodosApp(startInTravel: Boolean = false) {
         enabled = article == null && !nestedDetailVisible.value && destination != MainDestination.HOME
     ) {
         initialTravelScheduleId.value = null
-        openTravelChecklist.value = false
         destinationName.value = MainDestination.HOME.name
     }
 
@@ -168,7 +166,6 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                         if (selected == destination) scrollToTopRequest.intValue++
                         selectedArticle.value = null
                         initialTravelScheduleId.value = null
-                        openTravelChecklist.value = false
                         destinationName.value = selected.name
                     }
                 )
@@ -187,13 +184,7 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                 MainDestination.HOME -> RhodosHome(
                     padding = padding,
                     scrollToTopRequest = scrollToTopRequest.intValue,
-                    onOpenChecklist = {
-                        initialTravelScheduleId.value = null
-                        openTravelChecklist.value = true
-                        destinationName.value = MainDestination.TRAVEL.name
-                    },
                     onOpenKolymbia = {
-                        openTravelChecklist.value = false
                         initialTravelScheduleId.value = "ktel_kolymbia"
                         destinationName.value = MainDestination.TRAVEL.name
                     }
@@ -203,11 +194,9 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                     scrollToTopRequest = scrollToTopRequest.intValue,
                     onBack = {
                         initialTravelScheduleId.value = null
-                        openTravelChecklist.value = false
                         destinationName.value = MainDestination.HOME.name
                     },
                     initialScheduleId = initialTravelScheduleId.value,
-                    openChecklistDirectly = openTravelChecklist.value,
                     onDetailVisibilityChanged = { nestedDetailVisible.value = it }
                 )
                 MainDestination.NEWS -> NewsScreen(
@@ -286,7 +275,6 @@ private fun MainNavigationBar(
 private fun RhodosHome(
     padding: PaddingValues,
     scrollToTopRequest: Int,
-    onOpenChecklist: () -> Unit,
     onOpenKolymbia: () -> Unit
 ) {
     val context = LocalContext.current
@@ -408,7 +396,6 @@ private fun RhodosHome(
                 Spacer(Modifier.height(16.dp))
             }
             HomeQuickActions(
-                onOpenChecklist = onOpenChecklist,
                 onOpenKolymbia = onOpenKolymbia
             )
             Spacer(Modifier.height(16.dp))

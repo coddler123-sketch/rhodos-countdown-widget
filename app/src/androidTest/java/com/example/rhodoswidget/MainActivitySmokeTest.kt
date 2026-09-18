@@ -274,16 +274,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
     }
 
-    @Test
-    fun checklistShortcutOpensChecklistDirectly() {
-        composeRule.onNodeWithTag("checklist-link").performClick()
 
-        composeRule.onNodeWithTag("travel-checklist-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("Checkliste").assertIsDisplayed()
-
-        pressBack()
-        composeRule.onNodeWithText("RHODOS").assertIsDisplayed()
-    }
 
     @Test
     fun backFromArticleReturnsToNewsOverview() {
