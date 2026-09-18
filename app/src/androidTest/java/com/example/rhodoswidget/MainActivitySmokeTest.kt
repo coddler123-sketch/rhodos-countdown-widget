@@ -244,6 +244,24 @@ class MainActivitySmokeTest {
     }
 
     @Test
+    fun randomTipButtonOpensDetailOverlay() {
+        composeRule.onNodeWithTag("main-nav-compass").performClick()
+        composeRule.onNodeWithTag("compass-random-tip-button").performClick()
+
+        composeRule.onNodeWithTag("compass-tip-overlay").assertIsDisplayed()
+    }
+
+    @Test
+    fun tavernCalculatorCalculatesTotalAndPerPerson() {
+        composeRule.onNodeWithTag("main-nav-travel").performClick()
+        composeRule.onNodeWithTag("travel-area-explore").performClick()
+
+        composeRule.onNodeWithTag("tavern-calculator-amount-input").performTextInput("50")
+        composeRule.onNodeWithText("Gesamt inkl. Trinkgeld:").assertIsDisplayed()
+        composeRule.onNodeWithText("55,00 €").assertIsDisplayed()
+    }
+
+    @Test
     fun travelOverviewOpensMobilityAreaAndReturns() {
         composeRule.onNodeWithTag("main-nav-travel").performClick()
         composeRule.onNodeWithTag("travel-area-today").assertIsDisplayed()

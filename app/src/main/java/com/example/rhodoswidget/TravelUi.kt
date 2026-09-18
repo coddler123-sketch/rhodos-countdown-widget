@@ -271,6 +271,7 @@ fun TravelScreen(
         }
         when (selectedArea) {
             TravelArea.TODAY -> {
+                item { OfflineTravelSummaryCard() }
                 item {
                     MarineWeatherCard(
                         marineWeather = marineWeather,
@@ -342,6 +343,7 @@ fun TravelScreen(
                         }
                     )
                 }
+                item { TavernCalculatorCard() }
                 item { GreekPhrasebookCard() }
                 items(excursionIdeas, key = { it.id }) { idea ->
                     ExcursionCard(

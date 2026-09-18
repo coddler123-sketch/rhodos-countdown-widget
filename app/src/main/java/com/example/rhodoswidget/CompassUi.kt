@@ -149,7 +149,12 @@ fun CompassScreen(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { CompassOverviewHeader(compassTips.size) }
+            item {
+                CompassOverviewHeader(
+                    count = compassTips.size,
+                    onRandomTip = { openTip(compassTips.random().id) }
+                )
+            }
             if (isOverview) {
                 item {
                     CompassHeroCard(

@@ -1,22 +1,35 @@
 package com.example.rhodoswidget
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -339,5 +352,157 @@ internal fun TravelChecklistCard(
             lineHeight = 14.sp,
             modifier = Modifier.padding(top = 6.dp)
         )
+    }
+}
+
+@Composable
+internal fun TavernCalculatorCard() {
+    var amountInput by rememberSaveable { mutableStateOf("") }
+    var selectedTipPercent by rememberSaveable { mutableStateOf(10) }
+    var peopleCount by rememberSaveable { mutableStateOf(2) }
+
+    val amount = amountInput.replace(',', '.').toDoubleOrNull() ?: 0.0
+    val tipMultiplier = 1.0 + (selectedTipPercent / 100.0)
+    val totalWithTip = amount * tipMultiplier
+    val perPerson = if (peopleCount > 0) totalWithTip / peopleCount else totalWithTip
+
+    TravelCardContainer {
+        Text(
+            text = "💶 TAVERNEN- & TRINKGELD-RECHNER",
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Rechnung entspannt aufteilen",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = amountInput,
+            onValueChange = { if (it.length <= 7) amountInput = it },
+            label = { Text("Rechnungsbetrag (€)", color = Color(0xCCFFFFFF)) },
+            placeholder = { Text("z.B. 45.00", color = Color(0x66FFFFFF)) },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = HomeAccent,
+                unfocusedBorderColor = Color(0x66FFFFFF)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("tavern-calculator-amount-input")
+        )
+
+        Spacer(Modifier.height(10.dp))
+        Text("Trinkgeld wählen (Griecheland ca. 5–10 %):", color = Color(0xBFFFFFFF), fontSize = 11.sp, fontFamily = Montserrat)
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(5, 10, 15).forEach { percent ->
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (selectedTipPercent == percent) HomeAccent else Color(0xFF22363B))
+                        .clickable { selectedTipPercent = percent }
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        "$percent %",
+                        color = if (selectedTipPercent == percent) Color(0xFF102A2F) else Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Personen:", color = Color(0xBFFFFFFF), fontSize = 12.sp, fontFamily = Montserrat)
+            Spacer(Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF22363B))
+                    .clickable { if (peopleCount > 1) peopleCount-- }
+            ) {
+                Text("-", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
+            }
+            Text("$peopleCount", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 14.dp))
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF22363B))
+                    .clickable { if (peopleCount < 10) peopleCount++ }
+            ) {
+                Text("+", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
+        if (amount > 0) {
+            Spacer(Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF173D44))
+                    .padding(12.dp)
+            ) {
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Gesamt inkl. Trinkgeld:", color = Color.White, fontSize = 12.sp)
+                        Text(String.format(Locale.GERMANY, "%.2f €", totalWithTip), color = HomeAccent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    if (peopleCount > 1) {
+                        Spacer(Modifier.height(6.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Pro Person ($peopleCount P.):", color = Color.White, fontSize = 12.sp)
+                            Text(String.format(Locale.GERMANY, "%.2f €", perPerson), color = HomeAccent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun OfflineTravelSummaryCard() {
+    TravelCardContainer {
+        Text(
+            text = "📴 ANREISE & OFFLINE-NOTFALLkarte",
+            color = HomeAccent,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Wichtiges auf einen Blick (Ohne Internet)",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(10.dp))
+        Text("✈️ Hinflug: So. 20.09.2026 | 14:30 Uhr (Hamburg HAM ➔ Rhodos RHO)", color = Color.White, fontSize = 12.sp, lineHeight = 17.sp)
+        Text("🏨 Hotel: Relax Hotel Kolymbia (Doppelzimmer Superior Shared Pool)", color = Color(0xEEFFFFFF), fontSize = 11.sp, lineHeight = 16.sp)
+        Text("📍 Adresse: Eucalyptus Street, Kolymbia 851 02, Rhodos", color = Color(0xCCFFFFFF), fontSize = 11.sp, lineHeight = 16.sp)
+        Spacer(Modifier.height(6.dp))
+        Text("🚨 Notrufnummern: 112 (EU-Notruf) | 100 (Polizei) | 166 (Notarzt)", color = HomeAccent, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
     }
 }

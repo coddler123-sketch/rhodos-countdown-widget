@@ -156,12 +156,17 @@ internal val greekPhrases = listOf(
     GreekPhrase("Taverne & Bestellung", "Éna neró, parakaló", "É-na ne-ró, pa-ra-ka-ló", "Ein Wasser bitte"),
     GreekPhrase("Taverne & Bestellung", "Polý nóstimo!", "Po-lí nós-ti-mo", "Sehr lecker!"),
     GreekPhrase("Taverne & Bestellung", "Dyo biras, parakaló", "Di-o bí-ras, pa-ra-ka-ló", "Zwei Bier bitte"),
+    GreekPhrase("Taverne & Bestellung", "Éna oúzo, parakaló", "É-na u-zo, pa-ra-ka-ló", "Einen Ouzo bitte"),
+    GreekPhrase("Taverne & Bestellung", "To fayitó ítan katapliktikó!", "To fa-ji-tó í-tan ka-ta-plik-ti-kó", "Das Essen war fantastisch!"),
     GreekPhrase("Begrüßung & Danke", "Kaliméra", "Ka-li-mé-ra", "Guten Morgen / Guten Tag"),
     GreekPhrase("Begrüßung & Danke", "Kalispera", "Ka-lis-pé-ra", "Guten Abend"),
     GreekPhrase("Begrüßung & Danke", "Efcharistó polý", "Ef-cha-ris-tó po-lí", "Vielen Dank"),
     GreekPhrase("Begrüßung & Danke", "Parakaló", "Pa-ra-ka-ló", "Bitte / Gern geschehen"),
     GreekPhrase("Begrüßung & Danke", "Yássas / Yássou", "Já-sas / Já-su", "Hallo / Tschüss (Formell / Informell)"),
+    GreekPhrase("Begrüßung & Danke", "Miláte germaniká?", "Mi-lá-te ger-ma-ni-ká", "Sprechen Sie Deutsch?"),
     GreekPhrase("Unterwegs & Fragen", "Poú eínai i paralía?", "Pu í-ne i pa-ra-lí-a?", "Wo ist der Strand?"),
+    GreekPhrase("Unterwegs & Fragen", "Poú eínai to stási?", "Pu í-ne to stá-si", "Wo ist die Bushaltestelle?"),
     GreekPhrase("Unterwegs & Fragen", "Nai / Óchi", "Nä / Ó-chi", "Ja / Nein (Vorsicht: 'Nai' heißt Ja!)"),
-    GreekPhrase("Unterwegs & Fragen", "Gatáki", "Ga-tá-ki", "Kätzchen (für die süßen Tavernenkatzen)")
+    GreekPhrase("Unterwegs & Fragen", "Gatáki", "Ga-tá-ki", "Kätzchen (für die süßen Tavernenkatzen)"),
+    GreekPhrase("Unterwegs & Fragen", "Voítheia!", "Vo-í-thi-a", "Hilfe! (Notfall)")
 )

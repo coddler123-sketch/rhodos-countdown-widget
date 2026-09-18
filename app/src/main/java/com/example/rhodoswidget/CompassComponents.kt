@@ -62,11 +62,29 @@ internal data class CompassCategory(
 )
 
 @Composable
-internal fun CompassOverviewHeader(count: Int) {
+internal fun CompassOverviewHeader(count: Int, onRandomTip: () -> Unit = {}) {
     Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(HomeAccent.copy(alpha = 0.15f))
+                .border(1.dp, HomeAccent.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .testTag("compass-random-tip-button")
+                .clickable { onRandomTip() }
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            Text(
+                "🎲 Überrascht uns!",
+                color = HomeAccent,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat
+            )
+        }
         Spacer(Modifier.weight(1f))
         Text("$count AUSGEWÄHLTE TIPPS", color = HomeAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
+    Spacer(Modifier.height(6.dp))
     Text("Rhodos Tipps", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat)
     Text(
         "Wähle ein Thema für Empfehlungen und persönliche Erfahrungen.",
