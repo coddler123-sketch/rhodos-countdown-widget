@@ -7,7 +7,7 @@ import org.junit.Test
 class CompassTipsTest {
     @Test
     fun `tip collection balances community and researched guidance`() {
-        assertEquals(48, compassTips.size)
+        assertEquals(52, compassTips.size)
         assertEquals(compassTips.size, compassTips.map { it.id }.distinct().size)
         assertTrue(compassTips.all { it.id.isNotBlank() && it.id != it.title })
         assertTrue(compassTips.count { it.source == CompassTipSource.COMMUNITY } >= 10)
@@ -57,7 +57,7 @@ class CompassTipsTest {
     fun `new food and shopping tips include balanced review summaries`() {
         val reviewedTips = compassTips.filter { it.reviewSummary != null }
 
-        assertEquals(18, reviewedTips.size)
+        assertEquals(22, reviewedTips.size)
         assertTrue(reviewedTips.all { it.reviewSummary.orEmpty().length >= 120 })
         assertTrue(reviewedTips.all { it.source == CompassTipSource.RESEARCHED })
         assertEquals(4, compassTips.count { it.category == "Supermärkte" })

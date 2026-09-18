@@ -508,9 +508,53 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             transport = "Bus oder Auto nach Rhodos-Stadt",
             combination = "Mit Mandraki und Altstadt verbinden.",
             returnTip = "Rückfahrt nach Kolymbia vorher festlegen.",
-            facilities = "Olivenöl, Honig, Kräuter, Gewürze und Liköre",
+            facilities = "Olivenöl, Honig, Kräuter, Gewürze und Likören",
             checkedAt = "16.08.2026",
             imageRes = R.drawable.dimitrisvetsikas1969_castle_7462448_1920
+        )
+        "Agathi Beach & Burg Feraklos" -> fallback.copy(
+            duration = "Halber Tag",
+            bestTime = "Vormittag",
+            fromHotel = "Ca. 15 Min. südlich von Kolymbia",
+            transport = "Mietwagen oder Taxi",
+            septemberNote = "Festes Schuhwerk für den Burgaufstieg nutzen; feiner Sandstrand danach ideal.",
+            combination = "Burgaufstieg am Vormittag mit Badestopp & Tavernenbesuch verbinden.",
+            facilities = "Sandstrand, flaches Wasser, Tavernen, historische Ruine",
+            checkedAt = "18.09.2026",
+            imageRes = R.drawable.rhodes_island_castle_fg0v9vo1hwtndkqc
+        )
+        "Bergdorf Archipoli & Agios Nectarios" -> fallback.copy(
+            duration = "2–3 Stunden",
+            bestTime = "Vormittags oder Nachmittags",
+            fromHotel = "Ca. 10 Min. im Landesinneren von Kolymbia",
+            transport = "Mietwagen oder Taxi",
+            septemberNote = "Ruhige Atmosphäre abseits des Massentourismus.",
+            combination = "Mit den Sieben Quellen (Epta Piges) oder Eleousa verbindbar.",
+            facilities = "Uralt-Platane, Kirche, Kräuterpfad, lokale Imkerei",
+            checkedAt = "18.09.2026",
+            imageRes = R.drawable.rhodos_1906323
+        )
+        "Eleousa & Waldkirche Fountoukli" -> fallback.copy(
+            duration = "2–3 Stunden",
+            bestTime = "Heiße Mittagszeit",
+            fromHotel = "Ca. 20 Min. westlich am Profitis Ilias",
+            transport = "Mietwagen",
+            septemberNote = "Schattige Pinien- und Platanenwälder bieten kühle Erholung.",
+            combination = "Mit Archipoli oder Filerimos-Hügel verbinden.",
+            facilities = "Waldkirche aus 15. Jh., historische Architektur, Fisch-Rondell",
+            checkedAt = "18.09.2026",
+            imageRes = R.drawable.rhodos_1906326
+        )
+        "Kloster Tsambika Aussichtspunkt" -> fallback.copy(
+            duration = "1–2 Stunden",
+            bestTime = "Später Nachmittag / Sonnenuntergang",
+            fromHotel = "Ca. 10 Min. Fahrt zum Parkplatz",
+            transport = "Mietwagen oder Taxi + 300 Stufen zu Fuß",
+            septemberNote = "Wasser mitnehmen; 300 Stufen erfordern etwas Kondition.",
+            combination = "Mit Tsambika Beach oder Eukalyptusallee am Abend verbinden.",
+            facilities = "Panorama-Aussichtspunkt, Felskapelle, Kiosk am Parkplatz",
+            checkedAt = "18.09.2026",
+            imageRes = R.drawable.prasonisi_rhodes_024
         )
         else -> fallback
     }

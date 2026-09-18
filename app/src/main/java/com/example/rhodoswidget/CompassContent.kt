@@ -454,5 +454,57 @@ internal val compassTips = listOf(
         reviewSummary = "Wiederkehrend gelobt werden fachkundige, unaufdringliche Beratung, großzügiges Probieren und die Auswahl an Öl, Honig, Kräutern und besonderen Cremes. Viele Gäste empfinden die Preise im Vergleich zur Altstadt als fair; die Anfahrt lohnt vor allem zusammen mit einem Stadtbesuch.",
         source = CompassTipSource.RESEARCHED,
         sourceUrl = "https://wanderlog.com/place/details/12856969/traditional-greek-kiosk"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Agathi Beach & Burg Feraklos",
+        description = "Einer der feinsten Sandstrände der Ostküste mit flachem Meerzugang, kombiniert mit der mittelalterlichen Johanniter-Burgruine Feraklos auf dem Felsen oberhalb.",
+        note = "Festes Schuhwerk für den Aufstieg zur Burgruine mitbringen; danach Abkühlung am Agathi Beach",
+        location = "bei Haraki / Archangelos (~15 Min. von Kolymbia)",
+        journey = "Mietwagen oder Taxi",
+        tags = listOf("Ausflug", "Halbtag", "Sandstrand", "Burgruine", "Schnorcheln"),
+        reviewSummary = "Agathi Beach überzeugt mit feinstem goldgelbem Sand, kristallklarem flachen Wasser und gemütlichen Strandtavernen. Der Aufstieg zur Burg Feraklos bietet fantastischen Panorama-Weitblick über die Küste.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agathi%20Beach%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Bergdorf Archipoli & Agios Nectarios",
+        description = "Ein ruhiges, traditionelles Bergdorf im Landesinneren mit der imposanten Kirche Agios Nectarios, einer riesigen Uralt-Platane und einem Kräuter-Naturlehrpfad.",
+        note = "Hier lassen sich vor Ort echter Insel-Honig, Souma (Tresterbrand) und Olivenöl probieren",
+        location = "Archipoli (~10 Min. von Kolymbia)",
+        journey = "Mietwagen oder Taxi",
+        tags = listOf("Ausflug", "Halbtag", "Bergdorf", "Natur", "Kräuterpfad", "ruhig"),
+        reviewSummary = "Beliebter Stopp im Hinterland abseits der Touristenmassen. Wunderschöne Kirche, riesige Schatten-Platane und authentischer Einblick in die Inselkultur.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agios%20Nectarios%20Archipoli%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Eleousa & Waldkirche Fountoukli",
+        description = "Ehemaliges italienisches Musterdorf mit historischem Rundbassin (Heimat des seltenen Gizani-Fisches) und der malerischen byzantinischen Waldkirche Agios Nikolaos Fountoukli.",
+        note = "Herrlich schattiges Ausflugsziel an heißen Tagen in den Pinienwäldern am Profitis Ilias",
+        location = "Eleousa / Profitis Ilias (~20 Min. von Kolymbia)",
+        journey = "Mietwagen",
+        tags = listOf("Ausflug", "Halbtag", "Geschichte", "Pinienwald", "Kirche", "ruhig"),
+        reviewSummary = "Verzaubert durch kühle Waldluft, einzigartige Architekturgeschichte der 1930er-Jahre und die verträumte byzantinische Fountoukli-Kirche im Grün.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agios%20Nikolaos%20Fountoukli%20Eleousa%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Kloster Tsambika Aussichtspunkt",
+        description = "Die weiße Felskapelle hoch über Kolymbia – über 300 Stufen erreicht man den besten Rundum-Panoramablick der rhassischen Ostküste.",
+        note = "Am späten Nachmittag oder zum Sonnenaufgang beste Lichtverhältnisse und angenehmere Temperaturen",
+        location = "Felsen über Kolymbia (~10 Min. Fahrt + Aufstieg)",
+        journey = "Mietwagen / Taxi zum Parkplatz, dann 300 Stufen zu Fuß",
+        tags = listOf("Ausflug", "Halbtag", "Aussichtspunkt", "Panoramablick", "Fotospot"),
+        reviewSummary = "Spektakuläre Aussicht auf Kolymbia, den Tsambika-Strand und Afandou. Der Aufstieg über die 300 Stufen lohnt sich für jeden Fotofreund.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Moni%20Tsambika%20Rhodes"
     )
 ).let(::attachCompassTipIds)
