@@ -266,3 +266,84 @@ fun WeatherCard(
         }
     }
 }
+
+@Composable
+fun BeachWindRadarCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .padding(16.dp)
+    ) {
+        Text(
+            "STRAND- & WIND-RADAR 🏖️💨",
+            color = HomeAccent,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Welcher Strand passt heute am besten?",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0x25000000))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    " Ostküste (Kolymbia & Buchten)",
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Geschützt vor Westwinden • Ruhiges Meer • Perfekt zum Schwimmen & Schnorcheln (Kolymbia, Tsambika, Anthony Quinn Bay)",
+                    color = Color(0xCCFFFFFF),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0x1A000000))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    " Westküste & Prasonisi",
+                    color = Color(0xBFFFFFFF),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Auffrischender Wind & Wellen • Ideal für Windsurfer & Kitesurfer",
+                    color = Color(0x99FFFFFF),
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+    }
+}

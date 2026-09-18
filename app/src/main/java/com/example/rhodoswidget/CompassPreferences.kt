@@ -6,6 +6,7 @@ object CompassPreferences {
     private const val PREFS = "rhodos_compass"
     private const val KEY_SAVED = "saved_tips"
     private const val KEY_VISITED = "visited_tips"
+    private const val KEY_FOODIE = "foodie_checked_items"
     private const val NOTE_PREFIX = "note_"
     private const val KEY_STABLE_IDS_MIGRATED = "stable_ids_migrated"
 
@@ -33,11 +34,16 @@ object CompassPreferences {
 
     fun visited(context: Context): Set<String> = stringSet(context, KEY_VISITED)
 
+    fun foodieChecked(context: Context): Set<String> = stringSet(context, KEY_FOODIE)
+
     fun toggleSaved(context: Context, id: String): Set<String> =
         toggleAndSave(context, KEY_SAVED, id)
 
     fun toggleVisited(context: Context, id: String): Set<String> =
         toggleAndSave(context, KEY_VISITED, id)
+
+    fun toggleFoodieItem(context: Context, id: String): Set<String> =
+        toggleAndSave(context, KEY_FOODIE, id)
 
     fun note(context: Context, id: String): String =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

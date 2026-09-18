@@ -430,6 +430,8 @@ private fun RhodosHome(
                 else -> HighlightCard(rhodosHighlightOfTheDay())
             }
             Spacer(Modifier.height(12.dp))
+            BeachWindRadarCard()
+            Spacer(Modifier.height(12.dp))
             BottomSection(
                 s = s,
                 isRefreshing = isRefreshing.value,

@@ -25,10 +25,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -320,6 +324,7 @@ fun TravelScreen(
                 }
             }
             TravelArea.MOBILITY -> {
+                item { MobilityHubCard() }
                 item { BusOverviewCard() }
                 item {
                     LiveTimetablesCard(
@@ -394,6 +399,7 @@ fun TravelScreen(
                 }
             }
             TravelArea.HELP -> {
+                item { RhodosEmergencyCard(onCall = callNumber, onOpenMap = openMap) }
                 item { EmergencyCard(onCall = { callNumber("112") }) }
                 item {
                     ExpandableTravelGroup(
@@ -973,6 +979,183 @@ private fun GreekPhrasebookCard() {
                         fontFamily = Montserrat
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MobilityHubCard() {
+    var selectedRoute by rememberSaveable { mutableStateOf("Rhodos-Stadt") }
+    val routeTimes = mapOf(
+        "Rhodos-Stadt" to listOf("09:15", "10:15", "11:30", "13:00", "15:30", "17:30", "19:30", "21:00"),
+        "Lindos" to listOf("09:30", "10:45", "12:15", "14:30", "16:45", "18:30"),
+        "Faliraki" to listOf("09:15", "10:15", "11:30", "13:00", "15:30", "17:30"),
+        "Flughafen" to listOf("Umstieg in Rhodos-Stadt oder Direktbus (Diagonale)", "Taxi: ca. 40–45 € (30 Min)")
+    )
+    val routeNotes = mapOf(
+        "Rhodos-Stadt" to "Fahrzeit: ca. 45 Min | Preis: ~4,00 € | Halt: Haupthaltestelle Eucalyptus Ave",
+        "Lindos" to "Fahrzeit: ca. 35 Min | Preis: ~3,50 € | Halt: Lindos Main Square",
+        "Faliraki" to "Fahrzeit: ca. 20 Min | Preis: ~2,80 € | Halt: Faliraki Center",
+        "Flughafen" to "Fahrzeit: ca. 30 Min Taxi / 75 Min Bus via Rhodos-Stadt"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
+            .padding(16.dp)
+            .testTag("mobility-hub-card")
+    ) {
+        Text(
+            "KOLYMBIA BUS & MOBILITÄTS-HUB 🚌",
+            color = HomeAccent,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Fahrpläne & Abfahrten ab Relax Hotel Kolymbia",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(12.dp))
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(listOf("Rhodos-Stadt", "Lindos", "Faliraki", "Flughafen")) { route ->
+                FilterChip(
+                    selected = selectedRoute == route,
+                    onClick = { selectedRoute = route },
+                    label = { Text(route, fontSize = 11.sp, fontFamily = Montserrat) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color(0x33FFFFFF),
+                        labelColor = Color(0xCCFFFFFF),
+                        selectedContainerColor = HomeAccent.copy(alpha = 0.25f),
+                        selectedLabelColor = HomeAccent
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = selectedRoute == route,
+                        borderColor = HomeCardBorder,
+                        selectedBorderColor = HomeAccent
+                    )
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0x20000000))
+                .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(8.dp))
+                .padding(12.dp)
+        ) {
+            Text(
+                "ABFAHRTEN NACH ${selectedRoute.uppercase()}",
+                color = HomeAccent,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                routeTimes[selectedRoute]?.joinToString("  •  ").orEmpty(),
+                color = Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 20.sp
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                routeNotes[selectedRoute].orEmpty(),
+                color = Color(0x99FFFFFF),
+                fontSize = 11.sp
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "💡 Tipp: Tickets direkt beim Busfahrer (in bar) oder an Kiosken kaufen. Bitte 5–10 Min früher an der Haltestelle stehen.",
+            color = Color(0xCCFFFFFF),
+            fontSize = 11.sp,
+            lineHeight = 16.sp
+        )
+    }
+}
+
+@Composable
+private fun RhodosEmergencyCard(onCall: (String) -> Unit, onOpenMap: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(Color(0x331D9A6C))
+            .border(1.dp, Color(0xFF5ED6A2), HomeCardShape)
+            .padding(16.dp)
+            .testTag("rhodos-emergency-sos-card")
+    ) {
+        Text(
+            "NOTFALL & SERVICE KOLYMBIA 🚨",
+            color = Color(0xFF5ED6A2),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Wichtige Telefonnummern & Anlaufstellen vor Ort",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(12.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            EmergencyContactRow("EU-Notruf (Rettung & Polizei)", "112", onCall)
+            EmergencyContactRow("Apotheke Kolymbia (Rodou-Lindou)", "+30 22410 56200", onCall, onOpenMap = { onOpenMap("Pharmacy Kolymbia Rhodes") })
+            EmergencyContactRow("Deutsch-Griechischer Arzt Kolymbia", "+30 22410 56100", onCall)
+            EmergencyContactRow("Taxizentrale Kolymbia", "+30 22410 69600", onCall)
+            EmergencyContactRow("Relax Hotel Rezeption", "+30 22410 56250", onCall)
+        }
+    }
+}
+
+@Composable
+private fun EmergencyContactRow(
+    label: String,
+    number: String,
+    onCall: (String) -> Unit,
+    onOpenMap: (() -> Unit)? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0x26000000))
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(number, color = Color(0xFF5ED6A2), fontSize = 11.sp)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (onOpenMap != null) {
+                TextButton(onClick = onOpenMap, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                    Text("📍 Karte", color = Color.White, fontSize = 11.sp)
+                }
+            }
+            TextButton(onClick = { onCall(number) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                Text("📞 Anrufen", color = Color(0xFF5ED6A2), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

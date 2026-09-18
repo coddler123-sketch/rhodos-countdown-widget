@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.OutlinedButton
@@ -150,13 +152,43 @@ internal fun CompassHeroCard(
     }
 }
 
+internal data class FoodieItem(
+    val id: String,
+    val title: String,
+    val subtitle: String
+)
+
+internal val rhodosFoodieItems = listOf(
+    FoodieItem("foodie-gyros", "Gyros Pita", "Bei Manolis in Kolymbia probieren"),
+    FoodieItem("foodie-saganaki", "Saganaki", "Gebackener Feta mit Honig & Sesam"),
+    FoodieItem("foodie-pitaroudia", "Pitaroudia", "Traditionelle rhodische Kichererbsen-Puffer"),
+    FoodieItem("foodie-oktopus", "Gegrillter Oktopus", "Direkt in der Strandtaverne genießen"),
+    FoodieItem("foodie-melekouni", "Melekouni", "Rhodischer Sesam-Honig-Energiegel"),
+    FoodieItem("foodie-souvlaki", "Souvlaki-Spieß", "Zartes Fleisch vom Holzkohlegrill"),
+    FoodieItem("foodie-ouzo", "Eiskalter Ouzo / Mythos", "Perfekt zum Sonnenuntergang"),
+    FoodieItem("foodie-joghurt", "Griechischer Joghurt", "Mit echtem Rhodos-Kiefernhonig")
+)
+
 @Composable
 internal fun CompassQuickFilters(
     selected: String?,
     onSelected: (String) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(listOf("Rund ums Relax Hotel", "Zu Fuß", "Ohne Auto", "Halber Tag", "Ruhig", "Essen")) { filter ->
+        items(
+            listOf(
+                "Rund ums Relax Hotel",
+                "Zu Fuß",
+                "< 5 Min zu Fuß",
+                "5–15 Min zu Fuß",
+                "15–30 Min Bus/Taxi",
+                "Tagesausflug",
+                "Ohne Auto",
+                "Halber Tag",
+                "Ruhig",
+                "Essen"
+            )
+        ) { filter ->
             FilterChip(
                 selected = selected == filter,
                 onClick = { onSelected(filter) },
@@ -174,6 +206,92 @@ internal fun CompassQuickFilters(
                     selectedBorderColor = HomeAccent
                 )
             )
+        }
+    }
+}
+
+@Composable
+internal fun FoodieBucketListCard(
+    checkedIds: Set<String>,
+    onToggleItem: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val completed = rhodosFoodieItems.count { it.id in checkedIds }
+    val total = rhodosFoodieItems.size
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeCardBorder, HomeCardShape)
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "RHODOS FOODIE BUCKET-LIST 🍢",
+                    color = HomeAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Griechische Spezialitäten im Urlaub probieren",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Montserrat
+                )
+            }
+            Text(
+                "$completed / $total",
+                color = if (completed == total) HomeAccent else Color(0xCCFFFFFF),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        rhodosFoodieItems.forEach { item ->
+            val isChecked = item.id in checkedIds
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onToggleItem(item.id) }
+                    .padding(vertical = 4.dp, horizontal = 4.dp)
+            ) {
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = { onToggleItem(item.id) },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = HomeAccent,
+                        uncheckedColor = Color(0x66FFFFFF),
+                        checkmarkColor = Color(0xFF0C252B)
+                    )
+                )
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    Text(
+                        item.title,
+                        color = if (isChecked) HomeAccent else Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        item.subtitle,
+                        color = Color(0x99FFFFFF),
+                        fontSize = 11.sp
+                    )
+                }
+            }
         }
     }
 }

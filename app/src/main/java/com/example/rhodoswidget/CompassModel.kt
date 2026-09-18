@@ -124,6 +124,24 @@ internal fun matchesCompassQuickFilter(tip: CompassTip, filter: String): Boolean
         tip.journey.contains("zu Fuß", ignoreCase = true)
     "Zu Fuß" -> tip.journey.contains("zu Fuß", ignoreCase = true) ||
         tip.tags.any { it.contains("zu Fuß", ignoreCase = true) }
+    "< 5 Min zu Fuß" -> tip.journey.contains("5 Min", ignoreCase = true) ||
+        tip.journey.contains("direkt", ignoreCase = true) ||
+        tip.tags.any { it.contains("5 Min", ignoreCase = true) } ||
+        tip.location.contains("Kolymbia", ignoreCase = true) && (tip.category == "Essen" || tip.category == "Supermärkte")
+    "5–15 Min zu Fuß" -> tip.journey.contains("zu Fuß", ignoreCase = true) ||
+        tip.location.contains("Eucalyptus", ignoreCase = true) ||
+        tip.location.contains("Kolymbia", ignoreCase = true)
+    "15–30 Min Bus/Taxi" -> tip.journey.contains("Bus", ignoreCase = true) ||
+        tip.journey.contains("15 Min", ignoreCase = true) ||
+        tip.journey.contains("20 Min", ignoreCase = true) ||
+        tip.location.contains("Tsambika", ignoreCase = true) ||
+        tip.location.contains("Anthony Quinn", ignoreCase = true) ||
+        tip.location.contains("Seven Springs", ignoreCase = true)
+    "Tagesausflug" -> tip.tags.any { it.contains("Halbtag", ignoreCase = true) } ||
+        tip.tags.any { it.contains("Ausflug", ignoreCase = true) } ||
+        tip.location.contains("Lindos", ignoreCase = true) ||
+        tip.location.contains("Rhodos", ignoreCase = true) ||
+        tip.location.contains("Prasonisi", ignoreCase = true)
     "Ohne Auto" -> tip.tags.any { it.contains("ohne Auto", ignoreCase = true) } ||
         tip.journey.contains("zu Fuß", ignoreCase = true) ||
         tip.journey.contains("Bus", ignoreCase = true)

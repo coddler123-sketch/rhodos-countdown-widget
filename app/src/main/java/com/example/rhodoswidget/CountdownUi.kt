@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -80,20 +81,7 @@ fun CountdownProgress(fraction: Float) {
 fun CountdownSection(s: HomeState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         if (s.isOnVacation) {
-            Text(
-                text = "Ihr seid auf Rhodos. 🌊",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = Montserrat
-            )
-            Text(
-                text = "Genießt jeden Augenblick.",
-                color = Color(0xE6FFFFFF),
-                fontSize = 18.sp,
-                fontFamily = Montserrat,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            LiveVacationCompanionCard(s = s)
         } else if (s.isReached) {
             Text(
                 text = "Es ist soweit!",
@@ -203,4 +191,58 @@ private fun CountdownDivider() {
             .height(42.dp)
             .background(Color(0x66FFFFFF))
     )
+}
+
+@Composable
+fun LiveVacationCompanionCard(s: HomeState, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeAccent.copy(alpha = 0.18f))
+            .border(1.dp, HomeAccent.copy(alpha = 0.4f), HomeCardShape)
+            .padding(20.dp)
+    ) {
+        Text(
+            text = "WILLKOMMEN AUF RHODOS! 🌊🌴",
+            color = HomeAccent,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            letterSpacing = 0.8.sp
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Euer Urlaub in Kolymbia läuft!",
+            color = Color.White,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Genießt die Sonne im Relax Hotel, das Meer an der Tsambika Bucht und fantastisches Essen!",
+            color = Color(0xE6FFFFFF),
+            fontSize = 13.sp,
+            fontFamily = Montserrat,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
+        )
+        Spacer(Modifier.height(14.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0x33000000))
+                .padding(horizontal = 14.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "💡 Tipp des Tages: Abends Gyros Pita bei Taverne Manolis holen",
+                color = HomeAccent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
 }

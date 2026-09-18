@@ -75,6 +75,7 @@ fun CompassScreen(
     }
     var savedTips by remember(context) { mutableStateOf(persistedTips.first) }
     var visitedTips by remember(context) { mutableStateOf(persistedTips.second) }
+    var foodieChecked by remember(context) { mutableStateOf(CompassPreferences.foodieChecked(context)) }
     val visible = remember(selectedCategory, searchQuery, selectedFilter) {
         filterCompassTips(compassTips, searchQuery, selectedCategory).filter { tip ->
             selectedFilter == null || matchesCompassQuickFilter(tip, selectedFilter.orEmpty())
@@ -123,6 +124,10 @@ fun CompassScreen(
 
     fun toggleVisited(id: String) {
         visitedTips = CompassPreferences.toggleVisited(context, id)
+    }
+
+    fun toggleFoodie(id: String) {
+        foodieChecked = CompassPreferences.toggleFoodieItem(context, id)
     }
 
     fun selectCategory(category: String) {
@@ -178,6 +183,14 @@ fun CompassScreen(
             }
             if (isOverview && dayPlan.isNotEmpty()) {
                 item { CompassDayPlanCard(dayPlan) }
+            }
+            if (isOverview) {
+                item {
+                    FoodieBucketListCard(
+                        checkedIds = foodieChecked,
+                        onToggleItem = ::toggleFoodie
+                    )
+                }
             }
             if (isOverview) {
                 items(categories.chunked(2), key = { row -> row.first().title }) { row ->
