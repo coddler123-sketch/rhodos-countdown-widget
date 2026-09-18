@@ -184,6 +184,10 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                 MainDestination.HOME -> RhodosHome(
                     padding = padding,
                     scrollToTopRequest = scrollToTopRequest.intValue,
+                    showNewsBadge = latestNewsId != null && latestNewsId != lastSeenNewsId.value,
+                    onOpenNews = {
+                        destinationName.value = MainDestination.NEWS.name
+                    },
                     onOpenKolymbia = {
                         initialTravelScheduleId.value = "ktel_kolymbia"
                         destinationName.value = MainDestination.TRAVEL.name
@@ -225,36 +229,33 @@ private fun MainNavigationBar(
     showNewsBadge: Boolean,
     onSelect: (MainDestination) -> Unit
 ) {
+    val navDestinations = listOf(
+        MainDestination.HOME,
+        MainDestination.COMPASS,
+        MainDestination.TRAVEL
+    )
     NavigationBar(containerColor = Color(0xFF102A2F)) {
-        MainDestination.entries.forEach { destination ->
+        navDestinations.forEach { destination ->
             val labelRes = when (destination) {
                 MainDestination.HOME -> R.string.main_nav_home
+                MainDestination.COMPASS -> R.string.main_nav_compass
                 MainDestination.TRAVEL -> R.string.main_nav_travel
                 MainDestination.NEWS -> R.string.main_nav_news
-                MainDestination.COMPASS -> R.string.main_nav_compass
             }
             val iconRes = when (destination) {
                 MainDestination.HOME -> R.drawable.ic_nav_home
+                MainDestination.COMPASS -> R.drawable.ic_nav_compass
                 MainDestination.TRAVEL -> R.drawable.ic_nav_travel
                 MainDestination.NEWS -> R.drawable.ic_nav_news
-                MainDestination.COMPASS -> R.drawable.ic_nav_compass
             }
             NavigationBarItem(
                 selected = destination == selected,
                 onClick = { onSelect(destination) },
                 icon = {
-                    BadgedBox(
-                        badge = {
-                            if (destination == MainDestination.NEWS && showNewsBadge) {
-                                Badge(modifier = Modifier.testTag("main-nav-news-badge"))
-                            }
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(iconRes),
-                            contentDescription = null
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null
+                    )
                 },
                 label = { Text(stringResource(labelRes)) },
                 modifier = Modifier.testTag("main-nav-${destination.name.lowercase()}"),
@@ -275,6 +276,8 @@ private fun MainNavigationBar(
 private fun RhodosHome(
     padding: PaddingValues,
     scrollToTopRequest: Int,
+    showNewsBadge: Boolean = false,
+    onOpenNews: () -> Unit = {},
     onOpenKolymbia: () -> Unit
 ) {
     val context = LocalContext.current
@@ -386,6 +389,8 @@ private fun RhodosHome(
             HeaderSection(
                 s = s,
                 hasUpdateBadge = updateController.availableUpdate != null,
+                showNewsBadge = showNewsBadge,
+                onOpenNews = onOpenNews,
                 onSettings = { showSettings.value = true }
             )
             Spacer(Modifier.height(18.dp))
@@ -542,7 +547,13 @@ private fun showUpdateDownloadError(context: android.content.Context) {
 }
 
 @Composable
-private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () -> Unit) {
+private fun HeaderSection(
+    s: HomeState,
+    hasUpdateBadge: Boolean,
+    showNewsBadge: Boolean = false,
+    onOpenNews: () -> Unit = {},
+    onSettings: () -> Unit
+) {
     Row(verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -568,44 +579,84 @@ private fun HeaderSection(s: HomeState, hasUpdateBadge: Boolean, onSettings: () 
             )
             CountdownProgress(s.progress)
         }
-        // Kleine Darstellung bei weiterhin gut erreichbarer 48-dp-Touchfläche.
-        Box(
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .offset(x = 12.dp, y = (-12).dp)
-                .size(48.dp)
-                .testTag("settings-button")
-                .clickable(onClick = onSettings)
-                .clearAndSetSemantics {
-                    contentDescription = "Einstellungen öffnen"
-                    onClick {
-                        onSettings()
-                        true
-                    }
-                }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.offset(x = 12.dp, y = (-12).dp)
         ) {
+            // News Bell Button
             Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(HomeCardColor.copy(alpha = 0.38f))
+                    .size(44.dp)
+                    .testTag("news-bell-button")
+                    .clickable(onClick = onOpenNews)
+                    .clearAndSetSemantics {
+                        contentDescription = "Nachrichten öffnen"
+                        onClick {
+                            onOpenNews()
+                            true
+                        }
+                    }
             ) {
-                Text(
-                    text = "⚙",
-                    fontSize = 17.sp,
-                    color = HomeAccent.copy(alpha = 0.78f),
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            if (hasUpdateBadge) {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 6.dp, end = 6.dp)
-                        .size(9.dp)
-                        .background(Color(0xFFFF5A5F), CircleShape)
-                )
+                        .align(Alignment.Center)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(HomeCardColor.copy(alpha = 0.38f))
+                ) {
+                    Text(
+                        text = "🔔",
+                        fontSize = 15.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                if (showNewsBadge) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 4.dp, end = 4.dp)
+                            .size(9.dp)
+                            .background(HomeAccent, CircleShape)
+                    )
+                }
+            }
+            // Settings Button
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .testTag("settings-button")
+                    .clickable(onClick = onSettings)
+                    .clearAndSetSemantics {
+                        contentDescription = "Einstellungen öffnen"
+                        onClick {
+                            onSettings()
+                            true
+                        }
+                    }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(HomeCardColor.copy(alpha = 0.38f))
+                ) {
+                    Text(
+                        text = "⚙",
+                        fontSize = 17.sp,
+                        color = HomeAccent.copy(alpha = 0.78f),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                if (hasUpdateBadge) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 4.dp, end = 4.dp)
+                            .size(9.dp)
+                            .background(Color(0xFFFF5A5F), CircleShape)
+                    )
+                }
             }
         }
     }

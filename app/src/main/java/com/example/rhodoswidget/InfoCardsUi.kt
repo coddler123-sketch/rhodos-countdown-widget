@@ -322,8 +322,8 @@ fun FlightDayTimelineCard() {
         )
         Spacer(Modifier.height(10.dp))
         TimelineItem("14:00 Uhr", "Boarding & Abflugbereich", "Gepäck aufgegeben & Sicherheitskontrolle")
-        TimelineItem("14:30 Uhr", "Abflug nach Rhodos 🛫", "Direktflug 20.09.2026")
-        TimelineItem("19:00 Uhr", "Ankunft Flughafen Rhodos (RHO) 🛬", "Ortszeit Rhodos")
+        TimelineItem("14:30 Uhr", "Abflug ab Hamburg (HAM) nach Rhodos 🛫", "Direktflug 20.09.2026")
+        TimelineItem("19:00 Uhr", "Ankunft Flughafen Rhodos (RHO) 🛬", "Ortszeit Rhodos (+1 Std.)")
         TimelineItem("~20:00 Uhr", "Check-in Relax Hotel Kolymbia 🏨", "Doppelzimmer Superior Shared Pool (RHO071)")
     }
 }

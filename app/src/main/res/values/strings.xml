@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Rhodos Widget</string>
-    <string name="main_nav_home">Heute</string>
-    <string name="main_nav_travel">Unterwegs</string>
+    <string name="main_nav_home">Home</string>
+    <string name="main_nav_compass">Entdecken</string>
+    <string name="main_nav_travel">Vor Ort &amp; SOS</string>
     <string name="main_nav_news">Aktuelles</string>
-    <string name="main_nav_compass">Tipps</string>
     <string name="community_title">Rhodos-Urlaubsgruppe</string>
     <string name="community_label">FACEBOOK-GRUPPE</string>
     <string name="community_description">Reisetipps und Erfahrungen austauschen</string>
