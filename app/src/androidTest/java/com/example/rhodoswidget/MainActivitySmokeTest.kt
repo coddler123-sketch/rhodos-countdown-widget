@@ -90,7 +90,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-compass").performClick()
         composeRule.onNodeWithText("Rhodos Tipps").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("${compassTipIds.size} AUSGEWÄHLTE TIPPS").assertIsDisplayed()
         composeRule.onNodeWithTag("compass-screen").performScrollToKey("community")
         composeRule.onNodeWithTag("community-link").assertIsDisplayed()
 
@@ -99,7 +99,7 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithText("6 Treffer").assertIsDisplayed()
 
         composeRule.onNodeWithTag("compass-category-filter-all").performClick()
-        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("${compassTipIds.size} AUSGEWÄHLTE TIPPS").assertIsDisplayed()
 
         pressBack()
 
@@ -218,7 +218,7 @@ class MainActivitySmokeTest {
 
         pressBack()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("47 AUSGEWÄHLTE TIPPS").assertIsDisplayed()
+        composeRule.onNodeWithText("${compassTipIds.size} AUSGEWÄHLTE TIPPS").assertIsDisplayed()
     }
 
     @Test
@@ -226,7 +226,6 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-home").assertIsSelected()
 
         composeRule.onNodeWithTag("main-nav-travel").performClick().assertIsSelected()
-        composeRule.onNodeWithTag("main-nav-news").performClick().assertIsSelected()
         composeRule.onNodeWithTag("main-nav-compass").performClick().assertIsSelected()
         composeRule.onNodeWithTag("compass-screen").assertIsDisplayed()
 
@@ -287,7 +286,7 @@ class MainActivitySmokeTest {
             .commit()
         composeRule.activityRule.scenario.recreate()
 
-        composeRule.onNodeWithTag("main-nav-news").performClick()
+        composeRule.onNodeWithTag("news-bell-button").performClick()
         composeRule.onNodeWithText("Aktuelles von Rhodos").assertIsDisplayed()
         composeRule.onNodeWithText("NEUESTE MELDUNG").assertIsDisplayed()
         composeRule.onNodeWithTag("news-more-filters").performClick()
