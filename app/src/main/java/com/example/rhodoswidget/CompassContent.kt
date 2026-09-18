@@ -151,13 +151,13 @@ internal val compassTips = listOf(
     ),
     CompassTip(
         category = "Mobilität",
-        title = "September-Fahrplan neu prüfen",
-        description = "Busse nach Rhodos-Stadt und Lindos dauern je nach Stopps ca. 1 Std. Sie sind meist unklimatisiert und im Sommer sehr voll ('Kuschelkurs').",
-        note = "Wer es flexibler und angenehmer mag, ist mit Mietauto oder Roller unterwegs",
-        kind = CompassTipKind.CAUTION,
+        title = "Linienbusse & Fahrpläne ab Kolymbia",
+        description = "Der aktuelle KTEL-Fahrplan ist in der App integriert und bis 30.09.2026 gültig. Busse nach Rhodos-Stadt und Lindos brauchen ca. 1 Stunde.",
+        note = "Fahrplan ist für eure komplette Reisezeit aktuell; Busse sind im Sommer gut gefüllt",
+        kind = CompassTipKind.RECOMMENDATION,
         location = "Kolymbia Beach",
         journey = "KTEL Ostküste",
-        tags = listOf("Bus", "September", "Fahrplan", "Mietwagen"),
+        tags = listOf("Bus", "Fahrplan", "Kolymbia", "Linienbus"),
         source = CompassTipSource.RESEARCHED,
         sourceUrl = "https://www.rhodos-wiki.de/von-a-nach-b/linienbus-auf-rhodos/"
     ),

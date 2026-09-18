@@ -22,8 +22,8 @@ class CompassTipsTest {
         assertTrue(filterCompassTips(compassTips, "Kolymbia").size >= 4)
         assertTrue(filterCompassTips(compassTips, "ohne Auto").size >= 2)
         assertEquals(
-            listOf("September-Fahrplan neu prüfen"),
-            filterCompassTips(compassTips, "September", "Mobilität").map { it.title }
+            listOf("Linienbusse & Fahrpläne ab Kolymbia"),
+            filterCompassTips(compassTips, "Fahrplan", "Mobilität").map { it.title }
         )
     }
 

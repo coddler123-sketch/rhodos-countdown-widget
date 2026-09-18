@@ -250,12 +250,12 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             counterRecommendation = "Für einen kurzen oder entspannten Urlaubstag wahrscheinlich zu weit.",
             imageRes = R.drawable.prasonisi_rhodes_003
         )
-        "September-Fahrplan neu prüfen" -> fallback.copy(
-            duration = "5 Minuten",
-            bestTime = "Ab 15.–19.09. und täglich vor Abfahrt",
-            returnTip = "Screenshot oder Offline-Kopie der Rückfahrt speichern.",
-            counterRecommendation = "Alte Sommerzeiten niemals ungeprüft übernehmen.",
-            validUntil = "Vor jeder Fahrt neu prüfen",
+        "Linienbusse & Fahrpläne ab Kolymbia" -> fallback.copy(
+            duration = "Ca. 1 Std. Fahrtzeit nach Rhodos-Stadt oder Lindos",
+            bestTime = "Vormittags für den Hinweg, späten Nachmittag für den Rückweg",
+            returnTip = "Offline-Fahrplan direkt in der App aufrufen.",
+            counterRecommendation = "Wer es flexibler und klimatisierter mag, wählt Mietwagen oder Roller.",
+            validUntil = "Fahrplan bis 30.09.2026 in der App integriert",
             imageRes = R.drawable.category_rhodes_bus
         )
         "Rückfahrt zuerst planen" -> fallback.copy(
