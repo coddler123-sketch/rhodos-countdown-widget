@@ -16,6 +16,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -349,6 +352,7 @@ fun TravelScreen(
                 }
                 item { TavernCalculatorCard() }
                 item { GreekPhrasebookCard() }
+                item { PhotoSpotsCard(onOpenMap = openMap) }
                 items(excursionIdeas, key = { it.id }) { idea ->
                     ExcursionCard(
                         idea = idea,
@@ -814,8 +818,36 @@ internal fun TravelCardContainer(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
+private fun rememberGreekTts(): (String) -> Unit {
+    val context = LocalContext.current
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    DisposableEffect(context) {
+        var instance: TextToSpeech? = null
+        instance = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val localeResult = instance?.setLanguage(Locale.forLanguageTag("el-GR"))
+                if (localeResult == TextToSpeech.LANG_MISSING_DATA || localeResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    instance?.setLanguage(Locale.forLanguageTag("el"))
+                }
+            }
+        }
+        tts = instance
+        onDispose {
+            instance?.stop()
+            instance?.shutdown()
+        }
+    }
+    return remember(tts) {
+        { text: String ->
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "greek_tts_${text.hashCode()}")
+        }
+    }
+}
+
+@Composable
 private fun GreekPhrasebookCard() {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val speakGreek = rememberGreekTts()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -834,7 +866,7 @@ private fun GreekPhrasebookCard() {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "GRIECHISCH FÜR DIE TAVERNE 🇬🇷",
+                    text = "GRIECHISCH FÜR DIE TAVERNE 🇬🇷 🔊",
                     color = HomeAccent,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -843,7 +875,7 @@ private fun GreekPhrasebookCard() {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Sprachführer & wichtige Redewendungen",
+                    text = "Sprachführer & Audio-Aussprache",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -863,19 +895,29 @@ private fun GreekPhrasebookCard() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 5.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { speakGreek(phrase.ttsText) }
+                        .padding(vertical = 6.dp, horizontal = 4.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = phrase.greek,
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = Montserrat
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = phrase.greek,
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = Montserrat
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "🔊",
+                                fontSize = 12.sp
+                            )
+                        }
                         Text(
                             text = phrase.german,
                             color = HomeAccent,
@@ -891,6 +933,116 @@ private fun GreekPhrasebookCard() {
                         fontFamily = Montserrat
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PhotoSpotsCard(onOpenMap: (String) -> Unit) {
+    var selectedCategory by rememberSaveable { mutableStateOf("Alle") }
+    val categories = listOf("Alle", "Sonnenaufgang", "Vormittag", "Golden Hour", "Blaue Stunde", "Mittagslicht")
+
+    val filteredSpots = remember(selectedCategory) {
+        if (selectedCategory == "Alle") photoSpots
+        else photoSpots.filter { it.timeCategory == selectedCategory }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HomeCardShape)
+            .background(HomeCardColor)
+            .border(1.dp, HomeAccent.copy(alpha = 0.5f), HomeCardShape)
+            .padding(16.dp)
+            .testTag("photo-spots-card")
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "📸 DIE 10 BESTEN FOTOSPOTS UM KOLYMBIA",
+                color = HomeAccent,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat,
+                letterSpacing = 0.8.sp
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Perfekte Uhrzeiten & Fototipps für Urlaubsfotos",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Montserrat
+        )
+        Spacer(Modifier.height(10.dp))
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(categories) { category ->
+                val isSelected = selectedCategory == category
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { selectedCategory = category },
+                    label = { Text(category, fontSize = 11.sp, fontFamily = Montserrat) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color(0x33FFFFFF),
+                        labelColor = Color(0xCCFFFFFF),
+                        selectedContainerColor = HomeAccent.copy(alpha = 0.25f),
+                        selectedLabelColor = HomeAccent
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        borderColor = HomeCardBorder,
+                        selectedBorderColor = HomeAccent
+                    )
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        filteredSpots.forEach { spot ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0x20000000))
+                    .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${spot.iconEmoji} ${spot.title}",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = Montserrat,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { onOpenMap(spot.mapQuery) }, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)) {
+                        Text("📍 Karte", color = HomeAccent, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                Text(
+                    text = "⏰ ${spot.bestTime}  •  📍 ${spot.location}",
+                    color = HomeAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
+                )
+                Text(
+                    text = spot.tip,
+                    color = Color(0xDDFFFFFF),
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
+                    fontFamily = Montserrat
+                )
             }
         }
     }

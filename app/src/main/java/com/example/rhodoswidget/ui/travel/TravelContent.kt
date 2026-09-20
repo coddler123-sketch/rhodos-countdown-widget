@@ -159,26 +159,27 @@ internal data class GreekPhrase(
     val category: String,
     val greek: String,
     val phonetic: String,
-    val german: String
+    val german: String,
+    val ttsText: String = greek
 )
 
 internal val greekPhrases = listOf(
-    GreekPhrase("Taverne & Bestellung", "Ton logariasmó, parakaló", "Ton lo-ga-rjas-mó, pa-ra-ka-ló", "Die Rechnung bitte"),
-    GreekPhrase("Taverne & Bestellung", "Stin ygía mas! / Yamas!", "Stin i-jí-a mas / Ja-mas", "Zum Wohl / Prost!"),
-    GreekPhrase("Taverne & Bestellung", "Éna neró, parakaló", "É-na ne-ró, pa-ra-ka-ló", "Ein Wasser bitte"),
-    GreekPhrase("Taverne & Bestellung", "Polý nóstimo!", "Po-lí nós-ti-mo", "Sehr lecker!"),
-    GreekPhrase("Taverne & Bestellung", "Dyo biras, parakaló", "Di-o bí-ras, pa-ra-ka-ló", "Zwei Bier bitte"),
-    GreekPhrase("Taverne & Bestellung", "Éna oúzo, parakaló", "É-na u-zo, pa-ra-ka-ló", "Einen Ouzo bitte"),
-    GreekPhrase("Taverne & Bestellung", "To fayitó ítan katapliktikó!", "To fa-ji-tó í-tan ka-ta-plik-ti-kó", "Das Essen war fantastisch!"),
-    GreekPhrase("Begrüßung & Danke", "Kaliméra", "Ka-li-mé-ra", "Guten Morgen / Guten Tag"),
-    GreekPhrase("Begrüßung & Danke", "Kalispera", "Ka-lis-pé-ra", "Guten Abend"),
-    GreekPhrase("Begrüßung & Danke", "Efcharistó polý", "Ef-cha-ris-tó po-lí", "Vielen Dank"),
-    GreekPhrase("Begrüßung & Danke", "Parakaló", "Pa-ra-ka-ló", "Bitte / Gern geschehen"),
-    GreekPhrase("Begrüßung & Danke", "Yássas / Yássou", "Já-sas / Já-su", "Hallo / Tschüss (Formell / Informell)"),
-    GreekPhrase("Begrüßung & Danke", "Miláte germaniká?", "Mi-lá-te ger-ma-ni-ká", "Sprechen Sie Deutsch?"),
-    GreekPhrase("Unterwegs & Fragen", "Poú eínai i paralía?", "Pu í-ne i pa-ra-lí-a?", "Wo ist der Strand?"),
-    GreekPhrase("Unterwegs & Fragen", "Poú eínai to stási?", "Pu í-ne to stá-si", "Wo ist die Bushaltestelle?"),
-    GreekPhrase("Unterwegs & Fragen", "Nai / Óchi", "Nä / Ó-chi", "Ja / Nein (Vorsicht: 'Nai' heißt Ja!)"),
-    GreekPhrase("Unterwegs & Fragen", "Gatáki", "Ga-tá-ki", "Kätzchen (für die süßen Tavernenkatzen)"),
-    GreekPhrase("Unterwegs & Fragen", "Voítheia!", "Vo-í-thi-a", "Hilfe! (Notfall)")
+    GreekPhrase("Taverne & Bestellung", "Ton logariasmó, parakaló", "Ton lo-ga-rjas-mó, pa-ra-ka-ló", "Die Rechnung bitte", "Τον λογαριασμό, παρακαλώ"),
+    GreekPhrase("Taverne & Bestellung", "Stin ygía mas! / Yamas!", "Stin i-jí-a mas / Ja-mas", "Zum Wohl / Prost!", "Στην υγεία μας! Γειά μας!"),
+    GreekPhrase("Taverne & Bestellung", "Éna neró, parakaló", "É-na ne-ró, pa-ra-ka-ló", "Ein Wasser bitte", "Ένα νερό, παρακαλώ"),
+    GreekPhrase("Taverne & Bestellung", "Polý nóstimo!", "Po-lí nós-ti-mo", "Sehr lecker!", "Πολύ νόστιμο!"),
+    GreekPhrase("Taverne & Bestellung", "Dyo biras, parakaló", "Di-o bí-ras, pa-ra-ka-ló", "Zwei Bier bitte", "Δύο μπίρες, παρακαλώ"),
+    GreekPhrase("Taverne & Bestellung", "Éna oúzo, parakaló", "É-na u-zo, pa-ra-ka-ló", "Einen Ouzo bitte", "Ένα ούζο, παρακαλώ"),
+    GreekPhrase("Taverne & Bestellung", "To fayitó ítan katapliktikó!", "To fa-ji-tó í-tan ka-ta-plik-ti-kó", "Das Essen war fantastisch!", "Το φαγητό ήταν καταπληκτικό!"),
+    GreekPhrase("Begrüßung & Danke", "Kaliméra", "Ka-li-mé-ra", "Guten Morgen / Guten Tag", "Καλημέρα"),
+    GreekPhrase("Begrüßung & Danke", "Kalispera", "Ka-lis-pé-ra", "Guten Abend", "Καλησπέρα"),
+    GreekPhrase("Begrüßung & Danke", "Efcharistó polý", "Ef-cha-ris-tó po-lí", "Vielen Dank", "Ευχαριστώ πολύ"),
+    GreekPhrase("Begrüßung & Danke", "Parakaló", "Pa-ra-ka-ló", "Bitte / Gern geschehen", "Παρακαλώ"),
+    GreekPhrase("Begrüßung & Danke", "Yássas / Yássou", "Já-sas / Já-su", "Hallo / Tschüss (Formell / Informell)", "Γειά σας! Γειά σου!"),
+    GreekPhrase("Begrüßung & Danke", "Miláte germaniká?", "Mi-lá-te ger-ma-ni-ká", "Sprechen Sie Deutsch?", "Μιλάτε γερμανικά;"),
+    GreekPhrase("Unterwegs & Fragen", "Poú eínai i paralía?", "Pu í-ne i pa-ra-lí-a?", "Wo ist der Strand?", "Πού είναι η παραλία;"),
+    GreekPhrase("Unterwegs & Fragen", "Poú eínai to stási?", "Pu í-ne to stá-si", "Wo ist die Bushaltestelle?", "Πού είναι η στάση;"),
+    GreekPhrase("Unterwegs & Fragen", "Nai / Óchi", "Nä / Ó-chi", "Ja / Nein (Vorsicht: 'Nai' heißt Ja!)", "Ναι, Όχι"),
+    GreekPhrase("Unterwegs & Fragen", "Gatáki", "Ga-tá-ki", "Kätzchen (für die süßen Tavernenkatzen)", "Γατάκι"),
+    GreekPhrase("Unterwegs & Fragen", "Voítheia!", "Vo-í-thi-a", "Hilfe! (Notfall)", "Βοήθεια!")
 )
