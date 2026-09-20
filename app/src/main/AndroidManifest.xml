@@ -32,7 +32,7 @@
         </activity>
 
         <receiver
-            android:name=".RhodosCountdownLargeWidgetProvider"
+            android:name=".widget.RhodosCountdownLargeWidgetProvider"
             android:exported="true"
             android:label="@string/widget_large_name">
             <intent-filter>
@@ -45,11 +45,11 @@
         </receiver>
 
         <receiver
-            android:name=".RhodosWidgetAlarmReceiver"
+            android:name=".widget.RhodosWidgetAlarmReceiver"
             android:exported="false" />
 
         <receiver
-            android:name=".RhodosWidgetScheduleReceiver"
+            android:name=".widget.RhodosWidgetScheduleReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

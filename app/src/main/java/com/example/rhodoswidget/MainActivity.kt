@@ -1,5 +1,16 @@
 package com.example.rhodoswidget
 
+import com.example.rhodoswidget.R
+import com.example.rhodoswidget.MainActivity
+import com.example.rhodoswidget.ui.home.*
+import com.example.rhodoswidget.ui.compass.*
+import com.example.rhodoswidget.ui.travel.*
+import com.example.rhodoswidget.ui.news.*
+import com.example.rhodoswidget.ui.weather.*
+import com.example.rhodoswidget.ui.settings.*
+import com.example.rhodoswidget.ui.theme.*
+import com.example.rhodoswidget.widget.*
+
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -191,6 +202,9 @@ private fun RhodosApp(startInTravel: Boolean = false) {
                     onOpenKolymbia = {
                         initialTravelScheduleId.value = "ktel_kolymbia"
                         destinationName.value = MainDestination.TRAVEL.name
+                    },
+                    onOpenTravel = {
+                        destinationName.value = MainDestination.TRAVEL.name
                     }
                 )
                 MainDestination.TRAVEL -> TravelScreen(
@@ -278,7 +292,8 @@ private fun RhodosHome(
     scrollToTopRequest: Int,
     showNewsBadge: Boolean = false,
     onOpenNews: () -> Unit = {},
-    onOpenKolymbia: () -> Unit
+    onOpenKolymbia: () -> Unit,
+    onOpenTravel: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val state = remember { mutableStateOf(HomeState.load(context)) }
@@ -401,7 +416,10 @@ private fun RhodosHome(
                 Spacer(Modifier.height(16.dp))
             }
             HomeQuickActions(
-                onOpenKolymbia = onOpenKolymbia
+                onOpenKolymbia = onOpenKolymbia,
+                onOpenTavernCalc = onOpenTravel,
+                onOpenPhrasebook = onOpenTravel,
+                onOpenEmergency = onOpenTravel
             )
             Spacer(Modifier.height(16.dp))
             HomeDayPlanSection(

@@ -1,0 +1,521 @@
+package com.example.rhodoswidget.ui.compass
+import com.example.rhodoswidget.*
+
+import com.example.rhodoswidget.R
+import com.example.rhodoswidget.MainActivity
+import com.example.rhodoswidget.ui.home.*
+import com.example.rhodoswidget.ui.travel.*
+import com.example.rhodoswidget.ui.news.*
+import com.example.rhodoswidget.ui.weather.*
+import com.example.rhodoswidget.ui.settings.*
+import com.example.rhodoswidget.ui.theme.*
+import com.example.rhodoswidget.widget.*
+
+internal val compassTips = listOf(
+    CompassTip("Essen", "Taverne Akti", "Leckeres Essen, faire Preise und freundlicher Service.", "Besonders häufig empfohlen"),
+    CompassTip("Essen", "Stama", "Kleine Speisekarte und sehr herzlicher Service.", "Persönliche Empfehlung aus der Gruppe"),
+    CompassTip("Strände", "Tsambika / Tsampika", "Goldgelber Sand über mindestens 1 km mit seichtem Wasserzugang und reinem Sandboden. Kein einzelnes Hotel direkt am Strand – pure Natur!", "Baden als absolutes Vergnügen; schöner seichter Sandboden", CompassTipKind.RECOMMENDATION),
+    CompassTip("Strände", "Stegna", "Schöner Strand mit guten Möglichkeiten zum Essen.", "In der Hauptzeit mehr Andrang", CompassTipKind.NOTE),
+    CompassTip("Strände", "Pefkoi Plakia Beach", "Ruhige Pause am Meer bei der Blue Waves Cantine.", "Tipp für einen entspannten Strandtag"),
+    CompassTip("Strände", "Elli Beach", "Zentraler Stadtstrand mit derzeit gemischten Erfahrungen.", "Sauberkeit vor Ort prüfen", CompassTipKind.CAUTION),
+    CompassTip("Ausflüge", "Mandraki vor Sonnenaufgang", "Ruhiges Licht, Altstadtkulisse und einlaufende Schiffe.", "Am besten sehr früh besuchen"),
+    CompassTip("Mobilität", "Mietwagenbedingungen prüfen", "Selbstbeteiligung, Kaution, Shuttle und Versicherung schriftlich bestätigen lassen.", "Vor der Buchung klären", CompassTipKind.CAUTION),
+    CompassTip("Unterkünfte", "Elysium bei Faliraki", "Strand, Service und Lage wurden positiv hervorgehoben.", "Einzelne sehr positive Erfahrung", CompassTipKind.NOTE),
+    CompassTip("Unterkünfte", "Kresten Palace", "Mehrere positive Rückmeldungen zu Hotel und Aufenthalt.", "Steiler Weg zum Strand", CompassTipKind.CAUTION),
+    CompassTip("Unterkünfte", "Lydia Maris Resort", "Von einem wiederkehrenden Gast erneut positiv bewertet.", "Erfahrung eines Stammgasts", CompassTipKind.NOTE),
+    CompassTip("Unterkünfte", "Esperides Beach Family", "Familienhotel mit Pool, direkter Meerlage und gutem Essen.", "Gut für Familien"),
+    CompassTip("Unterkünfte", "Blue Sea Beach", "Positiver erster Eindruck in direkter Strandlage.", "Für Abendbummel außerhalb von Faliraki", CompassTipKind.CAUTION),
+    CompassTip(
+        category = "Unterkünfte",
+        title = "Relax Hotel – unser Hotel",
+        description = "Euer familiengeführtes 3-Sterne-Hotel liegt zentral in Kolymbia und laut Hotel rund 100 Meter vom Meer entfernt.",
+        note = "Leistungen, Essenszeiten und mögliche Gebühren können von Saison und gebuchtem Reiseangebot abhängen",
+        location = "Eukalyptus Alley 2, Kolymbia, Rhodos",
+        journey = "Vor Ort; Flughafen laut Hotel unter 40 Autominuten",
+        tags = listOf("Relax Hotel", "Kolymbia", "Pool", "Strandnähe", "24-h-Rezeption"),
+        hotelDetails = listOf(
+            CompassTipDetail(
+                "EUER ZIMMER · SHARED POOL",
+                "Gebucht ist ein Doppelzimmer Superior Sharing Pool im renovierten Teil. Schauinsland führt das Relax unter RHO071 und bietet diese exklusive Zimmerkategorie seit Sommer 2023 an. Dazu gehören Terrasse mit Sonnenliegen, Walk-in-Dusche, Föhn, Klimaanlage und direkter Zugang zum Shared Pool. Der Pool ist kein Privatpool, sondern wird mit den angrenzenden Zimmern geteilt."
+            ),
+            CompassTipDetail(
+                "ADRESSE & KONTAKT",
+                "Eukalyptus Alley 2, Kolymbia · 85100/85103 Rhodos · Rezeption +30 22410 56220 · relax.hotel@hotmail.com · relaxhotel.gr"
+            ),
+            CompassTipDetail(
+                "LAGE & UMGEBUNG",
+                "Zentral in Kolymbia, laut Hotel etwa 100 m vom Meer. Ein Supermarkt wird mit rund 200 m Entfernung angegeben; Geschäfte, Tavernen und die Eukalyptusstraße liegen in der näheren Umgebung."
+            ),
+            CompassTipDetail(
+                "ZIMMER",
+                "Das gesamte Hotel wurde laut eigener Website 2019 umfangreich renoviert. Die besonderen, bei Schauinsland exklusiven Superior-Shared-Pool-Zimmer kamen als erneuerter Bereich zur Sommersaison 2023 hinzu. Maßgeblich bleiben euer Voucher und die Rezeption."
+            ),
+            CompassTipDetail(
+                "ESSEN & TRINKEN",
+                "Laut Schauinsland-Reisen (Veranstalterbeschreibung) alle Mahlzeiten als Buffet: Frühstück 7:00–10:30 Uhr, Mittagessen 12:30–14:30 Uhr, Abendessen 18:30–21:00 Uhr. Lokale alkoholische und alkoholfreie Getränke 11:00–23:00 Uhr, Kaffee 6:30–20:00 Uhr. Genaue Zeiten vor Ort an der Rezeption bestätigen lassen."
+            ),
+            CompassTipDetail(
+                "POOL & FAMILIE",
+                "Saisonaler Außenpool, Kinderbecken, Garten, Spielplatz und Spielebereich. Ob Liegen, Schirme oder einzelne Angebote verfügbar sind, kann saisonabhängig sein."
+            ),
+            CompassTipDetail(
+                "SERVICE & REGELN",
+                "24-h-Rezeption, Aufzug, WLAN, Safe, Autovermietung und Außenparkplätze werden genannt. Haustiere sind nicht erlaubt. Beim Check-in Pool-Nutzungszeiten, Tiefe/Temperatur, Handtücher sowie mögliche WLAN- oder Klimagebühren klären."
+            ),
+            CompassTipDetail(
+                "AN- & ABREISE",
+                "Die veröffentlichten Check-in-/Check-out-Zeiten widersprechen sich je nach Anbieter. Maßgeblich sind euer Voucher und die Rezeption. Am Vortag Transfer-Abholzeit, Gepäckaufbewahrung und mögliche Zimmerverlängerung erfragen."
+            )
+        ),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.relaxhotel.gr/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Melekouni probieren",
+        description = "Der rhodische Sesam-Honig-Riegel ist eine typische Süßigkeit der Insel und ein gutes kleines Mitbringsel.",
+        note = "In Bäckereien und Läden nach lokaler Herstellung fragen",
+        location = "Inselweit",
+        journey = "leicht zu finden",
+        tags = listOf("regional", "süß", "Mitbringsel"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitgreece.gr/blog/travel-tips/1257/we-serve-the-aegean/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Lakani auf der Karte suchen",
+        description = "Lakani gehört zu den traditionellen Gerichten von Rhodos und wird langsam im Ofen gegart.",
+        note = "Nicht jede Taverne bietet das Gericht täglich an",
+        location = "Traditionelle Tavernen",
+        journey = "vorher nachfragen",
+        tags = listOf("regional", "herzhaft", "Taverne"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitgreece.gr/blog/travel-tips/1257/we-serve-the-aegean/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Dodekanes-Gebäck testen",
+        description = "Xerotigana und Pastelaries stehen für die süße Küche der Dodekanes-Inseln.",
+        note = "Ideal als Dessert oder zum Kaffee",
+        location = "Bäckereien und Tavernen",
+        journey = "inselweit",
+        tags = listOf("Dessert", "regional", "Kaffee"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitgreece.gr/experiences/gastronomy/traditional-cuisine/local-flavours-of-the-greek-cuisine/"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Sieben Quellen im Schatten",
+        description = "Quellen, Waldwege und der schmale Wassertunnel machen Epta Piges zu einem angenehmen Naturziel nahe Kolymbia.",
+        note = "Im Tunnel kann es nass und rutschig sein",
+        kind = CompassTipKind.CAUTION,
+        location = "Epta Piges",
+        journey = "nahe Kolymbia",
+        tags = listOf("Natur", "Schatten", "ohne Auto möglich"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/sightseeing/seven-springs"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Kallithea: Architektur und Badestopp",
+        description = "Die restaurierte Thermenanlage verbindet historische Architektur, Kieselmosaike und eine kleine Badebucht.",
+        note = "Öffnungszeiten und Eintritt am Ausflugstag prüfen",
+        location = "Kallithea Springs",
+        journey = "Richtung Rhodos-Stadt",
+        tags = listOf("Kultur", "Baden", "Halbtag"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/sightseeing/kallithea-springs"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Lindos gleich morgens",
+        description = "Dorf und Akropolis werden stark besucht. Ein früher Start macht Wege, Hitze und Warteschlangen angenehmer.",
+        note = "Feste Schuhe und Wasser mitnehmen",
+        location = "Lindos",
+        journey = "Bus ab Kolymbia",
+        tags = listOf("Kultur", "früh", "Halbtag"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/villages/kalathos"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Anthony-Quinn-Bucht",
+        description = "Die kleine, von Felsen und Pinien eingerahmte Bucht ist ein schönes Ziel für klares Wasser und eine Badepause.",
+        note = "Wegen der kompakten Bucht möglichst früh ankommen",
+        location = "Ladiko",
+        journey = "nördlich von Kolymbia",
+        tags = listOf("Baden", "Bucht", "früh"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/beaches/anthony-quinn-bay"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Prasonisi als ganzer Reisetag",
+        description = "Am Südende treffen zwei unterschiedlich windige Küstenseiten aufeinander – spektakulär, aber weit entfernt.",
+        note = "Wind, Fahrzeit und Rückweg vorab einplanen",
+        kind = CompassTipKind.CAUTION,
+        location = "Südspitze von Rhodos",
+        journey = "Tagesausflug mit Auto",
+        tags = listOf("Landschaft", "Wind", "Tagesausflug"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/beaches/prasonisi-beach"
+    ),
+    CompassTip(
+        category = "Mobilität",
+        title = "Linienbusse & Fahrpläne ab Kolymbia",
+        description = "Der aktuelle KTEL-Fahrplan ist in der App integriert und bis 30.09.2026 gültig. Busse nach Rhodos-Stadt und Lindos brauchen ca. 1 Stunde.",
+        note = "Fahrplan ist für eure komplette Reisezeit aktuell; Busse sind im Sommer gut gefüllt",
+        kind = CompassTipKind.RECOMMENDATION,
+        location = "Kolymbia Beach",
+        journey = "KTEL Ostküste",
+        tags = listOf("Bus", "Fahrplan", "Kolymbia", "Linienbus"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.rhodos-wiki.de/von-a-nach-b/linienbus-auf-rhodos/"
+    ),
+    CompassTip(
+        category = "Mobilität",
+        title = "Rückfahrt zuerst planen",
+        description = "Bei Zielen mit wenigen Direktverbindungen zuerst die letzte passende Rückfahrt sichern und danach den Tagesablauf planen.",
+        note = "Besonders wichtig für Tsambika und Sieben Quellen",
+        location = "Ab Kolymbia",
+        journey = "Busausflüge",
+        tags = listOf("Bus", "Rückfahrt", "ohne Auto"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.ktelrodou.gr/schedule/"
+    ),
+    CompassTip(
+        category = "Kolymbia",
+        title = "Eukalyptusallee am Abend",
+        description = "Die von Eukalyptusbäumen gesäumte Straße zum Strand eignet sich für einen ruhigen Spaziergang oder eine kleine Radrunde.",
+        note = "In der Dämmerung auf Verkehr und Sichtbarkeit achten",
+        kind = CompassTipKind.NOTE,
+        location = "Kolymbia",
+        journey = "nah am Urlaubsort",
+        tags = listOf("Spaziergang", "Abend", "Fahrrad"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/beaches/kolymbia-beach"
+    ),
+    CompassTip(
+        category = "Kolymbia",
+        title = "Entspannter Strandtag vor Ort",
+        description = "Kolymbia verfügt über drei Strände. Besonders schön ist die kleine Sandbucht direkt am Hafenbereich mit Bar im Hintergrund, Kinderbereich, Wassersport und Bootstouren.",
+        note = "Kolymbia ist der ideale Ausgangsort in der Mitte aller Sehenswürdigkeiten",
+        location = "Kolymbia Beach & Hafen",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Strand", "Hafen", "Bootstouren", "Wassersport", "Kinderfreundlich"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/what-to-see/beaches/kolymbia-beach"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Carrusel: griechische Klassiker",
+        description = "Das familiengeführte Restaurant an der Eukalyptusstraße bietet griechische Klassiker, Grillgerichte und vegetarische Optionen.",
+        note = "Bei mehreren Vorspeisen lieber teilen – die Portionen werden als großzügig beschrieben",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Taverne", "Grill", "vegetarisch"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.carrusel-restaurant.com/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Meze bei Ouzaki teilen",
+        description = "Eine zentral gelegene griechische Taverne an der Eukalyptusstraße für Meze, Fisch und weitere traditionelle Gerichte.",
+        note = "Mehrere kleine Teller bestellen und gemeinsam probieren",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Meze", "Taverne", "zu Fuß"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Restaurant_Review-g635615-d21080739-Reviews-Taverna_Ouzaki-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "To Palio Nisaki: Fisch am Meer",
+        description = "Die traditionsreiche Fischtaverne liegt direkt am Kolymbia Beach und serviert Tagesfang, Meze und Meeresfrüchte.",
+        note = "Tagesfang, Zubereitung und Kilopreis vor der Bestellung bestätigen",
+        location = "Kolymbia Beach",
+        journey = "zu Fuß oder kurze Taxifahrt",
+        tags = listOf("Kolymbia", "Fisch", "Meeresfrüchte", "Meerblick"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://topalionisaki.gr/en/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Rosso di Sera: Pizza-Abend",
+        description = "Eine italienische Abwechslung in Kolymbia mit Pizza und Pasta sowie vegetarischen und veganen Möglichkeiten.",
+        note = "Das Lokal ist auf den Abend ausgerichtet – Öffnungszeit am Besuchstag prüfen",
+        location = "Athinon Street, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Pizza", "Pasta", "vegetarisch"),
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.visitrhodes.com/restaurants/ristorante--rosso-di-sera"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Anthoula: Traumhafte rhodische Küche",
+        description = "Traumhafte rhodische Küche nahe Kolymbia. Eukalyptus-Allee bis zur Hauptstraße Rodou-Lindou durchlaufen, an der Ampelkreuzung Richtung Sieben Quellen überqueren – ca. 50 m danach kommen zwei Tavernen. Antoula ist der Favorit für top Qualität & Preis-Leistungs-Verhältnis!",
+        note = "Qualität und Preis-Leistungs-Verhältnis fast nicht zu übertreffen",
+        location = "Rodou-Lindou / 50 m nach Ampelkreuzung Sieben Quellen (Kolymbia)",
+        journey = "Eukalyptus-Allee durchlaufen & Ampel überqueren",
+        tags = listOf("nahe Kolymbia", "Taverne", "Favorit", "rhodische Küche", "Preis-Leistung"),
+        reviewSummary = "Traumhafte rhodische Küche ganz in der Nähe von Kolymbia. Die Eukalyptus-Allee durchlaufen und die Ampelkreuzung überqueren. Qualität und Preis-Leistungs-Verhältnis gelten als unübertroffen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.rhodos-wiki.de/rhodos-restaurants/antoula/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Taverne Manolis: Gute Gyros Pita",
+        description = "Unweit des Strandes gelegene Taverne für eine richtig gute Gyros Pita und frische Snacks. Während Lokale im Zentrum meist touristisch orientiert sind, bietet Manolis echtes Essen nahe am Meer.",
+        note = "Leckere Gyros Pita unweit des Strandes; ideal für einen schnellen, guten Imbiss",
+        location = "Strandnähe, Kolymbia",
+        journey = "zu Fuß vom Strand",
+        tags = listOf("Kolymbia", "Gyros Pita", "Strandnähe", "Taverne", "günstig"),
+        reviewSummary = "Beliebter Anlaufpunkt nahe des Strandes für frische, gut gewürzte Gyros Pita und unkomplizierte griechische Spezialitäten zu fairen Preisen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.rhodos-wiki.de/rhodos-restaurants/manolis/"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Taverna Michel: familiär und vom Grill",
+        description = "Eine kleine familiengeführte Taverne in Kolymbia für griechische Grillgerichte, Meze, Pizza und Gyros.",
+        note = "Die jüngsten Bewertungen sind nicht einheitlich – Karte und Tagesform vor Ort einschätzen",
+        location = "Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Taverne", "Grill", "zu Fuß"),
+        reviewSummary = "Häufig gelobt werden herzlicher Familienservice, Tzatziki, Grillgerichte, großzügige Portionen und ein gutes Preis-Leistungs-Verhältnis. Einzelne aktuelle Stimmen kritisieren dagegen die Lage an der Straße sowie schwankende Qualität und Aufmerksamkeit im Service.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Restaurant_Review-g635615-d3513149-Reviews-Taverna_Michel-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Taverna Tsambikos: klassische Küche",
+        description = "Eine etwas außerhalb gelegene Taverne mit griechischer Hausmannskost, Grillgerichten und vegetarischen Optionen.",
+        note = "Für den Abend reservieren und die Anfahrt mit Taxi oder Auto einplanen",
+        location = "Straße Kolymbia–Archipoli",
+        journey = "kurze Taxi- oder Autofahrt",
+        tags = listOf("nahe Kolymbia", "Taverne", "traditionell", "vegetarisch"),
+        reviewSummary = "Viele Gäste nennen Moussaka, Mixed Grill und lokale Vorspeisen als Stärken und beschreiben den Empfang als warm und großzügig. Das Lokal liegt abseits des Zentrums; gerade zur Hauptzeit werden Reservierung und eine geplante Rückfahrt empfohlen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Restaurant_Review-g635615-d4444048-Reviews-Taverna_Tsambikos-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Food Box: schnell und unkompliziert",
+        description = "Eine zwanglose Adresse an der Eukalyptusstraße für Gyros-Pita, Burger, Grillteller, Salate und Crêpes.",
+        note = "Gut für einen schnellen Imbiss oder zum Mitnehmen statt für einen ruhigen Taverna-Abend",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Gyros", "Burger", "Take-away", "günstig"),
+        reviewSummary = "Wiederkehrendes Lob gilt den frisch wirkenden Speisen, großen Portionen, kurzen Wartezeiten und fairen Preisen. Vereinzelt berichten Gäste von weniger aufmerksamem Service oder unterschiedlich kräftig gewürztem Hähnchen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Restaurant_Review-g635615-d12938349-Reviews-Food_Box-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Limanaki: Meeresblick und Seafood",
+        description = "Ein Restaurant oberhalb der Küste mit Fisch, Meeresfrüchten, Pasta und weitem Blick über das Wasser.",
+        note = "Die Aussicht ist die sichere Stärke – Tagesfang und Preis vor der Bestellung klären",
+        location = "Küste von Kolymbia",
+        journey = "zu Fuß, Taxi oder Auto je nach Hotel",
+        tags = listOf("Kolymbia", "Fisch", "Meeresfrüchte", "Meerblick"),
+        reviewSummary = "Sehr häufig werden die Lage, der Sonnenuntergang, Cocktails und Gerichte wie Seafood-Pasta hervorgehoben. Neuere Bewertungen sind beim Essen und Service geteilt: Manche erleben einen besonderen Abend, andere empfinden Qualität oder Preis-Leistung als durchschnittlich.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Restaurant_Review-g635615-d4600258-Reviews-Limanaki_Seafood_Restaurant-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Mylos: besonderer Abend am Meer",
+        description = "Ein gehobeneres À-la-carte-Restaurant am Atlantica Imperial Resort mit moderner griechisch-mediterraner Küche.",
+        note = "Vorher klären, ob externe Gäste reservieren können und welcher Preis gilt",
+        location = "Atlantica Imperial Resort, Kolymbia",
+        journey = "zu Fuß oder kurzes Taxi je nach Hotel",
+        tags = listOf("Kolymbia", "gehoben", "Meerblick", "Reservierung"),
+        reviewSummary = "Viele Rezensionen loben die sorgfältige Präsentation, authentische Aromen, großzügige Portionen, den Meerblick und sehr aufmerksamen Service. Das Preisniveau ist höher und zahlreiche Berichte stammen von Hotelgästen mit inkludiertem Restaurantbesuch.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.com/Restaurant_Review-g635615-d12833701-Reviews-Mylos_A_La_Carte_Restaurant-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Supermärkte",
+        title = "Sklavenitis: Griechischer Supermarkt",
+        description = "Griechischer Supermarkt an der Rodou-Lindou kurz vor der Einmündung nach Kolymbia (nahe dem ehemaligen Krankenhaus / heute Seniorenheim). Bietet alles für den täglichen Bedarf – hier kaufen in erster Linie Einheimische ein.",
+        note = "In Kolymbia wird alles angeboten, was man für einen erfüllten Urlaub braucht",
+        location = "Rodou-Lindou kurz vor Einmündung Kolymbia",
+        journey = "mit Auto, Taxi oder kurzem Weg je nach Hotellage",
+        tags = listOf("Kolymbia", "Supermarkt", "Lebensmittel", "Einheimische", "Vollsortimenter"),
+        reviewSummary = "Sehr gut sortierter griechischer Vollsortimenter mit Frischetheke und fairen Preisen. Vor allem von Einheimischen genutzt; liegt direkt an der Rodou-Lindou vor der Zufahrt nach Kolymbia.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.sklavenitis.gr/anakoinoseis/"
+    ),
+    CompassTip(
+        category = "Supermärkte",
+        title = "Zeus: zentraler Ferienmarkt",
+        description = "Ein zentraler Supermarkt und Tourist Shop in Kolymbia für Getränke, Snacks, Strandbedarf und Souvenirs.",
+        note = "Praktisch zu Fuß; bei einem großen Einkauf Preise mit Sklavenitis vergleichen",
+        location = "Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Supermarkt", "Strandbedarf", "zu Fuß"),
+        reviewSummary = "Viele Rezensionen nennen die große Auswahl, hilfsbereites Personal und für den Ferienort ordentliche Preise. Andere ordnen Zeus klar als Tourist Shop ein und finden nicht jedes Produkt besonders günstig – für Bequemlichkeit und kleine Einkäufe ist er vor allem praktisch.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://citymaps.gr/souper-market/rodos/zeus-supermarket-tourist-shop/"
+    ),
+    CompassTip(
+        category = "Supermärkte",
+        title = "Edem: Markt an der Eukalyptusstraße",
+        description = "Ein zentral gelegener Ferienmarkt für Lebensmittel, Getränke, Snacks und Dinge des täglichen Bedarfs.",
+        note = "Gut für den Einkauf zu Fuß; für einen großen Warenkorb weiterhin mit Sklavenitis vergleichen",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Supermarkt", "Lebensmittel", "zu Fuß"),
+        reviewSummary = "Die öffentlich ausgewiesenen Google-Daten lagen zuletzt bei 4,3 von 5 Punkten aus rund 292 Rezensionen; die große Mehrheit vergab vier oder fünf Sterne. Es gibt aber auch einzelne sehr niedrige Bewertungen, deshalb Preise und Frische wie bei jedem Ferienmarkt vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://businessguide.gr/listing/hellenic-market-edem-rhodes-supermarket/"
+    ),
+    CompassTip(
+        category = "Supermärkte",
+        title = "Michalis Kiosk: schnell versorgt",
+        description = "Ein kleiner Kiosk an der Hauptstraße für kalte Getränke, Snacks und spontane Besorgungen unterwegs.",
+        note = "Für Kleinigkeiten praktisch; kein Ersatz für einen vollständigen Supermarkteinkauf",
+        location = "EO95 bei Kolymbia",
+        journey = "zu Fuß nur je nach Unterkunft, sonst kurzer Stopp mit Auto oder Taxi",
+        tags = listOf("Kolymbia", "Kiosk", "Getränke", "schneller Stopp"),
+        reviewSummary = "Das öffentlich sichtbare Bewertungsaggregat nennt 5,0 von 5 Punkten aus 29 Rezensionen und damit eine auffallend starke, wenn auch noch überschaubare Basis. Aus den zugänglichen Daten lassen sich einzelne Stärken jedoch nicht verlässlich herauslesen; Sortiment und Öffnung deshalb vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.cybo.com/GR-postal-code/851-03_afantou/grocery-stores-and-supermarkets/"
+    ),
+    CompassTip(
+        category = "Mode & Accessoires",
+        title = "Hashtag Shop: griechische Sommermode",
+        description = "Eine Boutique an der Eukalyptusstraße mit Kleidung, Sandalen, Strandmode, Taschen und Accessoires für Frauen und Männer.",
+        note = "Interessanter für tragbare Urlaubserinnerungen als für klassische Souvenirs",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Mode", "Sandalen", "Accessoires", "zu Fuß"),
+        reviewSummary = "Bei 4,9 von 5 Punkten aus 39 Google-Rezensionen werden besonders hilfsbereiter Service, faire Preise, gute Auswahl und Produkte griechischer Firmen gelobt. Einzelne Käufer berichten zugleich von kleinen Qualitätsproblemen bei günstigen Accessoires – Nähte, Verschlüsse und Schrauben kurz prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://wanderlog.com/place/details/7941601"
+    ),
+    CompassTip(
+        category = "Souvenirs",
+        title = "Tourist Shop Oslo Street: beliebter Fundort",
+        description = "Ein gut bewerteter Ferienladen in Kolymbia für Souvenirs und typische Urlaubsbesorgungen.",
+        note = "Vor dem Kauf Material, Herkunft und Preise mit einem zweiten Laden vergleichen",
+        location = "Oslo Street, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Souvenirs", "Ferienbedarf", "zu Fuß"),
+        reviewSummary = "Das öffentlich sichtbare Bewertungsaggregat führt den Laden mit 4,9 von 5 Punkten aus 42 Rezensionen und damit als einen der stärksten allgemeinen Tourist Shops im Ort. Da kaum belastbare Einzeltexte zugänglich sind, bleibt offen, welche Waren besonders überzeugen – Qualität und Herkunft vor Ort prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.cybo.com/GR-postal-code/851-03_afantou/grocery-stores-and-supermarkets/"
+    ),
+    CompassTip(
+        category = "Souvenirs",
+        title = "Secret Rhodes: handgemachte Andenken",
+        description = "Ein kleiner Laden an der Eukalyptusstraße mit Keramik, Schmuck, Naturkosmetik, Olivenölseife und handgemachten Dekorationen.",
+        note = "Gut für individuellere Mitbringsel statt der üblichen Massenware",
+        location = "Eukalyptusstraße, Kolymbia",
+        journey = "zu Fuß je nach Hotel",
+        tags = listOf("Kolymbia", "Souvenirs", "handgemacht", "Naturkosmetik"),
+        reviewSummary = "Die vorhandenen Rezensionen heben originelle Handarbeiten, freundliche Beratung, lokale Produkte und faire Preise hervor. Die Bewertungsbasis ist allerdings deutlich kleiner als bei großen Attraktionen; Öffnungszeiten deshalb am Besuchstag prüfen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://wanderlog.com/place/details/10072130/secret-rhodes-sv5swu"
+    ),
+    CompassTip(
+        category = "Souvenirs",
+        title = "Michail: Keramik aus Familienhand",
+        description = "Ein familiengeführter Kunsthandwerksladen mit handgefertigter Keramik, Gefäßen und dekorativen Einzelstücken.",
+        note = "Bei Fluggepäck Verpackung und Transport zerbrechlicher Stücke direkt klären",
+        location = "bei Kolymbia",
+        journey = "Taxi oder Auto",
+        tags = listOf("nahe Kolymbia", "Souvenirs", "Keramik", "Kunsthandwerk"),
+        reviewSummary = "Gäste loben besonders die sichtbare Handarbeit, kreative Formen, die familiäre Atmosphäre und persönliche Erklärungen zur Herstellung. Für einen kurzen Einkaufsbummel ist die Lage weniger spontan; für gezielte Keramik-Souvenirs lohnt der eigene Stopp.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.fr/Attraction_Review-g635615-d23862457-Reviews-Michail_Artistic_Craft_and_Artifacts-Kolimbia_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Regionale Produkte",
+        title = "Artistic Village: Keramik und Galerie",
+        description = "Eine familiengeführte Keramikwerkstatt mit Galerie und kleinem Museum zwischen Afandou und Kolymbia.",
+        note = "Mehr als ein Shop: etwas Zeit zum Ansehen der Werkstatt und Einzelstücke einplanen",
+        location = "Straße Rhodos–Lindos bei Kolymbia",
+        journey = "Auto oder Taxi",
+        tags = listOf("nahe Kolymbia", "Keramik", "Galerie", "regional"),
+        reviewSummary = "Viele Besucher sprechen von außergewöhnlicher, vor Ort gefertigter Keramik, großer Auswahl und freundlichen Erklärungen der Familie. Besonders positiv fällt auf, dass die Stücke als origineller wahrgenommen werden als typische Souvenirware.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Attraction_Review-g635615-d6557395-Reviews-Artistic_Village_Contemporary_Art_Art_gallery_Museum_of_Ceramic_Art-Kolimbia_Rhod.html"
+    ),
+    CompassTip(
+        category = "Regionale Produkte",
+        title = "Olive Oil Factory: Öl mit Einblick",
+        description = "Eine familiengeführte Station in Archangelos, die traditionelle und moderne Ölherstellung sowie Verkostungen verbindet.",
+        note = "Verkostung nutzen, aber Preise und Mengen vor dem Kauf vergleichen",
+        location = "Archangelos",
+        journey = "Auto oder Taxi",
+        tags = listOf("Archangelos", "Olivenöl", "Verkostung", "regional"),
+        reviewSummary = "Positiv beschrieben werden die persönliche Führung, der Vergleich alter und neuer Pressmethoden und die Verkostung von Öl und lokalen Produkten. Kritische Stimmen empfinden die Verkaufspreise als hoch – anschauen und probieren kann sich trotzdem lohnen.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.tripadvisor.co.uk/Attraction_Review-g1175544-d8355871-Reviews-Olive_Oil_Factory-Archangelos_Rhodes_Dodecanese_South_Aegean.html"
+    ),
+    CompassTip(
+        category = "Regionale Produkte",
+        title = "Traditional Greek Kiosk: probieren und mitnehmen",
+        description = "Ein kleiner Spezialitätenladen am Symi-Platz in Rhodos-Stadt mit Olivenöl, Honig, Kräutern, Gewürzen und Likören.",
+        note = "Nur als Teil eines Tags in Rhodos-Stadt einplanen – nicht für einen schnellen Einkauf in Kolymbia",
+        location = "Symi-Platz, Rhodos-Stadt",
+        journey = "mit Bus oder Auto nach Rhodos-Stadt",
+        tags = listOf("Rhodos-Stadt", "Olivenöl", "Honig", "Verkostung"),
+        reviewSummary = "Wiederkehrend gelobt werden fachkundige, unaufdringliche Beratung, großzügiges Probieren und die Auswahl an Öl, Honig, Kräutern und besonderen Cremes. Viele Gäste empfinden die Preise im Vergleich zur Altstadt als fair; die Anfahrt lohnt vor allem zusammen mit einem Stadtbesuch.",
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://wanderlog.com/place/details/12856969/traditional-greek-kiosk"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Agathi Beach & Burg Feraklos",
+        description = "Einer der feinsten Sandstrände der Ostküste mit flachem Meerzugang, kombiniert mit der mittelalterlichen Johanniter-Burgruine Feraklos auf dem Felsen oberhalb.",
+        note = "Festes Schuhwerk für den Aufstieg zur Burgruine mitbringen; danach Abkühlung am Agathi Beach",
+        location = "bei Haraki / Archangelos (~15 Min. von Kolymbia)",
+        journey = "Mietwagen oder Taxi",
+        tags = listOf("Ausflug", "Halbtag", "Sandstrand", "Burgruine", "Schnorcheln"),
+        reviewSummary = "Agathi Beach überzeugt mit feinstem goldgelbem Sand, kristallklarem flachen Wasser und gemütlichen Strandtavernen. Der Aufstieg zur Burg Feraklos bietet fantastischen Panorama-Weitblick über die Küste.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agathi%20Beach%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Bergdorf Archipoli & Agios Nectarios",
+        description = "Ein ruhiges, traditionelles Bergdorf im Landesinneren mit der imposanten Kirche Agios Nectarios, einer riesigen Uralt-Platane und einem Kräuter-Naturlehrpfad.",
+        note = "Hier lassen sich vor Ort echter Insel-Honig, Souma (Tresterbrand) und Olivenöl probieren",
+        location = "Archipoli (~10 Min. von Kolymbia)",
+        journey = "Mietwagen oder Taxi",
+        tags = listOf("Ausflug", "Halbtag", "Bergdorf", "Natur", "Kräuterpfad", "ruhig"),
+        reviewSummary = "Beliebter Stopp im Hinterland abseits der Touristenmassen. Wunderschöne Kirche, riesige Schatten-Platane und authentischer Einblick in die Inselkultur.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agios%20Nectarios%20Archipoli%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Eleousa & Waldkirche Fountoukli",
+        description = "Ehemaliges italienisches Musterdorf mit historischem Rundbassin (Heimat des seltenen Gizani-Fisches) und der malerischen byzantinischen Waldkirche Agios Nikolaos Fountoukli.",
+        note = "Herrlich schattiges Ausflugsziel an heißen Tagen in den Pinienwäldern am Profitis Ilias",
+        location = "Eleousa / Profitis Ilias (~20 Min. von Kolymbia)",
+        journey = "Mietwagen",
+        tags = listOf("Ausflug", "Halbtag", "Geschichte", "Pinienwald", "Kirche", "ruhig"),
+        reviewSummary = "Verzaubert durch kühle Waldluft, einzigartige Architekturgeschichte der 1930er-Jahre und die verträumte byzantinische Fountoukli-Kirche im Grün.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Agios%20Nikolaos%20Fountoukli%20Eleousa%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Kloster Tsambika Aussichtspunkt",
+        description = "Die weiße Felskapelle hoch über Kolymbia – über 300 Stufen erreicht man den besten Rundum-Panoramablick der rhassischen Ostküste.",
+        note = "Am späten Nachmittag oder zum Sonnenaufgang beste Lichtverhältnisse und angenehmere Temperaturen",
+        location = "Felsen über Kolymbia (~10 Min. Fahrt + Aufstieg)",
+        journey = "Mietwagen / Taxi zum Parkplatz, dann 300 Stufen zu Fuß",
+        tags = listOf("Ausflug", "Halbtag", "Aussichtspunkt", "Panoramablick", "Fotospot"),
+        reviewSummary = "Spektakuläre Aussicht auf Kolymbia, den Tsambika-Strand und Afandou. Der Aufstieg über die 300 Stufen lohnt sich für jeden Fotofreund.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Moni%20Tsambika%20Rhodes"
+    )
+).let(::attachCompassTipIds)

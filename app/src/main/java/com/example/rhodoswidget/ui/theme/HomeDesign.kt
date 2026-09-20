@@ -1,0 +1,21 @@
+package com.example.rhodoswidget.ui.theme
+import com.example.rhodoswidget.*
+
+import com.example.rhodoswidget.R
+import com.example.rhodoswidget.MainActivity
+import com.example.rhodoswidget.ui.home.*
+import com.example.rhodoswidget.ui.compass.*
+import com.example.rhodoswidget.ui.travel.*
+import com.example.rhodoswidget.ui.news.*
+import com.example.rhodoswidget.ui.weather.*
+import com.example.rhodoswidget.ui.settings.*
+import com.example.rhodoswidget.widget.*
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+internal val HomeAccent = Color(0xFF64C3CA)
+internal val HomeCardColor = Color(0xB31A1D1F)
+internal val HomeCardBorder = Color(0x33FFFFFF)
+internal val HomeCardShape = RoundedCornerShape(18.dp)

@@ -1,5 +1,16 @@
 package com.example.rhodoswidget
 
+import com.example.rhodoswidget.R
+import com.example.rhodoswidget.MainActivity
+import com.example.rhodoswidget.ui.home.*
+import com.example.rhodoswidget.ui.compass.*
+import com.example.rhodoswidget.ui.travel.*
+import com.example.rhodoswidget.ui.news.*
+import com.example.rhodoswidget.ui.weather.*
+import com.example.rhodoswidget.ui.settings.*
+import com.example.rhodoswidget.ui.theme.*
+import com.example.rhodoswidget.widget.*
+
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
