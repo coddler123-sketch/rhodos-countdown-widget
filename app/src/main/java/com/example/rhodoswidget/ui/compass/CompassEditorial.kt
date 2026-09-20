@@ -567,6 +567,50 @@ internal fun editorialFor(tip: CompassTip): CompassEditorial {
             checkedAt = "18.09.2026",
             imageRes = R.drawable.prasonisi_rhodes_024
         )
+        "Afandou Beach & Golfplatz" -> fallback.copy(
+            duration = "Halber Tag",
+            bestTime = "Vormittag",
+            fromHotel = "Ca. 5 Min. nördlich von Kolymbia",
+            transport = "Bus, Mietwagen oder Taxi",
+            septemberNote = "Kristallklares Wasser; Kiesel-Badeschuhe empfohlen.",
+            combination = "Mit Taverna Vasili im Dorf Afandou verbinden.",
+            facilities = "Langer Naturstrand, Kantinen, Golfplatz",
+            checkedAt = "20.09.2026",
+            imageRes = R.drawable.prasonisi_rhodes_023
+        )
+        "Haraki Fischerdorf & Promenade" -> fallback.copy(
+            duration = "2–3 Stunden",
+            bestTime = "Später Nachmittag / Abend",
+            fromHotel = "Ca. 12 Min. südlich von Kolymbia",
+            transport = "Mietwagen oder Taxi",
+            septemberNote = "Sehr romantischer Abendspaziergang an der Meerespromenade.",
+            combination = "Mit Agathi Beach & Burg Feraklos verbinden.",
+            facilities = "Uferpromenade, Fischtavernen, Blick auf Burg Feraklos",
+            checkedAt = "20.09.2026",
+            imageRes = R.drawable.prasonisi_rhodes_028
+        )
+        "Loutanis Flussbett Spazierweg" -> fallback.copy(
+            duration = "1 Stunde",
+            bestTime = "Früher Morgen",
+            fromHotel = "Direkt im nördlichen Ortsteil Kolymbia",
+            transport = "Zu Fuß",
+            septemberNote = "Angenehme Kühle am Morgen vor der Tageshitze.",
+            combination = "Mit Kolymbia Beach oder Eukalyptusallee verbinden.",
+            facilities = "Naturbelassener Spazierweg, Schattenbäume",
+            checkedAt = "20.09.2026",
+            imageRes = R.drawable.rhodos_1364599
+        )
+        "Taverna Vasili: Traditioneller Grill" -> fallback.copy(
+            duration = "1–2 Stunden",
+            bestTime = "Abend",
+            fromHotel = "Ca. 5 Min. im Nachbardorf Afandou",
+            transport = "Taxi oder Mietwagen",
+            septemberNote = "Traditionelle Küche, bei Einheimischen sehr beliebt.",
+            combination = "Mit einem Strandnachmittag am Afandou Beach verbinden.",
+            facilities = "Grillgerichte, Stifado, Meze, Tischplätze im Freien",
+            checkedAt = "20.09.2026",
+            imageRes = R.drawable.lindos_donkey_path_002
+        )
         else -> fallback
     }
 }

@@ -517,5 +517,57 @@ internal val compassTips = listOf(
         kind = CompassTipKind.RECOMMENDATION,
         source = CompassTipSource.RESEARCHED,
         sourceUrl = "https://www.google.com/maps/search/?api=1&query=Moni%20Tsambika%20Rhodes"
+    ),
+    CompassTip(
+        category = "Strände",
+        title = "Afandou Beach & Golfplatz",
+        description = "Ein kilometerlanger, naturbelassener Kiesel-Sand-Strand gleich nördlich von Kolymbia. Kristallklares tiefes Wasser, entspannte Strandbars und der historische 18-Loch Golfplatz von Rhodos.",
+        note = "Badeschuhe wegen feinem Kiesel von Vorteil; perfekt für ungestörte Strandtage",
+        location = "Afandou (~5 Min. von Kolymbia)",
+        journey = "Kurze Fahrt mit Bus, Mietwagen oder Taxi",
+        tags = listOf("Strand", "Afandou", "Kieselstrand", "Golf", "ruhig"),
+        reviewSummary = "Sehr beliebte und ruhige Strandalternative zu Tsambika. Viel Platz zum Entspannen, glasklares tiefes Wasser, gemütliche Strandkantinen und der nahe 18-Loch Golfplatz.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Afandou%20Beach%20Rhodes"
+    ),
+    CompassTip(
+        category = "Ausflüge",
+        title = "Haraki Fischerdorf & Promenade",
+        description = "Ein malerisches kleines Fischerdorf südlich von Kolymbia. Die halbmondförmige Bucht bietet eine autofreie Uferpromenade mit exzellenten Fischrestaurants und direktem Blick auf die Burg Feraklos.",
+        note = "Besonders abends stimmungsvoll, wenn die Burgruine Feraklos beleuchtet wird",
+        location = "Haraki (~12 Min. von Kolymbia)",
+        journey = "Mietwagen oder Taxi",
+        tags = listOf("Ausflug", "Fischerdorf", "Promenade", "Fischtavernen", "Abend"),
+        reviewSummary = "Malerisches kleines Fischerdorf am Meer mit einer verkehrsfreien Uferpromenade, fantastischen Fischrestaurants und stimmungsvollem Blick auf die beleuchtete Burg Feraklos.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Haraki%20Beach%20Rhodes"
+    ),
+    CompassTip(
+        category = "Kolymbia",
+        title = "Loutanis Flussbett Spazierweg",
+        description = "Ein naturbelassener Weg entlang des kleinen Flussbetts Loutanis, das bei Kolymbia ins Meer mündet. Schattig im Grünen für einen ruhigen Morgenspaziergang abseits der Hotels.",
+        note = "Ideal für Frühaufsteher; Natur und Vogelgezwitscher vor dem Frühstück genießen",
+        location = "Kolymbia (nördlicher Ortsteil)",
+        journey = "zu Fuß direkt im Ort",
+        tags = listOf("Kolymbia", "Spaziergang", "Natur", "Morgen", "ruhig"),
+        reviewSummary = "Ein idyllischer und schattiger Naturspazierweg entlang des kleinen Flussbetts Loutanis in Kolymbia. Perfekt für einen entspannten Morgenspaziergang abseits der Hotels.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Loutanis%20River%20Kolymbia%20Rhodes"
+    ),
+    CompassTip(
+        category = "Essen",
+        title = "Taverna Vasili: Traditioneller Grill",
+        description = "Bekannte traditionelle Dorftaverne im nahegelegenen Afandou für gegrillte Lammkoteletts, hausgemachtes Stifado und griechische Meze.",
+        note = "Sehr beliebt bei Einheimischen; Plätze zur Hauptzeit am Abend begehrt",
+        location = "Afandou Dorf (~5 Min. von Kolymbia)",
+        journey = "Kurze Fahrt mit Taxi oder Auto",
+        tags = listOf("nahe Kolymbia", "Afandou", "Taverne", "Grill", "Einheimische"),
+        reviewSummary = "Hervorragendes traditionelles Grillgut, hausgemachtes Stifado und herzliche griechische Gastfreundschaft in einer authentischen Dorftaverne im sympathischen Nachbardorf Afandou.",
+        kind = CompassTipKind.RECOMMENDATION,
+        source = CompassTipSource.RESEARCHED,
+        sourceUrl = "https://www.google.com/maps/search/?api=1&query=Taverna%20Vasili%20Afandou%20Rhodes"
     )
 ).let(::attachCompassTipIds)
