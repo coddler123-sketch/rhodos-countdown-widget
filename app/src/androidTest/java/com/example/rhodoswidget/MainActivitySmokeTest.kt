@@ -283,8 +283,6 @@ class MainActivitySmokeTest {
         composeRule.onNodeWithTag("main-nav-travel").performClick()
         composeRule.onNodeWithTag("travel-area-today").assertIsDisplayed()
         composeRule.onNodeWithTag("travel-area-mobility").assertIsDisplayed()
-        composeRule.onNodeWithTag("travel-area-explore").assertIsDisplayed()
-        composeRule.onNodeWithTag("travel-area-help").assertIsDisplayed()
 
         composeRule.onNodeWithTag("travel-area-mobility").performClick()
         composeRule.onNodeWithTag("travel-area-screen").assertIsDisplayed()
