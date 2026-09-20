@@ -1079,17 +1079,17 @@ private fun TravelSubTabRow(
     onSelectArea: (TravelArea) -> Unit
 ) {
     val items = listOf(
-        TravelArea.MOBILITY to "🚌 Bus & Mobil",
-        TravelArea.TODAY to "💶 Taverne & Karte",
-        TravelArea.EXPLORE to "🗣️ Sprachführer",
-        TravelArea.HELP to "🏥 SOS & Hilfe"
+        Triple(TravelArea.MOBILITY, "🚌 Bus & Mobil", "travel-area-mobility"),
+        Triple(TravelArea.TODAY, "💶 Taverne & Karte", "travel-area-today"),
+        Triple(TravelArea.EXPLORE, "🗣️ Sprachführer", "travel-area-explore"),
+        Triple(TravelArea.HELP, "🏥 SOS & Hilfe", "travel-area-help")
     )
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 4.dp),
         modifier = Modifier.fillMaxWidth().testTag("travel-sub-tabs")
     ) {
-        items(items) { (area, label) ->
+        items(items) { (area, label, tag) ->
             val isSelected = selectedArea == area
             FilterChip(
                 selected = isSelected,
@@ -1106,7 +1106,8 @@ private fun TravelSubTabRow(
                     selected = isSelected,
                     borderColor = HomeCardBorder,
                     selectedBorderColor = HomeAccent
-                )
+                ),
+                modifier = Modifier.testTag(tag)
             )
         }
     }
