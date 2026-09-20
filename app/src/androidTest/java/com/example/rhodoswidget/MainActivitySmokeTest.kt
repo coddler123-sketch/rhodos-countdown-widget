@@ -286,8 +286,7 @@ class MainActivitySmokeTest {
 
         composeRule.onNodeWithTag("travel-area-mobility").performClick()
         composeRule.onNodeWithTag("travel-area-screen").assertIsDisplayed()
-        composeRule.onNodeWithTag("travel-more-mobility").performScrollTo().performClick()
-        composeRule.onNodeWithTag("travel-more-mobility").assertTextContains("−")
+        composeRule.onNodeWithTag("mobility-hub-card").assertIsDisplayed()
     }
 
     @Test
